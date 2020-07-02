@@ -4,9 +4,9 @@
   "description": "connect retailers with wholesalers",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "nodemon bin/server",
-    "start": "node bin/server"
+    "start": "node bin/server",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Urchmaney/pharm-pro#readme",
   "devDependencies": {
+    "@shelf/jest-mongodb": "^1.1.5",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-plugin-import": "^2.20.2",
@@ -26,6 +27,7 @@
     "nodemon": "^2.0.4"
   },
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "mongoose": "^5.9.20"
   }
 }
