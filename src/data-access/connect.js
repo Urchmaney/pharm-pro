@@ -3,7 +3,12 @@ const wholesalerService = require('./services/wholesalerService');
 
 const mongoConnect = async (URI) => {
   await connect(URI,
-    { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true },
+    {
+      useNewUrlParser: true,
+      useCreateIndex: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+    },
     err => {
       if (err) {
         console.log('Error connecting to Mongo DB', err);

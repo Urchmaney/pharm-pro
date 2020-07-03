@@ -1,10 +1,10 @@
 const { Schema, model } = require('mongoose');
 
 const wholesalerSchema = new Schema({
-  companyName: String,
+  companyName: { type: String, required: true },
   licenseNumber: { type: String, required: true },
   phoneNumber: String,
-  isDeleted: Boolean,
+  isDeleted: { type: Boolean, default: false },
   deletedAt: Date,
 });
 
