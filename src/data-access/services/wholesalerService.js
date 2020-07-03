@@ -26,9 +26,12 @@ const deleteWholesaler = async (id) => {
   await updateWholesaler(id, { isDeleted: true });
 };
 
+const getWholesalers = async () => Wholesaler.find({ isDeleted: false });
+
 module.exports = {
   addWholesaler,
   getWholesalerById,
   updateWholesaler,
   deleteWholesaler,
+  getWholesalers,
 };
