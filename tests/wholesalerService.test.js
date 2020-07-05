@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-const mongoConnect = require('../src/data-access/connect');
+const mongoConnect = require('../src/data_access/connect');
 
 let service = null;
 let newWholesaler = null;
