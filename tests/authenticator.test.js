@@ -3,6 +3,7 @@ const {
   verifyPassword,
   generateAuthToken,
   verifyAuthToken,
+  generateOTP,
 } = require('../src/authenticator/auth');
 
 describe('Passsord Hashing', () => {
@@ -49,5 +50,13 @@ describe('Generating authentication token', () => {
 
     const result = verifyAuthToken(token);
     expect(result).toBeNull();
+  });
+});
+
+describe('Generating OTP', () => {
+  it('should be defined and of length 4', () => {
+    const OTP = generateOTP();
+    expect(OTP).toBeDefined();
+    expect(OTP.length).toBe(4);
   });
 });
