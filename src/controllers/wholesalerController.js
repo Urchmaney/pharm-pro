@@ -25,7 +25,12 @@ const wholesalerController = (wholesalerService, authenticator) => {
 
   };
 
+  const login = {
+    authenticator,
+  };
+
   return {
+    login,
     create,
     index,
     show,
