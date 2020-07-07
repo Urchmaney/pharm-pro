@@ -18,6 +18,7 @@ const mongoConnect = async (URI) => {
   return {
     wholesalerService,
     closeConnect: () => connection.close(),
+    db: connection.db,
   };
 };
 
