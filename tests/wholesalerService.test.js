@@ -86,9 +86,8 @@ describe(' Wholesaler Service', () => {
   });
 
 
-  afterAll(done => {
+  afterAll(async done => {
     closeConn();
-    database.collections('wholesalers').deleteMany({});
     done();
   });
 });
