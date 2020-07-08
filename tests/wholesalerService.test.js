@@ -4,11 +4,10 @@ const mongoConnect = require('../src/data_access/connect');
 let service = null;
 let newWholesaler = null;
 let closeConn = null;
-let database = null;
 
 describe(' Wholesaler Service', () => {
   beforeAll(async () => {
-    const { wholesalerService, closeConnect, db } = await mongoConnect(global.__MONGO_URI__);
+    const { wholesalerService, closeConnect } = await mongoConnect(global.__MONGO_URI__);
     newWholesaler = (await wholesalerService.addWholesaler({
       fullName: '',
       registrationNumber: '87672',
@@ -16,7 +15,6 @@ describe(' Wholesaler Service', () => {
     })).result;
     service = wholesalerService;
     closeConn = closeConnect;
-    database = db;
   });
 
   describe('Add Wholesaler', () => {
