@@ -1,11 +1,5 @@
-const express = require('express');
+const startApp = require('../src/app');
 
-const app = express();
-
-app.get('/', (req, res) => {
-  res.json({ status: 'ok' }).status(200);
-});
-
-app.listen(3000, () => {
-  console.log('Application started at port 3000');
-});
+startApp()
+  .then(app => app.listen(3000, () => { console.log('Application started at port 3000'); }))
+  .catch(err => { console.log('error starting the application', err); });
