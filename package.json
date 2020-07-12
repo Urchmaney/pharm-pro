@@ -4,8 +4,8 @@
   "description": "connect retailers with wholesalers",
   "main": "index.js",
   "scripts": {
-    "build": "nodemon bin/server",
     "start": "node bin/server",
+    "build": "nodemon bin/server",
     "test": "jest"
   },
   "repository": {
