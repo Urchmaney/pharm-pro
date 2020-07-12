@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+require('dotenv').config();
 
 const mongoDB = require('./data_access/connect');
 const authenticator = require('./authenticator/auth');
@@ -10,7 +11,7 @@ const startApplication = async () => {
   const app = express();
   const {
     wholesalerService,
-  } = await mongoDB('mongodb://127.0.0.1:27017/pharm-pro');
+  } = await mongoDB(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/pharm-pro');
 
   const wholesalerController = wholesalerControllerGen(wholesalerService, authenticator);
   const wholesalerRouter = wholesalerRouterGen(wholesalerController);
