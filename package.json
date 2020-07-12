@@ -34,5 +34,8 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.20",
     "twilio": "^3.47.0"
+  },
+  "engine": {
+    "node": "13.2.0"
   }
 }
