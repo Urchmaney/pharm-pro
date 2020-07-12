@@ -7,9 +7,10 @@ let closeConn = null;
 
 describe(' Wholesaler Service', () => {
   beforeAll(async () => {
-    const { wholesalerService, closeConnect } = await mongoConnect(global.__MONGO_URI__);
+    const { wholesalerService, closeConnect, db } = await mongoConnect(global.__MONGO_URI__);
+    await db.collection('wholesalers').deleteMany({});
     newWholesaler = (await wholesalerService.addWholesaler({
-      fullName: '',
+      fullName: 'Bernad Bakens',
       registrationNumber: '87672',
       phoneNumber: '+2497877823',
     })).result;

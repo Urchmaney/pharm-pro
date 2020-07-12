@@ -17,7 +17,7 @@ beforeAll(async () => {
   closeConn = closeConnect;
   await db.collection('wholesalers').deleteMany({});
   wholesaler = (await wholesalerService.addWholesaler({
-    fullName: '',
+    fullName: 'Mr Lukemon Agbado',
     registrationNumber: '87672',
     phoneNumber: '+2497877823',
   })).result;
@@ -35,7 +35,6 @@ describe('wholesaler controller create action', () => {
     const { statusCode, result } = await create.action(wholesaler);
     expect(statusCode).toBe(200);
     expect(result).toBeDefined();
-    expect(typeof result).toBe('string');
   });
   it('should return status code of 400 for invalid wholesaler', async () => {
     const wholesaler = {};

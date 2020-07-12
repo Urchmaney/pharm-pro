@@ -1,7 +1,7 @@
 const { Schema, model } = require('mongoose');
 
 const wholesalerSchema = new Schema({
-  fullName: { type: String, require: true },
+  fullName: { type: String, required: true },
   companyName: String,
   licenseNumber: String,
   address: String,
