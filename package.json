@@ -4,7 +4,6 @@
   "description": "connect retailers with wholesalers",
   "main": "index.js",
   "scripts": {
-    "build": "nodemon bin/server",
     "start": "node bin/server",
     "test": "jest"
   },
@@ -33,6 +32,11 @@
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.20",
+    "swagger-jsdoc": "^4.0.0",
+    "swagger-ui-express": "^4.1.4",
     "twilio": "^3.47.0"
+  },
+  "engine": {
+    "node": "13.2.0"
   }
 }
