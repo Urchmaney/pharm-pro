@@ -4,7 +4,7 @@ const wholesalerController = (wholesalerService, authenticator) => {
     action: async (wholesaler) => {
       const { status, result } = await wholesalerService.addWholesaler(wholesaler);
       if (!status) return { statusCode: 400, result };
-      return { statusCode: 200, result: 'Successfully created wholesaler' };
+      return { statusCode: 200, result };
     },
   };
 
