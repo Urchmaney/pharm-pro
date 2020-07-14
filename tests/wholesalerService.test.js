@@ -12,7 +12,7 @@ describe(' Wholesaler Service', () => {
     newWholesaler = (await wholesalerService.addWholesaler({
       fullName: 'Bernad Bakens',
       registrationNumber: '87672',
-      phoneNumber: '+2497877823',
+      phoneNumber: '+2349078778256',
     })).result;
     service = wholesalerService;
     closeConn = closeConnect;
@@ -84,6 +84,19 @@ describe(' Wholesaler Service', () => {
     });
   });
 
+  describe('Get wholesaler by phone number', () => {
+    it('should return wholesaler if number is in db', async () => {
+      const phoneNumber = '+2349078778256';
+      const result = await service.getWholesalerByPhoneNumber(phoneNumber);
+      expect(result).toBeDefined();
+      expect(result._id).toMatchObject(newWholesaler._id);
+    });
+    it('should return null if number is not in db', async () => {
+      const phoneNumber = '+2349054378256';
+      const result = await service.getWholesalerByPhoneNumber(phoneNumber);
+      expect(result).toBeNull();
+    });
+  });
 
   afterAll(async done => {
     closeConn();
