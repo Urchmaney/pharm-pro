@@ -1,4 +1,4 @@
-const wholesalerController = (wholesalerService, authenticator) => {
+const wholesalerController = (wholesalerService, authenticator, notifier) => {
   const create = {
     roles: [],
     action: async (wholesaler) => {
@@ -41,6 +41,16 @@ const wholesalerController = (wholesalerService, authenticator) => {
     },
   };
 
+  const generateAndSendOTP = {
+    role: [],
+    action: async (phoneNumber) => {
+      const otp = authenticator.generateOTP();
+      const success = await notifier.sendSMS(`Garhia otp code:    ${otp}`, phoneNumber);
+      if (!success) return { statusCode: 400, result: 'Issue sending OTP. Check phone number format. +234 format.' };
+      return { statusCode: 200, result: 'OTP code successfully sent.' };
+    },
+  };
+
   const login = {
     authenticator,
   };
@@ -52,6 +62,7 @@ const wholesalerController = (wholesalerService, authenticator) => {
     show,
     update,
     deleteAction,
+    generateAndSendOTP,
   };
 };
 

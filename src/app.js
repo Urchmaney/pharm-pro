@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const mongoDB = require('./data_access/connect');
 const authenticator = require('./authenticator/auth');
+const notifier = require('./notification/notifier');
 const wholesalerControllerGen = require('./controllers/wholesalerController');
 const wholesalerRouterGen = require('./routers/wholesalerRouter');
 
@@ -15,7 +16,7 @@ const startApplication = async () => {
     wholesalerService,
   } = await mongoDB(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/pharm-pro');
 
-  const wholesalerController = wholesalerControllerGen(wholesalerService, authenticator);
+  const wholesalerController = wholesalerControllerGen(wholesalerService, authenticator, notifier);
   const wholesalerRouter = wholesalerRouterGen(wholesalerController);
 
   app.use(cors());

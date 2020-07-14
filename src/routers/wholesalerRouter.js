@@ -85,6 +85,30 @@ const wholesalerRouter = (controller) => {
     const { statusCode, result } = await controller.login(req.body);
     res.status(statusCode).json(result);
   });
+
+  /**
+  * @swagger
+  * /api/wholesalers/otp:
+  *  post:
+  *    description: send user OTP code.
+  *    tags:
+  *     - Wholesalers
+  *    parameters:
+  *     - name: phone Number
+  *       in: body
+  *       required: true
+  *       schema:
+  *         properties:
+  *           phoneNumber:
+  *             type: string
+  *    responses:
+  *     '200':
+  *      description: OTP succesfully sent.
+  */
+  router.post('/otp', async (req, res) => {
+    const { statusCode, result } = await controller.generateAndSendOTP.action(req.body.phoneNumber);
+    res.status(statusCode).json(result);
+  });
   return router;
 };
 

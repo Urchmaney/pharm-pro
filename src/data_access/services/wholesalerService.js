@@ -19,6 +19,8 @@ const getWholesalerById = async (id) => {
   return Wholesaler.findOne({ _id: id, isDeleted: false });
 };
 
+const getWholesalerByPhoneNumber = async (phoneNumber) => Wholesaler.findOne({ phoneNumber });
+
 const updateWholesaler = (id, newWholesaler) => Wholesaler
   .findByIdAndUpdate(id, newWholesaler, { upsert: true, new: true });
 
@@ -31,6 +33,7 @@ const getWholesalers = async () => Wholesaler.find({ isDeleted: false });
 module.exports = {
   addWholesaler,
   getWholesalerById,
+  getWholesalerByPhoneNumber,
   updateWholesaler,
   deleteWholesaler,
   getWholesalers,

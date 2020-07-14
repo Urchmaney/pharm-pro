@@ -1,6 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 const mongoConnect = require('../../src/data_access/connect');
 const authenticator = require('../../src/authenticator/auth');
+const notifier = require('../../src/notification/notifier');
 const wholesalerControllerGenerator = require('../../src/controllers/wholesalerController');
 
 let closeConn = null;
@@ -11,6 +12,7 @@ let index = null;
 let update = null;
 let show = null;
 let deleteAction = null;
+let generateAndSendOTP = null;
 
 beforeAll(async () => {
   const { wholesalerService, closeConnect, db } = await mongoConnect(global.__MONGO_URI__);
@@ -21,12 +23,14 @@ beforeAll(async () => {
     registrationNumber: '87672',
     phoneNumber: '+2497877823',
   })).result;
-  const wholesalerController = wholesalerControllerGenerator(wholesalerService, authenticator);
+  const wholesalerController = wholesalerControllerGenerator(wholesalerService,
+    authenticator, notifier);
   create = wholesalerController.create;
   index = wholesalerController.index;
   update = wholesalerController.update;
   show = wholesalerController.show;
   deleteAction = wholesalerController.deleteAction;
+  generateAndSendOTP = wholesalerController.generateAndSendOTP;
 });
 
 describe('wholesaler controller create action', () => {
@@ -91,6 +95,19 @@ describe('wholesaler controller delete action', () => {
     expect(result.statusCode).toBe(200);
     const { statusCode } = await show.action(id);
     expect(statusCode).toBe(404);
+  });
+});
+
+describe('wholesaler generate and send OTP', () => {
+  it('should not send OTP if phoneNumber is wrong', async () => {
+    const phoneNumber = '+23481348534';
+    const { statusCode } = await generateAndSendOTP.action(phoneNumber);
+    expect(statusCode).toBe(400);
+  });
+  it('should send OTP if phoneNumber is valid', async () => {
+    const phoneNumber = '+2348164292882';
+    const { statusCode } = await generateAndSendOTP.action(phoneNumber);
+    expect(statusCode).toBe(200);
   });
 });
 
