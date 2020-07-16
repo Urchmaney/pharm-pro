@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const fs = require('fs');
 const Wholesaler = require('../schemas/wholesaler_schema');
 
 const addWholesaler = async (wholesalerObj) => {
@@ -30,6 +31,14 @@ const deleteWholesaler = async (id) => {
 
 const getWholesalers = async () => Wholesaler.find({ isDeleted: false });
 
+const uploadWholesalerProfile = async (id, image) => {
+  const profileImage = {
+    contentType: image.contentType,
+    data: fs.readFileSync(image.path),
+  };
+  return updateWholesaler(id, { profileImage });
+};
+
 module.exports = {
   addWholesaler,
   getWholesalerById,
@@ -37,4 +46,5 @@ module.exports = {
   updateWholesaler,
   deleteWholesaler,
   getWholesalers,
+  uploadWholesalerProfile,
 };
