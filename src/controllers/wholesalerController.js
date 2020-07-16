@@ -51,6 +51,17 @@ const wholesalerController = (wholesalerService, authenticator, notifier) => {
     },
   };
 
+  const uploadProfileImage = {
+    roles: [],
+    action: async (wholesalerId, profileImage) => {
+      let wholesaler = await wholesalerService.getWholesalerById(wholesalerId);
+      if (!wholesaler) return { statusCode: 400, result: 'Please login.' };
+      if (!profileImage) return { statusCode: 400, result: 'Please select an image.' };
+      wholesaler = await wholesalerService.uploadWholesalerProfile(wholesalerId, profileImage);
+      return { statusCode: 200, result: wholesaler };
+    },
+  };
+
   const login = {
     authenticator,
   };
@@ -63,6 +74,7 @@ const wholesalerController = (wholesalerService, authenticator, notifier) => {
     update,
     deleteAction,
     generateAndSendOTP,
+    uploadProfileImage,
   };
 };
 

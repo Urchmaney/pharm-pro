@@ -13,6 +13,7 @@ let update = null;
 let show = null;
 let deleteAction = null;
 let generateAndSendOTP = null;
+let uploadProfileImage = null;
 
 beforeAll(async () => {
   const { wholesalerService, closeConnect, db } = await mongoConnect(global.__MONGO_URI__);
@@ -31,6 +32,7 @@ beforeAll(async () => {
   show = wholesalerController.show;
   deleteAction = wholesalerController.deleteAction;
   generateAndSendOTP = wholesalerController.generateAndSendOTP;
+  uploadProfileImage = wholesalerController.uploadProfileImage;
 });
 
 describe('wholesaler controller create action', () => {
@@ -88,16 +90,6 @@ describe('wholesaler controller update action', () => {
   });
 });
 
-describe('wholesaler controller delete action', () => {
-  it('should delete wholesaler', async () => {
-    const id = wholesaler._id;
-    const result = await deleteAction.action(id);
-    expect(result.statusCode).toBe(200);
-    const { statusCode } = await show.action(id);
-    expect(statusCode).toBe(404);
-  });
-});
-
 describe('wholesaler generate and send OTP', () => {
   it('should not send OTP if phoneNumber is wrong', async () => {
     const phoneNumber = '+23481348534';
@@ -111,6 +103,43 @@ describe('wholesaler generate and send OTP', () => {
   });
 });
 
+describe('wholesaler upload profile image', () => {
+  it('should return status code 400 if wholesaler is not found', async () => {
+    const wholesalerId = 'de';
+    const profileImage = {
+      contentType: 'image/png',
+      path: '../uploads/profile_image.png',
+    };
+    const { statusCode } = await uploadProfileImage.action(wholesalerId, profileImage);
+    expect(statusCode).toBe(400);
+  });
+  it('should return status code 400 if image is not defined', async () => {
+    const profileImage = null;
+    const { statusCode } = await uploadProfileImage.action('', profileImage);
+    expect(statusCode).toBe(400);
+  });
+  it('should return 200 status code if image is defined and wholesaler is found', async () => {
+    const wholesalerId = wholesaler._id;
+    const profileImage = {
+      contentType: 'image/png',
+      path: './uploads/profile_image.png',
+    };
+    const { statusCode, result } = await uploadProfileImage.action(wholesalerId, profileImage);
+    expect(result).toBeDefined();
+    expect(result.profileImage).toBeDefined();
+    expect(statusCode).toBe(200);
+  });
+});
+
+describe('wholesaler controller delete action', () => {
+  it('should delete wholesaler', async () => {
+    const id = wholesaler._id;
+    const result = await deleteAction.action(id);
+    expect(result.statusCode).toBe(200);
+    const { statusCode } = await show.action(id);
+    expect(statusCode).toBe(404);
+  });
+});
 
 afterAll(done => {
   closeConn();
