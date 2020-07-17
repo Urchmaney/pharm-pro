@@ -18,9 +18,11 @@ const startApplication = async () => {
   const app = express();
   const {
     wholesalerService,
+    otpService,
   } = await mongoDB(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/pharm-pro');
 
-  const wholesalerController = wholesalerControllerGen(wholesalerService, authenticator, notifier);
+  const wholesalerController = wholesalerControllerGen(wholesalerService,
+    otpService, authenticator, notifier);
   const wholesalerRouter = wholesalerRouterGen(wholesalerController, fileUploadMiddleware);
 
   app.use(cors());
