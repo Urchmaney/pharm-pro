@@ -39,6 +39,7 @@ const wholesalerRouter = (controller, fileUploadMiddleware) => {
   *      -  application/json
   *    parameters:
   *      - in: path
+  *        name: id
   *    responses:
   *     '200':
   *      description: wholesaler with id
@@ -81,8 +82,30 @@ const wholesalerRouter = (controller, fileUploadMiddleware) => {
     res.status(statusCode).json(result);
   });
 
+  /**
+  * @swagger
+  * /api/wholesalers/login:
+  *  post:
+  *    description: login wholesaler with OTP.
+  *    tags:
+  *     - Wholesalers
+  *    parameters:
+  *     - name: session
+  *       in: body
+  *       required: true
+  *       schema:
+  *         properties:
+  *           phoneNumber:
+  *             type: string
+  *           otp:
+  *             type: string
+  *    responses:
+  *     '200':
+  *      description: Successfully logged in.
+  */
   router.post('/login', async (req, res) => {
-    const { statusCode, result } = await controller.login(req.body);
+    const { statusCode, result } = await controller.login.action(req.body.phoneNumber,
+      req.body.otp);
     res.status(statusCode).json(result);
   });
 

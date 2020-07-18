@@ -7,6 +7,9 @@ const wholesalerControllerGenerator = require('../../src/controllers/wholesalerC
 let closeConn = null;
 let wholesaler = null;
 
+let dbObj = null;
+let service = null;
+
 let create = null;
 let index = null;
 let update = null;
@@ -16,16 +19,17 @@ let generateAndSendOTP = null;
 let uploadProfileImage = null;
 
 beforeAll(async () => {
-  const { wholesalerService, closeConnect, db } = await mongoConnect(global.__MONGO_URI__);
+  const {
+    wholesalerService, otpService, closeConnect, db,
+  } = await mongoConnect(global.__MONGO_URI__);
+
+  dbObj = db;
+  service = wholesalerService;
   closeConn = closeConnect;
-  await db.collection('wholesalers').deleteMany({});
-  wholesaler = (await wholesalerService.addWholesaler({
-    fullName: 'Mr Lukemon Agbado',
-    registrationNumber: '87672',
-    phoneNumber: '+2497877823',
-  })).result;
+
   const wholesalerController = wholesalerControllerGenerator(wholesalerService,
-    authenticator, notifier);
+    otpService, authenticator, notifier);
+
   create = wholesalerController.create;
   index = wholesalerController.index;
   update = wholesalerController.update;
@@ -35,11 +39,20 @@ beforeAll(async () => {
   uploadProfileImage = wholesalerController.uploadProfileImage;
 });
 
+beforeEach(async () => {
+  await dbObj.collection('wholesalers').deleteMany({});
+  wholesaler = (await service.addWholesaler({
+    fullName: 'Mr Lukemon Agbado',
+    registrationNumber: '87672',
+    phoneNumber: '+2497877823',
+  })).result;
+});
+
 describe('wholesaler controller create action', () => {
   it('should return status code 200 for valid wholesaler', async () => {
     const wholesaler = { phoneNumber: '+23481473863', fullName: 'Mango Orange', registrationNumber: '3323' };
     const { statusCode, result } = await create.action(wholesaler);
-    expect(statusCode).toBe(200);
+    expect(statusCode).toBe(201);
     expect(result).toBeDefined();
   });
   it('should return status code of 400 for invalid wholesaler', async () => {
@@ -56,7 +69,7 @@ describe('wholesaler controller index action', () => {
   it('should return status code 200 and wholesaler list', async () => {
     const { statusCode, result } = await index.action();
     expect(statusCode).toBe(200);
-    expect(result.length).toBe(2);
+    expect(result.length).toBe(1);
   });
 });
 
