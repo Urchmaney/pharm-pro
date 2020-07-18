@@ -39,6 +39,7 @@ const wholesalerRouter = (controller, fileUploadMiddleware) => {
   *      -  application/json
   *    parameters:
   *      - in: path
+  *        name: id
   *    responses:
   *     '200':
   *      description: wholesaler with id
