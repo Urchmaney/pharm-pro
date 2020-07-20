@@ -41,6 +41,7 @@ const wholesalerSchema = new Schema({
   phoneNumber: { type: String, required: true },
   registrationNumber: { type: String, required: true },
   isDeleted: { type: Boolean, default: false },
+  profileImage: { data: Buffer, contentType: String },
   deletedAt: Date,
 });
 

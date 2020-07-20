@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const fs = require('fs');
 const Wholesaler = require('../schemas/wholesaler_schema');
 
 const addWholesaler = async (wholesalerObj) => {
@@ -19,6 +20,8 @@ const getWholesalerById = async (id) => {
   return Wholesaler.findOne({ _id: id, isDeleted: false });
 };
 
+const getWholesalerByPhoneNumber = async (phoneNumber) => Wholesaler.findOne({ phoneNumber });
+
 const updateWholesaler = (id, newWholesaler) => Wholesaler
   .findByIdAndUpdate(id, newWholesaler, { upsert: true, new: true });
 
@@ -28,10 +31,20 @@ const deleteWholesaler = async (id) => {
 
 const getWholesalers = async () => Wholesaler.find({ isDeleted: false });
 
+const uploadWholesalerProfile = async (id, image) => {
+  const profileImage = {
+    contentType: image.contentType,
+    data: fs.readFileSync(image.path),
+  };
+  return updateWholesaler(id, { profileImage });
+};
+
 module.exports = {
   addWholesaler,
   getWholesalerById,
+  getWholesalerByPhoneNumber,
   updateWholesaler,
   deleteWholesaler,
   getWholesalers,
+  uploadWholesalerProfile,
 };
