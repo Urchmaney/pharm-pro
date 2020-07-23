@@ -21,7 +21,23 @@ describe('Add create product', () => {
     const product = { name: 'Phenobab' };
     const { status, result } = await service.createProduct(product);
     expect(status).toBe(true);
+    expect(result._id).toBeDefined();
     expect(result).toBeDefined();
+  });
+});
+
+describe('All products', () => {
+  it('should return all products', async () => {
+    const products = await service.getProducts();
+    expect(products.length).toBe(1);
+  });
+});
+
+describe('Product ', () => {
+  it('should return product if id exists', async () => {
+    const { result } = await service.createProduct({ name: 'lonely' });
+    const product = await service.getProduct(result._id);
+    expect(product).toBeDefined();
   });
 });
 

@@ -9,7 +9,16 @@ const createProduct = async (product) => {
       result: Object.keys(error.errors).map(ele => error.errors[ele].message),
     };
   }
+  await product.save();
   return { status: true, result: product };
 };
 
-module.exports = { createProduct };
+const getProducts = async () => Product.find({});
+
+const getProduct = async (id) => Product.findById(id);
+
+module.exports = {
+  createProduct,
+  getProducts,
+  getProduct,
+};
