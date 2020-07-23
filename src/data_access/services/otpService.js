@@ -29,9 +29,9 @@ const createOTP = async (phoneNumber, userType) => {
 const deleteOTP = (phoneNumber, userType) => OtpModel.deleteMany({ phoneNumber, userType });
 
 const validateOTP = async (phoneNumber, userType, otp, date) => {
-  const otpObj = await getOTP(phoneNumber, userType);
+  const otpObj = await OtpModel.findOne({ phoneNumber, userType, otp }).lean();
   if (!otpObj) return false;
-  if (otp === otpObj.otp && otpObj.expiration > date) {
+  if (otpObj.expiration > date) {
     await deleteOTP(phoneNumber, userType);
     return true;
   }
