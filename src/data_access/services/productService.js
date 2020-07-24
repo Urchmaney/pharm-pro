@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Product = require('../schemas/product_schema');
 
 const createProduct = async (product) => {
@@ -15,10 +16,19 @@ const createProduct = async (product) => {
 
 const getProducts = async () => Product.find({});
 
-const getProduct = async (id) => Product.findById(id);
+const getProduct = async (id) => {
+  if (!mongoose.isValidObjectId(id)) return null;
+  return Product.findById(id);
+};
+
+const updateProduct = async (_id, newProduct) => {
+  if (!mongoose.isValidObjectId(_id)) return null;
+  return Product.findOneAndUpdate({ _id }, newProduct, { new: true });
+};
 
 module.exports = {
   createProduct,
   getProducts,
   getProduct,
+  updateProduct,
 };
