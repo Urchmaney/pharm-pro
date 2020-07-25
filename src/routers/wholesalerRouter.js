@@ -65,7 +65,7 @@ const wholesalerRouter = (controller, fileUploadMiddleware) => {
   *         $ref: '#/definitions/Wholesaler'
   *    responses:
   *     '200':
-  *      description: A successful fetch
+  *      description: successfully created.
   */
   router.post('/', async (req, res) => {
     const { statusCode, result } = await controller.create.action(req.body);
