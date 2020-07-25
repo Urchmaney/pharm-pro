@@ -22,8 +22,8 @@ const { Schema, model } = require('mongoose');
  *          type: number
  */
 const wholesalerProductSchema = new Schema({
-  wholesalerId: { type: String, required: true },
-  productId: { type: String, required: true },
+  wholesalerId: { type: String, required: true, ref: 'wholesalers' },
+  productId: { type: String, required: true, ref: 'products' },
   prodcutName: { type: String, required: true },
   productType: { type: String },
   pricePerPacket: { type: Number },
