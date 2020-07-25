@@ -23,8 +23,8 @@ beforeAll(async () => {
   closeConn = closeConnect;
 });
 
-describe('create wholesaler product', () => {
-  it('should add product if object is valid', async () => {
-
-  });
-});
+// describe('create wholesaler product', () => {
+//   it('should add product if object is valid', async () => {
+//     const 
+//   });
+// });

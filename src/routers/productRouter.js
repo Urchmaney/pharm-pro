@@ -58,8 +58,6 @@ const productRouter = (controller) => {
   *    tags:
   *     - Products
   *    parameters:
-  *     - in : path
-  *       name: id
   *     - in: body
   *       name: product
   *       required: true
@@ -78,18 +76,20 @@ const productRouter = (controller) => {
   * @swagger
   * /api/products/{id}:
   *  put:
-  *    description: Update product.
+  *    description: update product.
   *    tags:
   *     - Products
   *    parameters:
-  *     - name: product
-  *       in: body
+  *     - in : path
+  *       name: id
+  *     - in: body
+  *       name: product
   *       required: true
   *       schema:
   *         $ref: '#/definitions/Product'
   *    responses:
-  *     '201':
-  *      description: successfully created.
+  *     '200':
+  *      description: successfully updated.
   */
   router.put('/:id', async (req, res) => {
     const { statusCode, result } = await controller.update.action(req.params.id, req.body);
