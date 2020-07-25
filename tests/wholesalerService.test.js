@@ -9,7 +9,7 @@ describe(' Wholesaler Service', () => {
   beforeAll(async () => {
     const { wholesalerService, closeConnect, db } = await mongoConnect(global.__MONGO_URI__);
     await db.collection('wholesalers').deleteMany({});
-    newWholesaler = (await wholesalerService.addWholesaler({
+    newWholesaler = (await wholesalerService.createWholesaler({
       fullName: 'Bernad Bakens',
       registrationNumber: '87672',
       phoneNumber: '+2349078778256',
@@ -18,14 +18,14 @@ describe(' Wholesaler Service', () => {
     closeConn = closeConnect;
   });
 
-  describe('Add Wholesaler', () => {
+  describe('Create Wholesaler', () => {
     it('should fail if required field is missing', async () => {
-      const result = await service.addWholesaler({ companyName: 'ui' });
+      const result = await service.createWholesaler({ companyName: 'ui' });
       expect(result.status).toBe(false);
     });
 
     it('should add wholesaler if field is valid', async () => {
-      const { status, result } = await service.addWholesaler(
+      const { status, result } = await service.createWholesaler(
         {
           fullName: 'Zemus kate',
           registrationNumber: '26dy3',
@@ -97,6 +97,7 @@ describe(' Wholesaler Service', () => {
       expect(result).toBeNull();
     });
   });
+
 
   afterAll(async done => {
     closeConn();

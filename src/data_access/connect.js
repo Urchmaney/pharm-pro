@@ -2,6 +2,8 @@ const { connect, connection } = require('mongoose');
 const wholesalerService = require('./services/wholesalerService');
 const otpService = require('./services/otpService');
 const productService = require('./services/productService');
+const wholesalerProductService = require('./services/wholesalerProductService');
+const retailerService = require('./services/retailerService');
 
 const mongoConnect = async (URI) => {
   await connect(URI,
@@ -21,6 +23,8 @@ const mongoConnect = async (URI) => {
     wholesalerService,
     otpService,
     productService,
+    wholesalerProductService,
+    retailerService,
     closeConnect: () => connection.close(),
     db: connection.db,
   };

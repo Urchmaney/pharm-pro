@@ -37,13 +37,14 @@ const wholesalerSchema = new Schema({
   address: String,
   lga: String,
   state: String,
+  country: String,
   body: String,
   phoneNumber: { type: String, required: true },
   registrationNumber: { type: String, required: true },
   isDeleted: { type: Boolean, default: false },
   profileImage: { data: Buffer, contentType: String },
   deletedAt: Date,
-});
+}, { timestamps: true });
 
 const Wholesaler = model('wholesalers', wholesalerSchema);
 

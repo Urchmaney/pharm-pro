@@ -3,7 +3,7 @@ const wholesalerController = (wholesalerService, otpService, authenticator, noti
   const create = {
     roles: [],
     action: async (wholesaler) => {
-      const { status, result } = await wholesalerService.addWholesaler(wholesaler);
+      const { status, result } = await wholesalerService.createWholesaler(wholesaler);
       if (!status) return { statusCode: 400, result };
       const otp = await otpService.createOTP(result.phoneNumber, 1);
       const success = await notifier.sendSMS(`Garhia otp code:    ${otp}`, result.phoneNumber);
