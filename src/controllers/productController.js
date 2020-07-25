@@ -28,7 +28,7 @@ const productController = (productService) => {
   const update = {
     roles: [],
     action: async (id, newProduct) => {
-      const updatedProduct = await productService.updatedProduct(id, newProduct);
+      const updatedProduct = await productService.updateProduct(id, newProduct);
       if (updatedProduct) return { statusCode: 200, result: updatedProduct };
       return { statusCode: 400, result: 'invalid id.' };
     },
