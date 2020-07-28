@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 const Wholesaler = require('../schemas/wholesaler_schema');
 
-const addWholesaler = async (wholesalerObj) => {
+const createWholesaler = async (wholesalerObj) => {
   const wholesaler = new Wholesaler(wholesalerObj);
   const error = wholesaler.validateSync();
   if (error) {
@@ -40,7 +40,7 @@ const uploadWholesalerProfile = async (id, image) => {
 };
 
 module.exports = {
-  addWholesaler,
+  createWholesaler,
   getWholesalerById,
   getWholesalerByPhoneNumber,
   updateWholesaler,

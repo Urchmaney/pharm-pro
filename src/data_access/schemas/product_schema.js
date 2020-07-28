@@ -3,7 +3,7 @@ const { Schema, model } = require('mongoose');
 /**
  * @swagger
  *  definitions:
- *    product:
+ *    Product:
  *      type: object
  *      required:
  *        - name

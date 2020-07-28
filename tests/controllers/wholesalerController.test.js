@@ -41,7 +41,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await dbObj.collection('wholesalers').deleteMany({});
-  wholesaler = (await service.addWholesaler({
+  wholesaler = (await service.createWholesaler({
     fullName: 'Mr Lukemon Agbado',
     registrationNumber: '87672',
     phoneNumber: '+2497877823',

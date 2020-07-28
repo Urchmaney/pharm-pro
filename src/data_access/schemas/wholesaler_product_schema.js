@@ -1,4 +1,11 @@
-const { Schema, model } = require('mongoose');
+const {
+  Schema,
+  model,
+  isValidObjectId,
+  Types,
+} = require('mongoose');
+const Product = require('./product_schema');
+const Wholesaler = require('./wholesaler_schema');
 
 /**
  * @swagger
@@ -8,9 +15,7 @@ const { Schema, model } = require('mongoose');
  *      required:
  *        - productName
  *      properties:
- *        productName:
- *          type: string
- *        productType:
+ *        productId:
  *          type: string
  *        pricePerPacket:
  *          type: number
@@ -22,14 +27,34 @@ const { Schema, model } = require('mongoose');
  *          type: number
  */
 const wholesalerProductSchema = new Schema({
-  wholesalerId: { type: String, required: true },
-  productId: { type: String, required: true },
-  prodcutName: { type: String, required: true },
-  productType: { type: String },
-  pricePerPacket: { type: Number },
-  pricePerBox: { type: Number },
-  pricePerCarton: { type: Number },
-  quantity: { type: Number },
+  wholesaler: {
+    type: String,
+    required: true,
+    ref: 'wholesalers',
+    validate: {
+      validator: (_id) => {
+        if (!isValidObjectId(_id)) return false;
+        return Wholesaler.exists({ _id: Types.ObjectId(_id) });
+      },
+      message: 'Invalid wholesalerId',
+    },
+  },
+  product: {
+    type: String,
+    required: true,
+    ref: 'products',
+    validate: {
+      validator: (_id) => {
+        if (!isValidObjectId(_id)) return false;
+        return Product.exists({ _id: Types.ObjectId(_id) });
+      },
+      message: 'Invalid product Id.',
+    },
+  },
+  pricePerPacket: { type: Number, default: 0, min: 0 },
+  pricePerBox: { type: Number, default: 0, min: 0 },
+  pricePerCarton: { type: Number, default: 0, min: 0 },
+  quantity: { type: Number, default: 0, min: 0 },
 });
 
 const wholesalerProduct = model('wholesaleProducts', wholesalerProductSchema);
