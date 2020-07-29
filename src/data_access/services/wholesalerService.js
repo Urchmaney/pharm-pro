@@ -41,6 +41,12 @@ const uploadWholesalerProfile = async (id, image) => {
 };
 
 const createWholesalerRetailer = async (wholesalerRetailer) => {
+  if (typeof wholesalerRetailer !== 'object') {
+    return {
+      status: false,
+      result: ['Invalid payload sent'],
+    };
+  }
   wholesalerRetailer = new WholesalerRetailer(wholesalerRetailer);
   const error = wholesalerRetailer.validateSync();
   if (error) {
@@ -78,11 +84,12 @@ const getWholesalerRetailer = async (
   wholesalerId, phoneNumber,
 ) => WholesalerRetailer.findOne({ wholesalerId: wholesalerId.toString(), phoneNumber });
 
-const updateWholesalerRetailer = async (
-  wholesalerId, phoneNumber, newWholesalerRetailer,
-) => WholesalerRetailer.findOneAndUpdate({
-  wholesalerId: wholesalerId.toString(), phoneNumber,
-}, newWholesalerRetailer, { new: true });
+const updateWholesalerRetailer = async (_id, newWholesalerRetailer) => {
+  if (!mongoose.isValidObjectId(_id)) return null;
+  return WholesalerRetailer.findOneAndUpdate(
+    { _id }, newWholesalerRetailer, { new: true },
+  );
+};
 
 
 module.exports = {

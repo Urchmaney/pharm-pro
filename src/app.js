@@ -14,7 +14,10 @@ const wholesalerRouterGen = require('./routers/wholesalerRouter');
 const productControllerGen = require('./controllers/productController');
 const productRouterGen = require('./routers/productRouter');
 
-// const authMiddleware = require('./middlewares/auth_middleware');
+const wholesalerRetailerControllerGen = require('./controllers/wholesalerRetailerController');
+const wholesalerRetailerRouterGen = require('./routers/wholesalerRetailerRouter');
+
+const authMiddleware = require('./middlewares/auth_middleware')(authenticator);
 const fileUploadMiddleware = require('./middlewares/file_upload_middleware');
 
 const startApplication = async () => {
@@ -23,6 +26,7 @@ const startApplication = async () => {
     wholesalerService,
     otpService,
     productService,
+    retailerService,
   } = await mongoDB(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/pharm-pro');
 
   const wholesalerController = wholesalerControllerGen(wholesalerService,
@@ -32,11 +36,20 @@ const startApplication = async () => {
   const productController = productControllerGen(productService);
   const productRouter = productRouterGen(productController);
 
+  const wholesalerRetailerController = wholesalerRetailerControllerGen(
+    wholesalerService, retailerService,
+  );
+  const wholesalerRetailerRouter = wholesalerRetailerRouterGen(
+    wholesalerRetailerController, authMiddleware,
+  );
+
   app.use(cors());
 
   app.use(express.json());
 
   app.use(express.urlencoded({ extended: false }));
+
+  app.use('/api/wholesalers/retailers', wholesalerRetailerRouter);
 
   app.use('/api/wholesalers', wholesalerRouter);
 
