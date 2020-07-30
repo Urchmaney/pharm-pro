@@ -28,6 +28,8 @@ const { Schema, model } = require('mongoose');
  *          type: string
  *        registrationNumber:
  *          type: string
+ *        profileImage:
+ *          type: file
  *
  */
 const wholesalerSchema = new Schema({

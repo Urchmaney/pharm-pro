@@ -1,14 +1,27 @@
+const mongoose = require('mongoose');
 const WholesalerProduct = require('../schemas/wholesaler_product_schema');
 
 const createWholesalerProduct = async (wholesalerProduct) => {
   try {
+    if (typeof wholesalerProduct !== 'object') {
+      return {
+        status: false,
+        result: ['Invalid payload sent'],
+      };
+    }
+
     wholesalerProduct = new WholesalerProduct(wholesalerProduct);
     const error = await wholesalerProduct.validate();
-    if (error) return null;
+    if (error) {
+      return {
+        status: false,
+        result: Object.keys(error.errors).map(ele => error.errors[ele].message),
+      };
+    }
     await wholesalerProduct.save();
-    return wholesalerProduct;
-  } catch (e) {
-    return null;
+    return { status: true, result: wholesalerProduct };
+  } catch (err) {
+    return { status: false, result: ['product Id is Invalid.'] };
   }
 };
 
@@ -23,11 +36,12 @@ const getWholesalerProduct = async (wholesaler, product) => WholesalerProduct.fi
   product,
 }).populate('product');
 
-const updateWholesalerProduct = async (
-  wholesaler, product, newWholesalerProduct,
-) => WholesalerProduct.findOneAndUpdate({
-  wholesaler, product,
-}, newWholesalerProduct, { new: true });
+const updateWholesalerProduct = async (_id, newWholesalerProduct) => {
+  if (!mongoose.isValidObjectId(_id)) return null;
+  return WholesalerProduct.findOneAndUpdate({
+    _id,
+  }, newWholesalerProduct, { new: true });
+};
 
 
 module.exports = {
