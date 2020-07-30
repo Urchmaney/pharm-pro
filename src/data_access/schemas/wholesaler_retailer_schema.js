@@ -3,15 +3,13 @@ const { Schema, model } = require('mongoose');
 /**
  * @swagger
  *  definitions:
- *    wholesalerRetailer:
+ *    WholesalerRetailer:
  *      type: object
  *      required:
  *        - firstName
  *        - phoneNumber
  *      properties:
  *        fullName:
- *          type: string
- *        lastName:
  *          type: string
  *        phoneNumber:
  *          type: string

@@ -15,7 +15,6 @@ const mongoConnect = async (URI) => {
     },
     err => {
       if (err) {
-        console.log('Error connecting to Mongo DB', err);
         process.exit(1);
       }
     });

@@ -155,25 +155,30 @@ describe(' Wholesaler Service', () => {
 
   describe('Update wholesaler retailer', () => {
     it('should update wholesaler retailer if valid', async () => {
-      const newWholeRetailer = {
+      const oldWholeRetailer = (await service.createWholesalerRetailer({
         fullName: 'Menga man',
+        wholesalerId: '1e03ujde3d',
         phoneNumber: '+234906535533',
+        active: false,
+      })).result;
+      const newWholeRetailer = {
+        fullName: 'new Man',
       };
       const updateObj = await service.updateWholesalerRetailer(
-        newWholesaler._id, '+2348034567123', newWholeRetailer,
+        oldWholeRetailer._id, newWholeRetailer,
       );
       expect(updateObj).toBeDefined();
-      expect(updateObj.fullName).toBe('Menga man');
+      expect(updateObj.fullName).toBe('new Man');
       expect(updateObj.phoneNumber).toBe('+234906535533');
     });
 
-    it('should return null if wholesaler is invalid', async () => {
+    it('should return null if _id is invalid', async () => {
       const newWholeRetailer = {
         fullName: 'Menga man',
         phoneNumber: '+234906535533',
       };
       const updateObj = await service.updateWholesalerRetailer(
-        'dfjdiusdsd', +2348034567123, newWholeRetailer,
+        'dfjdiusdsd', newWholeRetailer,
       );
       expect(updateObj).toBeNull();
     });

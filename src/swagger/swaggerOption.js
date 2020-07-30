@@ -16,9 +16,16 @@ const swaggerOption = {
         },
       ],
     },
+    securityDefinitions: {
+      bearerAuth: {
+        type: 'apiKey',
+        name: 'Authorization',
+        scheme: 'bearer',
+        in: 'header',
+      },
+    },
   },
   apis: ['./src/routers/*.js', './src/data_access/schemas/*.js'],
 };
-
 
 module.exports = swaggerJsDoc(swaggerOption);
