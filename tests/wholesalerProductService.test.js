@@ -20,7 +20,7 @@ beforeAll(async () => {
   testWholesaler = (await wholesalerService.createWholesaler({
     fullName: 'Zemus kate',
     registrationNumber: '26dy3',
-    phoneNumber: '081672552',
+    phoneNumber: '+2348167255286',
   })).result;
   closeConn = closeConnect;
 });

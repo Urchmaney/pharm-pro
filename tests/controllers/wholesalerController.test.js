@@ -44,13 +44,13 @@ beforeEach(async () => {
   wholesaler = (await service.createWholesaler({
     fullName: 'Mr Lukemon Agbado',
     registrationNumber: '87672',
-    phoneNumber: '+2497877823',
+    phoneNumber: '+2349787782399',
   })).result;
 });
 
 describe('wholesaler controller create action', () => {
   it('should return status code 200 for valid wholesaler', async () => {
-    const wholesaler = { phoneNumber: '+23481473863', fullName: 'Mango Orange', registrationNumber: '3323' };
+    const wholesaler = { phoneNumber: '+2348147386399', fullName: 'Mango Orange', registrationNumber: '3323' };
     const { statusCode, result } = await create.action(wholesaler);
     expect(statusCode).toBe(201);
     expect(result).toBeDefined();

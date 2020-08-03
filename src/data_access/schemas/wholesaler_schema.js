@@ -41,7 +41,14 @@ const wholesalerSchema = new Schema({
   state: String,
   country: String,
   body: String,
-  phoneNumber: { type: String, required: true },
+  phoneNumber: {
+    type: String,
+    required: true,
+    validate: {
+      validator: (num) => /^\+234[0-9]{10}$/.test(num),
+      message: num => `"${num.value}"  is not a valid phone number. +2348010000000 is an example.`,
+    },
+  },
   registrationNumber: { type: String, required: true },
   isDeleted: { type: Boolean, default: false },
   profileImage: { data: Buffer, contentType: String },

@@ -30,7 +30,7 @@ describe(' Wholesaler Service', () => {
         {
           fullName: 'Zemus kate',
           registrationNumber: '26dy3',
-          phoneNumber: '081672552',
+          phoneNumber: '+2348167255267',
         },
       );
       expect(status).toBe(true);
