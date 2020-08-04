@@ -44,6 +44,7 @@ const wholesalerSchema = new Schema({
   phoneNumber: {
     type: String,
     required: true,
+    unique: true,
     validate: {
       validator: (num) => /^\+234[0-9]{10}$/.test(num),
       message: num => `"${num.value}"  is not a valid phone number. +2348010000000 is an example.`,
