@@ -1,18 +1,15 @@
 const { Schema, model } = require('mongoose');
 
-
 /**
  * @swagger
  *   definitions:
- *    Wholesaler:
+ *    Retailer:
  *      type: object
  *      required:
  *        - fullName
  *        - phoneNumber
  *      properties:
  *        fullName:
- *          type: string
- *        companyName:
  *          type: string
  *        licenseNumber:
  *          type: string
@@ -32,15 +29,7 @@ const { Schema, model } = require('mongoose');
  *          type: file
  *
  */
-const wholesalerSchema = new Schema({
-  fullName: { type: String, required: true },
-  companyName: String,
-  licenseNumber: String,
-  address: String,
-  lga: String,
-  state: String,
-  country: String,
-  body: String,
+const retailerSchema = new Schema({
   phoneNumber: {
     type: String,
     required: true,
@@ -50,12 +39,15 @@ const wholesalerSchema = new Schema({
       message: num => `"${num.value}"  is not a valid phone number. +2348010000000 is an example.`,
     },
   },
-  registrationNumber: { type: String, required: true },
-  isDeleted: { type: Boolean, default: false },
+  fullName: { type: String, required: true },
+  address: String,
+  lga: String,
+  state: String,
+  liceneNumber: String,
+  country: String,
+  body: String,
+  registrationNumber: String,
   profileImage: { data: Buffer, contentType: String },
-  deletedAt: Date,
 }, { timestamps: true });
 
-const Wholesaler = model('wholesalers', wholesalerSchema);
-
-module.exports = Wholesaler;
+module.exports = model('retailers', retailerSchema);

@@ -5,9 +5,10 @@ let service = null;
 let closeConn = null;
 
 beforeAll(async () => {
-  const { productService, closeConnect } = await mongoConnect(global.__MONGO_URI__);
+  const { productService, closeConnect, db } = await mongoConnect(global.__MONGO_URI__);
   service = productService;
   closeConn = closeConnect;
+  db.collection('products').deleteMany({});
 });
 
 describe('Add create product', () => {

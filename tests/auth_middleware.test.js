@@ -14,10 +14,10 @@ describe('Authenticator middleware', () => {
     const result = authMiddleware(mockReq, mockRes);
     expect(result).toBe(401);
   });
-  it('should return 400 for wrong token', () => {
+  it('should return 401 for wrong token', () => {
     const mockReq = { headers: { authorization: 'Bearer jwehewyuweyue68763uhwed768we4w78' } };
     const result = authMiddleware(mockReq, mockRes);
-    expect(result).toBe(400);
+    expect(result).toBe(401);
   });
   it('should return 200 for valid token', () => {
     const token = authenticator.generateAuthToken({ uid: '6gd767', roles: ['WHOLESALER'] });

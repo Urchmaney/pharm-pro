@@ -11,7 +11,16 @@ const notifier = require('./notification/notifier');
 const wholesalerControllerGen = require('./controllers/wholesalerController');
 const wholesalerRouterGen = require('./routers/wholesalerRouter');
 
-// const authMiddleware = require('./middlewares/auth_middleware');
+const productControllerGen = require('./controllers/productController');
+const productRouterGen = require('./routers/productRouter');
+
+const wholesalerRetailerControllerGen = require('./controllers/wholesalerRetailerController');
+const wholesalerRetailerRouterGen = require('./routers/wholesalerRetailerRouter');
+
+const wholesalerProductControllerGen = require('./controllers/wholesalerProductController');
+const wholesalerProductRouterGen = require('./routers/wholesalerProductRouter');
+
+const authMiddleware = require('./middlewares/auth_middleware')(authenticator);
 const fileUploadMiddleware = require('./middlewares/file_upload_middleware');
 
 const startApplication = async () => {
@@ -19,11 +28,31 @@ const startApplication = async () => {
   const {
     wholesalerService,
     otpService,
+    productService,
+    wholesalerProductService,
+    retailerService,
   } = await mongoDB(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/pharm-pro');
 
   const wholesalerController = wholesalerControllerGen(wholesalerService,
     otpService, authenticator, notifier);
   const wholesalerRouter = wholesalerRouterGen(wholesalerController, fileUploadMiddleware);
+
+  const productController = productControllerGen(productService);
+  const productRouter = productRouterGen(productController);
+
+  const wholesalerRetailerController = wholesalerRetailerControllerGen(
+    wholesalerService, retailerService,
+  );
+  const wholesalerRetailerRouter = wholesalerRetailerRouterGen(
+    wholesalerRetailerController, authMiddleware,
+  );
+
+  const wholesalerProductController = wholesalerProductControllerGen(
+    wholesalerProductService,
+  );
+  const wholesalerProductRouter = wholesalerProductRouterGen(
+    wholesalerProductController, authMiddleware,
+  );
 
   app.use(cors());
 
@@ -31,7 +60,13 @@ const startApplication = async () => {
 
   app.use(express.urlencoded({ extended: false }));
 
+  app.use('/api/wholesalers/products', wholesalerProductRouter);
+
+  app.use('/api/wholesalers/retailers', wholesalerRetailerRouter);
+
   app.use('/api/wholesalers', wholesalerRouter);
+
+  app.use('/api/products', productRouter);
 
   app.use('/', swaggerUI.serve, swaggerUI.setup(swaggerJsDoc));
 
