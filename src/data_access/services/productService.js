@@ -14,7 +14,26 @@ const createProduct = async (product) => {
   return { status: true, result: product };
 };
 
-const getProducts = async () => Product.find({});
+const getProducts = async (search) => {
+  const option = {};
+  if (search) {
+    option.$or = [
+      {
+        name: {
+          $regex: search,
+          $options: 'i',
+        },
+      },
+      {
+        medicalName: {
+          $regex: search,
+          $options: 'i',
+        },
+      },
+    ];
+  }
+  return Product.find(option);
+};
 
 const getProduct = async (id) => {
   if (!mongoose.isValidObjectId(id)) return null;

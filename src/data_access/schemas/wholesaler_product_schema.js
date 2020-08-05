@@ -2,9 +2,7 @@ const {
   Schema,
   model,
   isValidObjectId,
-  Types,
 } = require('mongoose');
-const Product = require('./product_schema');
 
 /**
  * @swagger
@@ -32,10 +30,7 @@ const wholesalerProductSchema = new Schema({
     required: true,
     ref: 'products',
     validate: {
-      validator: (_id) => {
-        if (!isValidObjectId(_id)) return false;
-        return Product.exists({ _id: Types.ObjectId(_id) });
-      },
+      validator: (_id) => isValidObjectId(_id),
       message: 'Invalid product Id.',
     },
   },
