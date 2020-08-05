@@ -20,7 +20,7 @@ beforeAll(async () => {
   testWholesaler = (await wholesalerService.createWholesaler({
     fullName: 'Zemus kate',
     registrationNumber: '26dy3',
-    phoneNumber: '081672552',
+    phoneNumber: '+2348167255286',
   })).result;
   closeConn = closeConnect;
 });
@@ -35,7 +35,8 @@ describe('create wholesaler product', () => {
       pricePerCarton: 10000,
       quantity: 100,
     };
-    const result = await service.createWholesalerProduct(wholesalerProduct);
+    const { status, result } = await service.createWholesalerProduct(wholesalerProduct);
+    expect(status).toBe(true);
     expect(result).toBeDefined();
     expect(result.pricePerCarton).toBe(10000);
   });
@@ -44,24 +45,18 @@ describe('create wholesaler product', () => {
       wholesaler: testWholesaler._id,
       product: '823823jedee',
     };
-    const result = await service.createWholesalerProduct(wholesalerProduct);
-    expect(result).toBeNull();
-  });
-  it('should return null if wholesaler Id is valid', async () => {
-    const wholesalerProduct = {
-      wholesaler: '122139230913',
-      product: testProduct._id,
-    };
-    const result = await service.createWholesalerProduct(wholesalerProduct);
-    expect(result).toBeNull();
+    const { result, status } = await service.createWholesalerProduct(wholesalerProduct);
+    expect(status).toBe(false);
+    expect(Array.isArray(result)).toBe(true);
   });
   it('should return no Id is valid', async () => {
     const wholesalerProduct = {
       wholesaler: '122139230913',
       product: '123ekdkedek',
     };
-    const result = await service.createWholesalerProduct(wholesalerProduct);
-    expect(result).toBeNull();
+    const { result, status } = await service.createWholesalerProduct(wholesalerProduct);
+    expect(status).toBe(false);
+    expect(Array.isArray(result)).toBe(true);
   });
 });
 
@@ -93,20 +88,29 @@ describe('wholesaler product', () => {
 
 describe('update wholesaler product', () => {
   it('should update wholesaler product if wholesaler and product is valid', async () => {
+    const wholesalerProduct = {
+      wholesaler: testWholesaler._id,
+      product: testProduct._id,
+      pricePerPacket: 100,
+      pricePerBox: 1000,
+      pricePerCarton: 10000,
+      quantity: 100,
+    };
+    const product = await service.createWholesalerProduct(wholesalerProduct);
     const newObj = { pricePerBox: 2000 };
     const result = await service.updateWholesalerProduct(
-      testWholesaler._id, testProduct._id, newObj,
+      product.result._id, newObj,
     );
     expect(result).toBeDefined();
     expect(result.pricePerBox).toBe(2000);
   });
   it('should return null if wholesaler and product is invalid', async () => {
     const newObj = { pricePerBox: 2000 };
-    let result = await service.updateWholesalerProduct('rek34kjrkr', 'e43e3', newObj);
+    let result = await service.updateWholesalerProduct('rek34kjrkr', newObj);
     expect(result).toBeNull();
-    result = await service.updateWholesalerProduct(testWholesaler._id, 'deuid3', newObj);
+    result = await service.updateWholesalerProduct(testWholesaler._id, newObj);
     expect(result).toBeNull();
-    result = await service.updateWholesalerProduct('deuid3', testProduct._id, newObj);
+    result = await service.updateWholesalerProduct('deuid3', newObj);
     expect(result).toBeNull();
   });
 });

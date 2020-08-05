@@ -10,7 +10,7 @@ const verifyPassword = (password, hash) => bcrypt.compareSync(password, hash);
 
 const generateAuthToken = (payload) => {
   const options = {
-    expiresIn: 24 * 60 * 60,
+    expiresIn: 6 * 30 * 24 * 60 * 60,
     issuer: ISSUER,
   };
   return jwt.sign(payload, SECRET_KEY, options);

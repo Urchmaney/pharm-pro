@@ -5,17 +5,16 @@ const {
   Types,
 } = require('mongoose');
 const Product = require('./product_schema');
-const Wholesaler = require('./wholesaler_schema');
 
 /**
  * @swagger
  *  definitions:
- *    wholesalerProduct:
+ *    WholesalerProduct:
  *      type: object
  *      required:
  *        - productName
  *      properties:
- *        productId:
+ *        product:
  *          type: string
  *        pricePerPacket:
  *          type: number
@@ -27,18 +26,7 @@ const Wholesaler = require('./wholesaler_schema');
  *          type: number
  */
 const wholesalerProductSchema = new Schema({
-  wholesaler: {
-    type: String,
-    required: true,
-    ref: 'wholesalers',
-    validate: {
-      validator: (_id) => {
-        if (!isValidObjectId(_id)) return false;
-        return Wholesaler.exists({ _id: Types.ObjectId(_id) });
-      },
-      message: 'Invalid wholesalerId',
-    },
-  },
+  wholesaler: { type: String, required: true, ref: 'wholesalers' },
   product: {
     type: String,
     required: true,
