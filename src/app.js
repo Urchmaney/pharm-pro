@@ -1,4 +1,5 @@
 const express = require('express');
+const multer = require('multer');
 const cors = require('cors');
 const swaggerUI = require('swagger-ui-express');
 const swaggerJsDoc = require('./swagger/swaggerOption');
@@ -71,6 +72,13 @@ const startApplication = async () => {
   app.use('/api/products', productRouter);
 
   app.use('/', swaggerUI.serve, swaggerUI.setup(swaggerJsDoc));
+
+  app.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+      res.status(400).json(err.message);
+    }
+    next();
+  });
 
   return app;
 };

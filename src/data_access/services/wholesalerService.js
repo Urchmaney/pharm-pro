@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const fs = require('fs');
 const Wholesaler = require('../schemas/wholesaler_schema');
 const WholesalerRetailer = require('../schemas/wholesaler_retailer_schema');
 
@@ -34,8 +33,8 @@ const getWholesalers = async () => Wholesaler.find({ isDeleted: false });
 
 const uploadWholesalerProfile = async (id, image) => {
   const profileImage = {
-    contentType: image.contentType,
-    data: fs.readFileSync(image.path),
+    contentType: image.mimetype,
+    data: image.buffer,
   };
   return updateWholesaler(id, { profileImage });
 };
