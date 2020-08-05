@@ -10,8 +10,8 @@ const productController = (productService) => {
 
   const index = {
     roles: [],
-    action: async () => {
-      const products = await productService.getProducts();
+    action: async (search) => {
+      const products = await productService.getProducts(search);
       return { statusCode: 200, result: products };
     },
   };

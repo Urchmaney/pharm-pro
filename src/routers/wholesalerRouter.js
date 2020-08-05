@@ -1,6 +1,6 @@
 const express = require('express');
 
-const wholesalerRouter = (controller, fileUploadMiddleware) => {
+const wholesalerRouter = (controller, fileUploadMiddleware, authMiddlewear) => {
   const router = express.Router();
 
   /**
@@ -140,6 +140,8 @@ const wholesalerRouter = (controller, fileUploadMiddleware) => {
   *    description: upload profile image.
   *    tags:
   *     - Wholesalers
+  *    security:
+  *     - bearerAuth: []
   *    consumes:
   *      - multipart/form-data
   *    parameters:
@@ -152,11 +154,11 @@ const wholesalerRouter = (controller, fileUploadMiddleware) => {
   *     '200':
   *      description: successfully upload profile image.
   */
-  router.post('/profile_image', fileUploadMiddleware.single('profile_image'),
+  router.post('/profile_image', authMiddlewear, fileUploadMiddleware.single('profile_image'),
     async (req, res) => {
       const {
         statusCode, result,
-      } = await controller.uploadProfileImage.action(req.file);
+      } = await controller.uploadProfileImage.action(req.user.id, req.file);
       res.status(statusCode).json(result);
     });
 

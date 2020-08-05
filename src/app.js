@@ -35,7 +35,9 @@ const startApplication = async () => {
 
   const wholesalerController = wholesalerControllerGen(wholesalerService,
     otpService, authenticator, notifier);
-  const wholesalerRouter = wholesalerRouterGen(wholesalerController, fileUploadMiddleware);
+  const wholesalerRouter = wholesalerRouterGen(
+    wholesalerController, fileUploadMiddleware, authMiddleware,
+  );
 
   const productController = productControllerGen(productService);
   const productRouter = productRouterGen(productController);

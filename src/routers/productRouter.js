@@ -13,6 +13,9 @@ const productRouter = (controller) => {
    *    name: Products
    *    produces:
    *      - application/json
+   *    parameters:
+   *      - in: query
+   *        name: search
    *    responses:
    *      '200':
    *       description: Products List
@@ -23,7 +26,7 @@ const productRouter = (controller) => {
    *            items: object
    */
   router.get('/', async (req, res) => {
-    const { statusCode, result } = await controller.index.action();
+    const { statusCode, result } = await controller.index.action(req.query.search);
     res.status(statusCode).json(result);
   });
 
