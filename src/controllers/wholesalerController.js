@@ -66,7 +66,6 @@ const wholesalerController = (wholesalerService, otpService, authenticator, noti
   const uploadProfileImage = {
     roles: [],
     action: async (wholesalerId, profileImage) => {
-      console.log('========================== get here to upload profile');
       let wholesaler = await wholesalerService.getWholesalerById(wholesalerId);
       if (!wholesaler) return { statusCode: 400, result: 'Please login.' };
       if (!profileImage) return { statusCode: 400, result: 'Please select an image.' };
