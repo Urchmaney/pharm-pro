@@ -68,6 +68,7 @@ const retailerController = (retailerService, otpService, authenticator, notifier
             {
               id: retailer._id,
               phoneNumber: retailer.phoneNumber,
+              type: 2,
             },
           ),
         },
