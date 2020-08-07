@@ -89,6 +89,7 @@ const wholesalerController = (wholesalerService, otpService, authenticator, noti
             {
               id: wholesaler._id,
               phoneNumber: wholesaler.phoneNumber,
+              type: 1,
             },
           ),
         },

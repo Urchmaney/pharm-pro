@@ -27,7 +27,12 @@ const wholesalerRetailerRouterGen = require('./routers/wholesalerRetailerRouter'
 const wholesalerProductControllerGen = require('./controllers/wholesalerProductController');
 const wholesalerProductRouterGen = require('./routers/wholesalerProductRouter');
 
-const authMiddleware = require('./middlewares/auth_middleware')(authenticator);
+const {
+  authWholesalerMiddleware, authRetailerMiddleware,
+} = require('./middlewares/auth_middleware');
+
+const wholesalerAuthMiddleware = authWholesalerMiddleware(authenticator);
+const retailerAuthMiddlewere = authRetailerMiddleware(authenticator);
 const fileUploadMiddleware = require('./middlewares/file_upload_middleware');
 
 const startApplication = async () => {
@@ -43,21 +48,21 @@ const startApplication = async () => {
   const wholesalerController = wholesalerControllerGen(wholesalerService,
     otpService, authenticator, notifier);
   const wholesalerRouter = wholesalerRouterGen(
-    wholesalerController, fileUploadMiddleware, authMiddleware,
+    wholesalerController, fileUploadMiddleware, wholesalerAuthMiddleware,
   );
 
   const retailerController = retailerControllerGen(
     retailerService, otpService, authenticator, notifier,
   );
   const retailerRouter = retailerRouterGen(
-    retailerController, fileUploadMiddleware, authMiddleware,
+    retailerController, fileUploadMiddleware, retailerAuthMiddlewere,
   );
 
   const retailerWholesalerController = retailerWholesalerControllerGen(
     retailerService, wholesalerService,
   );
   const retailerWholesalerRouter = retailerWholesalerRouterGen(
-    retailerWholesalerController, authMiddleware,
+    retailerWholesalerController, retailerAuthMiddlewere,
   );
 
   const productController = productControllerGen(productService);
@@ -67,14 +72,14 @@ const startApplication = async () => {
     wholesalerService, retailerService,
   );
   const wholesalerRetailerRouter = wholesalerRetailerRouterGen(
-    wholesalerRetailerController, authMiddleware,
+    wholesalerRetailerController, wholesalerAuthMiddleware,
   );
 
   const wholesalerProductController = wholesalerProductControllerGen(
     wholesalerProductService,
   );
   const wholesalerProductRouter = wholesalerProductRouterGen(
-    wholesalerProductController, authMiddleware,
+    wholesalerProductController, wholesalerAuthMiddleware,
   );
 
   app.use(cors());
