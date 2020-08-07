@@ -1,4 +1,5 @@
 const express = require('express');
+const multer = require('multer');
 const cors = require('cors');
 const swaggerUI = require('swagger-ui-express');
 const swaggerJsDoc = require('./swagger/swaggerOption');
@@ -10,6 +11,12 @@ const notifier = require('./notification/notifier');
 
 const wholesalerControllerGen = require('./controllers/wholesalerController');
 const wholesalerRouterGen = require('./routers/wholesalerRouter');
+
+const retailerControllerGen = require('./controllers/retailerController');
+const retailerRouterGen = require('./routers/retailerRouter');
+
+const retailerWholesalerControllerGen = require('./controllers/retailerWholesalerController');
+const retailerWholesalerRouterGen = require('./routers/retailerWholesalerRouter');
 
 const productControllerGen = require('./controllers/productController');
 const productRouterGen = require('./routers/productRouter');
@@ -37,6 +44,20 @@ const startApplication = async () => {
     otpService, authenticator, notifier);
   const wholesalerRouter = wholesalerRouterGen(
     wholesalerController, fileUploadMiddleware, authMiddleware,
+  );
+
+  const retailerController = retailerControllerGen(
+    retailerService, otpService, authenticator, notifier,
+  );
+  const retailerRouter = retailerRouterGen(
+    retailerController, fileUploadMiddleware, authMiddleware,
+  );
+
+  const retailerWholesalerController = retailerWholesalerControllerGen(
+    retailerService, wholesalerService,
+  );
+  const retailerWholesalerRouter = retailerWholesalerRouterGen(
+    retailerWholesalerController, authMiddleware,
   );
 
   const productController = productControllerGen(productService);
@@ -68,9 +89,20 @@ const startApplication = async () => {
 
   app.use('/api/wholesalers', wholesalerRouter);
 
+  app.use('/api/retailers/wholesalers', retailerWholesalerRouter);
+
+  app.use('/api/retailers', retailerRouter);
+
   app.use('/api/products', productRouter);
 
   app.use('/', swaggerUI.serve, swaggerUI.setup(swaggerJsDoc));
+
+  app.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+      res.status(400).json(err.message);
+    }
+    next();
+  });
 
   return app;
 };

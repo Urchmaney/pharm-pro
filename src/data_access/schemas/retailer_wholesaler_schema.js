@@ -3,7 +3,7 @@ const { Schema, model } = require('mongoose');
 /**
  * @swagger
  *  definitions:
- *    WholesalerRetailer:
+ *    RetailerWholesaler:
  *      type: object
  *      required:
  *        - fullName
@@ -14,11 +14,11 @@ const { Schema, model } = require('mongoose');
  *        phoneNumber:
  *          type: string
  */
-const wholesalerRetailerSchema = new Schema({
-  wholesalerId: { type: String, required: true },
+const retailerWholesalerSchema = new Schema({
+  retailerId: { type: String, required: true },
   fullName: { type: String, required: true },
   active: { type: Boolean, required: true },
   phoneNumber: { type: String, required: true },
 }, { timestamps: true });
 
-module.exports = model('wholesalerRetailers', wholesalerRetailerSchema);
+module.exports = model('retailerWholesalers', retailerWholesalerSchema);

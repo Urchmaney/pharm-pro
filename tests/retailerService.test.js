@@ -51,6 +51,18 @@ describe('Is retailer exist by phone Number', () => {
   });
 });
 
+describe('Get retailer by phone number', () => {
+  it('should return retailer if phone number exists', async () => {
+    const retailer = await service.getRetailerByPhoneNumber('+2348145778433');
+    expect(retailer).toBeDefined();
+    expect(retailer.phoneNumber).toBe('+2348145778433');
+  });
+  it('should return null if phone number does not exist', async () => {
+    const retailer = await service.getRetailerByPhoneNumber('+2348135778433');
+    expect(retailer).toBeNull();
+  });
+});
+
 describe('Get retailer by Id', () => {
   it('should return null if Id does not exist', async () => {
     let id = '83jh339dujdujd';
@@ -117,6 +129,118 @@ describe('Get all retailer', () => {
     const retailers = await service.getRetailers();
     expect(Array.isArray(retailers)).toBe(true);
     expect(retailers.length).toBe(4);
+  });
+});
+
+describe('Add retailer wholesaler', () => {
+  it('should not add retailer wholesaler object is invalid', async () => {
+    let retailerWholesaler = '';
+    let result = await service.addRetailerWholesaler(retailerWholesaler);
+    expect(result.status).toBe(false);
+    expect(Array.isArray(result.result)).toBe(true);
+
+    retailerWholesaler = {};
+    result = await service.addRetailerWholesaler(retailerWholesaler);
+    expect(result.status).toBe(false);
+    expect(Array.isArray(result.result)).toBe(true);
+
+    retailerWholesaler = {
+      retailerId: '6776765676',
+    };
+    result = await service.addRetailerWholesaler(retailerWholesaler);
+    expect(result.status).toBe(false);
+    expect(Array.isArray(result.result)).toBe(true);
+
+    retailerWholesaler = {
+      retailerId: '6776765676',
+      phoneNumber: '+2348164292882',
+    };
+    result = await service.addRetailerWholesaler(retailerWholesaler);
+    expect(result.status).toBe(false);
+    expect(Array.isArray(result.result)).toBe(true);
+
+    retailerWholesaler = {
+      retailerId: '6776765676',
+      phoneNumber: '+2348164292882',
+      active: true,
+    };
+    result = await service.addRetailerWholesaler(retailerWholesaler);
+    expect(result.status).toBe(false);
+    expect(Array.isArray(result.result)).toBe(true);
+
+    retailerWholesaler = {
+      retailerId: '6776765676',
+      phoneNumber: '+2348164292882',
+      fullName: 'Abdul Musa',
+    };
+    result = await service.addRetailerWholesaler(retailerWholesaler);
+    expect(result.status).toBe(false);
+    expect(Array.isArray(result.result)).toBe(true);
+  });
+  it('should add retailer wholesaler', async () => {
+    const retailerWholesaler = {
+      retailerId: '6776765676',
+      phoneNumber: '+2348164292882',
+      active: true,
+      fullName: 'Abdul Musa',
+    };
+    const { status, result } = await service.addRetailerWholesaler(retailerWholesaler);
+    expect(status).toBe(true);
+    expect(result).toBeDefined();
+    expect(typeof result).toBe('object');
+  });
+});
+
+describe('Get all retailers wholesalers', () => {
+  it('should return all retailer wholesalers', async () => {
+    const retailerId = '6776765676';
+    const retailerWholesalers = await service.getRetailerWholesalers(retailerId);
+    expect(retailerWholesalers.length).toBe(1);
+  });
+});
+
+describe('Get single retailer wholesaler', () => {
+  it('should return a retailer wholesaler if exists', async () => {
+    const phoneNumber = '+2348164292882';
+    const retailerId = '6776765676';
+    const retailerWholesaler = await service.getRetailerWholesalerByPhoneNumber(
+      retailerId, phoneNumber,
+    );
+    expect(retailerWholesaler).toBeDefined();
+    expect(retailerWholesaler.fullName).toBe('Abdul Musa');
+  });
+  it('should return null if retailer wholesaler does not exists', async () => {
+    const retailerWholesaler = await service.getRetailerWholesalerByPhoneNumber('jhyu76ed', '+2348164292882');
+    expect(retailerWholesaler).toBeNull();
+  });
+});
+
+describe('Update retailer wholesaler', () => {
+  it('should update only the phoneNumber and full name', async () => {
+    const oldObj = (await service.addRetailerWholesaler({
+      retailerId: '875877493722',
+      phoneNumber: '+2348164292882',
+      fullName: 'Mike emeka',
+      active: false,
+    })).result;
+    const updateObj = {
+      phoneNumber: '+2348064292882',
+      fullName: 'Luke emeka',
+      active: true,
+    };
+    const updatedObj = await service.updateRetailerWholesaler(oldObj._id, updateObj);
+    expect(updatedObj.fullName).toBe(updateObj.fullName);
+    expect(updatedObj.phoneNumber).toBe(updateObj.phoneNumber);
+    expect(updatedObj.active).toBe(false);
+  });
+  it('should return null if Id does not exists', async () => {
+    const updateObj = {
+      phoneNumber: '+2348064292882',
+      fullName: 'Luke emeka',
+      active: true,
+    };
+    const updatedObj = await service.updateRetailerWholesaler('87623323hwdwe', updateObj);
+    expect(updatedObj).toBeNull();
   });
 });
 

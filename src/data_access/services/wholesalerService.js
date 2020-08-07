@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const fs = require('fs');
 const Wholesaler = require('../schemas/wholesaler_schema');
 const WholesalerRetailer = require('../schemas/wholesaler_retailer_schema');
 
@@ -21,6 +20,8 @@ const getWholesalerById = async (id) => {
   return Wholesaler.findOne({ _id: id, isDeleted: false });
 };
 
+const isWholesalerPhoneNumberExist = async (phoneNumber) => Wholesaler.exists({ phoneNumber });
+
 const getWholesalerByPhoneNumber = async (phoneNumber) => Wholesaler.findOne({ phoneNumber });
 
 const updateWholesaler = (id, newWholesaler) => Wholesaler
@@ -34,8 +35,8 @@ const getWholesalers = async () => Wholesaler.find({ isDeleted: false });
 
 const uploadWholesalerProfile = async (id, image) => {
   const profileImage = {
-    contentType: image.contentType,
-    data: fs.readFileSync(image.path),
+    contentType: image.mimetype,
+    data: image.buffer,
   };
   return updateWholesaler(id, { profileImage });
 };
@@ -66,7 +67,7 @@ const getWholesalerRetailers = async (wholesalerId) => WholesalerRetailer.aggreg
       from: 'retailers',
       localField: 'phoneNumber',
       foreignField: 'phoneNumber',
-      as: 'retailer',
+      as: 'retailers',
     },
   },
   {
@@ -75,7 +76,7 @@ const getWholesalerRetailers = async (wholesalerId) => WholesalerRetailer.aggreg
       active: '$active',
       fullName: '$fullName',
       phoneNumber: '$phoneNumber',
-      profileImage: { $arrayElemAt: ['$countryInfo', 0] },
+      profileImage: { $arrayElemAt: ['$retailers', 0] },
     },
   },
 ]);
@@ -104,4 +105,5 @@ module.exports = {
   getWholesalerRetailers,
   getWholesalerRetailer,
   updateWholesalerRetailer,
+  isWholesalerPhoneNumberExist,
 };
