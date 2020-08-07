@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Retailer = require('../schemas/retailer_schema');
+const RetailerWholesaler = require('../schemas/retailer_wholesaler_schema');
 
 const createRetailer = async (retailer) => {
   retailer = new Retailer(retailer);
@@ -23,6 +24,8 @@ const getRetailer = async (id) => {
   return null;
 };
 
+const getRetailerByPhoneNumber = async (phoneNumber) => Retailer.findOne({ phoneNumber });
+
 const updateRetailer = async (_id, updateObj) => {
   if (mongoose.isValidObjectId(_id)) {
     return Retailer.findOneAndUpdate({ _id }, updateObj, { new: true });
@@ -32,10 +35,70 @@ const updateRetailer = async (_id, updateObj) => {
 
 const getRetailers = async () => Retailer.find({}).lean();
 
+const addRetailerWholesaler = async (retailerWholesaler) => {
+  if (typeof retailerWholesaler !== 'object') {
+    return {
+      status: false,
+      result: ['Invalid payload sent'],
+    };
+  }
+  retailerWholesaler = new RetailerWholesaler(retailerWholesaler);
+  const error = retailerWholesaler.validateSync();
+  if (error) {
+    return {
+      status: false,
+      result: Object.keys(error.errors).map(ele => error.errors[ele].message),
+    };
+  }
+  await retailerWholesaler.save();
+  return { status: true, result: retailerWholesaler };
+};
+
+const getRetailerWholesalers = async (retailerId) => RetailerWholesaler.aggregate([
+  { $match: { retailerId: retailerId.toString() } },
+  {
+    $lookup: {
+      from: 'wholesalers',
+      localField: 'phoneNumber',
+      foreignField: 'phoneNumber',
+      as: 'wholesalers',
+    },
+  },
+  {
+    $project: {
+      retailerId: '$retailerId',
+      active: '$active',
+      fullName: '$fullName',
+      phoneNumber: '$phoneNumber',
+      profileImage: { $arrayElemAt: ['$wholesalers', 0] },
+    },
+  },
+]);
+
+const getRetailerWholesalerByPhoneNumber = async (
+  retailerId, phoneNumber,
+) => RetailerWholesaler.findOne({ retailerId, phoneNumber }).lean();
+
+const getRetailerWholesaler = async (_id) => RetailerWholesaler.findOne({ _id }).lean();
+
+const updateRetailerWholesaler = async (_id, { fullName, phoneNumber }) => {
+  if (!mongoose.isValidObjectId(_id)) return null;
+  const updateObj = {};
+  if (fullName) updateObj.fullName = fullName;
+  if (phoneNumber) updateObj.phoneNumber = phoneNumber;
+  return RetailerWholesaler.findOneAndUpdate({ _id }, updateObj, { new: true });
+};
+
 module.exports = {
   createRetailer,
   isRetailerPhoneNumberExist,
   getRetailer,
+  getRetailerByPhoneNumber,
   updateRetailer,
   getRetailers,
+  addRetailerWholesaler,
+  getRetailerWholesalers,
+  getRetailerWholesalerByPhoneNumber,
+  updateRetailerWholesaler,
+  getRetailerWholesaler,
 };
