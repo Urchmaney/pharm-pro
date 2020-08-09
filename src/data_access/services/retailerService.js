@@ -73,7 +73,18 @@ const getRetailerWholesalers = async (retailerId) => RetailerWholesaler.aggregat
       active: '$active',
       fullName: '$fullName',
       phoneNumber: '$phoneNumber',
-      profileImage: { $arrayElemAt: ['$wholesalers', 0] },
+      location: '$location',
+      wholesaler: { $arrayElemAt: ['$wholesalers', 0] },
+    },
+  },
+  {
+    $project: {
+      retailerId: '$retailerId',
+      active: '$active',
+      fullName: '$fullName',
+      phoneNumber: '$phoneNumber',
+      location: '$location',
+      image: '$wholesaler.profileImage',
     },
   },
 ]);
@@ -84,11 +95,12 @@ const getRetailerWholesalerByPhoneNumber = async (
 
 const getRetailerWholesaler = async (_id) => RetailerWholesaler.findOne({ _id }).lean();
 
-const updateRetailerWholesaler = async (_id, { fullName, phoneNumber }) => {
+const updateRetailerWholesaler = async (_id, { fullName, phoneNumber, location }) => {
   if (!mongoose.isValidObjectId(_id)) return null;
   const updateObj = {};
   if (fullName) updateObj.fullName = fullName;
   if (phoneNumber) updateObj.phoneNumber = phoneNumber;
+  if (location) updateObj.location = location;
   return RetailerWholesaler.findOneAndUpdate({ _id }, updateObj, { new: true });
 };
 
