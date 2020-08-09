@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-const retailerController = (retailerService, otpService, authenticator, notifier) => {
+const retailerController = (retailerService, otpService, authenticator, notifier, uploader) => {
   const create = {
     roles: [],
     action: async (retailer) => {
@@ -82,7 +82,9 @@ const retailerController = (retailerService, otpService, authenticator, notifier
       let retailer = await retailerService.getRetailer(retailerId);
       if (!retailer) return { statusCode: 400, result: 'Please login.' };
       if (!profileImage) return { statusCode: 400, result: 'Please select an image.' };
-      retailer = await retailerService.uploadRetailerProfileImage(retailerId, profileImage);
+      profileImage = await uploader.uploadImage(profileImage);
+      if (!profileImage) return { statusCode: 500, result: 'Internal server Error. Please contact admin.' };
+      retailer = await retailerService.updateRetailerProfileImage(retailerId, profileImage);
       return { statusCode: 200, result: retailer };
     },
   };

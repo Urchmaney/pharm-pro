@@ -26,7 +26,7 @@ const { Schema, model } = require('mongoose');
  *        registrationNumber:
  *          type: string
  *        profileImage:
- *          type: file
+ *          type: string
  *
  */
 const retailerSchema = new Schema({
@@ -47,7 +47,7 @@ const retailerSchema = new Schema({
   country: String,
   body: String,
   registrationNumber: String,
-  profileImage: { data: Buffer, contentType: String },
+  profileImage: { type: String },
 }, { timestamps: true });
 
 module.exports = model('retailers', retailerSchema);

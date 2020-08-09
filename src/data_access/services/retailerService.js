@@ -33,6 +33,9 @@ const updateRetailer = async (_id, updateObj) => {
   return null;
 };
 
+const updateRetailerProfileImage = async (
+  id, fileUrl) => updateRetailer(id, { profileImage: fileUrl });
+
 const getRetailers = async () => Retailer.find({}).lean();
 
 const addRetailerWholesaler = async (retailerWholesaler) => {
@@ -95,6 +98,7 @@ module.exports = {
   getRetailer,
   getRetailerByPhoneNumber,
   updateRetailer,
+  updateRetailerProfileImage,
   getRetailers,
   addRetailerWholesaler,
   getRetailerWholesalers,
