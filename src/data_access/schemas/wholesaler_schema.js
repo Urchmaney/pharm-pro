@@ -29,7 +29,7 @@ const { Schema, model } = require('mongoose');
  *        registrationNumber:
  *          type: string
  *        profileImage:
- *          type: file
+ *          type: string
  *
  */
 const wholesalerSchema = new Schema({
@@ -52,7 +52,7 @@ const wholesalerSchema = new Schema({
   },
   registrationNumber: { type: String, required: true },
   isDeleted: { type: Boolean, default: false },
-  profileImage: { data: Buffer, contentType: String },
+  profileImage: { type: String },
   deletedAt: Date,
 }, { timestamps: true });
 

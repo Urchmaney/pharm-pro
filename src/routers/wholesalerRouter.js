@@ -72,8 +72,27 @@ const wholesalerRouter = (controller, fileUploadMiddleware, authMiddlewear) => {
     res.status(statusCode).json(result);
   });
 
-  router.put('/:id', async (req, res) => {
-    const { statusCode, result } = await controller.update.action(req.params.id, req.body);
+  /**
+  * @swagger
+  * /api/wholesalers:
+  *  put:
+  *    description: update wholesaler.
+  *    security:
+  *      - bearerAuth: []
+  *    tags:
+  *     - Wholesalers
+  *    parameters:
+  *     - in: body
+  *       name: wholesaler
+  *       required: true
+  *       schema:
+  *         $ref: '#/definitions/Wholesaler'
+  *    responses:
+  *     '200':
+  *      description: successfully updated.
+  */
+  router.put('/', authMiddlewear, async (req, res) => {
+    const { statusCode, result } = await controller.update.action(req.user.id, req.body);
     res.status(statusCode).json(result);
   });
 
