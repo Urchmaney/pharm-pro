@@ -71,7 +71,7 @@ const wholesalerController = (wholesalerService, otpService, authenticator, noti
       if (!profileImage) return { statusCode: 400, result: 'Please select an image.' };
       profileImage = await uploader.uploadImage(profileImage);
       if (!profileImage) return { statusCode: 500, result: 'Internal server Error. Please contact admin.' };
-      wholesaler = await wholesalerService.uploadWholesalerProfile(wholesalerId, profileImage);
+      wholesaler = await wholesalerService.updateWholesalerProfileImage(wholesalerId, profileImage);
       return { statusCode: 200, result: wholesaler };
     },
   };

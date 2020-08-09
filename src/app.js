@@ -53,7 +53,7 @@ const startApplication = async () => {
   );
 
   const retailerController = retailerControllerGen(
-    retailerService, otpService, authenticator, notifier,
+    retailerService, otpService, authenticator, notifier, uploader,
   );
   const retailerRouter = retailerRouterGen(
     retailerController, fileUploadMiddleware, retailerAuthMiddlewere,

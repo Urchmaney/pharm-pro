@@ -33,7 +33,8 @@ const deleteWholesaler = async (id) => {
 
 const getWholesalers = async () => Wholesaler.find({ isDeleted: false });
 
-const uploadWholesalerProfile = async (id, image) => updateWholesaler(id, { profileImage: image });
+const updateWholesalerProfileImage = async (
+  id, image) => updateWholesaler(id, { profileImage: image });
 
 const createWholesalerRetailer = async (wholesalerRetailer) => {
   if (typeof wholesalerRetailer !== 'object') {
@@ -94,7 +95,7 @@ module.exports = {
   updateWholesaler,
   deleteWholesaler,
   getWholesalers,
-  uploadWholesalerProfile,
+  updateWholesalerProfileImage,
   createWholesalerRetailer,
   getWholesalerRetailers,
   getWholesalerRetailer,

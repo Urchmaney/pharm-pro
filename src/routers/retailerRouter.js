@@ -147,6 +147,27 @@ const retailerRouter = (controller, fileUploadMiddleware, authMiddlewear) => {
     res.status(statusCode).json(result);
   });
 
+  /**
+  * @swagger
+  * /api/retailers/profile_image:
+  *  post:
+  *    description: upload profile image.
+  *    tags:
+  *     - Retailers
+  *    security:
+  *     - bearerAuth: []
+  *    consumes:
+  *      - multipart/form-data
+  *    parameters:
+  *     - name: profile_image
+  *       in: formData
+  *       type: file
+  *       decription: profile image to upload.
+  *       required: true
+  *    responses:
+  *     '200':
+  *      description: successfully upload profile image.
+  */
   router.post('/profile_image', authMiddlewear, fileUploadMiddleware.single('profile_image'),
     async (req, res) => {
       const {
