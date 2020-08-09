@@ -33,13 +33,7 @@ const deleteWholesaler = async (id) => {
 
 const getWholesalers = async () => Wholesaler.find({ isDeleted: false });
 
-const uploadWholesalerProfile = async (id, image) => {
-  const profileImage = {
-    contentType: image.mimetype,
-    data: image.buffer,
-  };
-  return updateWholesaler(id, { profileImage });
-};
+const uploadWholesalerProfile = async (id, image) => updateWholesaler(id, { profileImage: image });
 
 const createWholesalerRetailer = async (wholesalerRetailer) => {
   if (typeof wholesalerRetailer !== 'object') {

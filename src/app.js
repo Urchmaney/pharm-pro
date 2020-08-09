@@ -8,6 +8,7 @@ require('dotenv').config();
 const mongoDB = require('./data_access/connect');
 const authenticator = require('./authenticator/auth');
 const notifier = require('./notification/notifier');
+const uploader = require('./file_uploader/cloudinary_file_uploader');
 
 const wholesalerControllerGen = require('./controllers/wholesalerController');
 const wholesalerRouterGen = require('./routers/wholesalerRouter');
@@ -46,7 +47,7 @@ const startApplication = async () => {
   } = await mongoDB(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/pharm-pro');
 
   const wholesalerController = wholesalerControllerGen(wholesalerService,
-    otpService, authenticator, notifier);
+    otpService, authenticator, notifier, uploader);
   const wholesalerRouter = wholesalerRouterGen(
     wholesalerController, fileUploadMiddleware, wholesalerAuthMiddleware,
   );
