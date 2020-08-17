@@ -34,11 +34,21 @@ const productController = (productService) => {
     },
   };
 
+  const createMany = {
+    roles: [],
+    action: async (products) => {
+      const { status, result } = await productService.createManyProducts(products);
+      if (status) return { statusCode: 201, result };
+      return { statusCode: 400, result };
+    },
+  };
+
   return {
     index,
     create,
     show,
     update,
+    createMany,
   };
 };
 

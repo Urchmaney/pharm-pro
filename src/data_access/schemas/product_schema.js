@@ -17,14 +17,14 @@ const { Schema, model } = require('mongoose');
  *        form:
  *          type: string
  *        image:
- *          type: buffer
+ *          type: string
  */
 const productShema = new Schema({
   name: { type: String, required: true },
   medicalName: { type: String },
   companyName: { type: String },
   form: { type: String },
-  image: { data: Buffer, contentType: String },
+  image: { type: String },
 });
 
 const product = model('products', productShema);
