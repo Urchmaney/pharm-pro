@@ -123,6 +123,29 @@ const productRouter = (controller) => {
     res.status(statusCode).json(result);
   });
 
+  /**
+  * @swagger
+  * /api/products/{id}:
+  *  delete:
+  *    description: Delete Product by id.
+  *    tags:
+  *      -  Products
+  *    name: Products
+  *    produces:
+  *      -  application/json
+  *    parameters:
+  *      - in: path
+  *        name: id
+  *    responses:
+  *     '200':
+  *      description: Delete product with id
+  *
+  */
+  router.delete('/:id', async (req, res) => {
+    const { statusCode, result } = await controller.deleteObj.action(req.params.id);
+    res.status(statusCode).json(result);
+  });
+
   return router;
 };
 

@@ -43,12 +43,21 @@ const productController = (productService) => {
     },
   };
 
+  const deleteObj = {
+    roles: [],
+    action: async (id) => {
+      await productService.deleteProduct(id);
+      return { statusCode: 200, result: id };
+    },
+  };
+
   return {
     index,
     create,
     show,
     update,
     createMany,
+    deleteObj,
   };
 };
 

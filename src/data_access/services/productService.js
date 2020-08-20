@@ -54,10 +54,17 @@ const createManyProducts = async (products) => {
   }
 };
 
+const deleteProduct = async (_id) => {
+  try {
+    await Product.deleteOne({ _id });
+  } catch (e) { console.log(e.message); }
+};
+
 module.exports = {
   createProduct,
   getProducts,
   getProduct,
   updateProduct,
   createManyProducts,
+  deleteProduct,
 };
