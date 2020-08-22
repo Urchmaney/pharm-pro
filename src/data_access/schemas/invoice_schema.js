@@ -1,4 +1,4 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model, isValidObjectId } = require('mongoose');
 
 /**
  * @swagger
@@ -10,11 +10,12 @@ const { Schema, model } = require('mongoose');
  *      properties:
  *        quantity:
  *          type: number
+ *        quantityType:
+ *          type: enum
+ *          enum: [Carton, Satchet, Packet, Box]
  *        product:
  *          type: string
  *        costPrice:
- *          type: number
- *        price:
  *          type: number
  *    Invoice:
  *      type: object
@@ -26,8 +27,6 @@ const { Schema, model } = require('mongoose');
  *          type: string
  *        wholesaler:
  *          type: string
- *        totalNumber:
- *          type: number
  *        products:
  *          type: array
  *          items:
@@ -35,16 +34,32 @@ const { Schema, model } = require('mongoose');
  *
  */
 const invoiceSchema = new Schema({
-  retailer: { type: String, required: true, ref: 'retailers' },
-  wholesaler: { type: String, required: true, ref: 'wholesalers' },
+  retailer: {
+    type: String,
+    required: true,
+    ref: 'retailers',
+    validate: {
+      validator: (_id) => isValidObjectId(_id),
+      message: 'Invalid retailer Id.',
+    },
+  },
+  wholesaler: {
+    type: String,
+    required: true,
+    ref: 'wholesalers',
+    validate: {
+      validator: (_id) => isValidObjectId(_id),
+      message: 'Invalid wholesaler Id.',
+    },
+  },
   products: [{
-    quantity: { type: Number, required: true },
+    quantity: { type: Number, required: true, min: 0.5 },
+    quantityType: { type: String, required: true, enum: ['Satchet', 'Packet', 'Box', 'Cartoon'] },
     product: { type: String, required: true, ref: 'products' },
     costPrice: { type: Number },
-    price: { type: Number },
     accepted: { type: Boolean },
   }],
   totalAmount: { type: Number },
-});
+}, { timestamps: true });
 
 module.exports = model('invoices', invoiceSchema);
