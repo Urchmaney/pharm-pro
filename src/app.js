@@ -28,8 +28,11 @@ const wholesalerRetailerRouterGen = require('./routers/wholesalerRetailerRouter'
 const wholesalerProductControllerGen = require('./controllers/wholesalerProductController');
 const wholesalerProductRouterGen = require('./routers/wholesalerProductRouter');
 
+const invoiceControllerGen = require('./controllers/invoiceController');
+const invoiceRouterGen = require('./routers/invoiceRouter');
+
 const {
-  authWholesalerMiddleware, authRetailerMiddleware,
+  authWholesalerMiddleware, authRetailerMiddleware, authMiddleware,
 } = require('./middlewares/auth_middleware');
 
 const wholesalerAuthMiddleware = authWholesalerMiddleware(authenticator);
@@ -44,6 +47,7 @@ const startApplication = async () => {
     productService,
     wholesalerProductService,
     retailerService,
+    invoiceService,
   } = await mongoDB(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/pharm-pro');
 
   const wholesalerController = wholesalerControllerGen(wholesalerService,
@@ -83,6 +87,11 @@ const startApplication = async () => {
     wholesalerProductController, wholesalerAuthMiddleware,
   );
 
+  const invoiceController = invoiceControllerGen(invoiceService);
+  const invoiceRouter = invoiceRouterGen(
+    invoiceController, authMiddleware, retailerAuthMiddlewere, wholesalerAuthMiddleware,
+  );
+
   app.use(cors());
 
   app.use(express.json());
@@ -100,6 +109,8 @@ const startApplication = async () => {
   app.use('/api/retailers', retailerRouter);
 
   app.use('/api/products', productRouter);
+
+  app.use('/api/invoices', invoiceRouter);
 
   app.use('/', swaggerUI.serve, swaggerUI.setup(swaggerJsDoc));
 
