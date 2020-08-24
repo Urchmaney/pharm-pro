@@ -26,6 +26,7 @@
     "nodemon": "^2.0.4"
   },
   "dependencies": {
+    "axios": "^0.20.0",
     "bcrypt": "^5.0.0",
     "cloudinary": "^1.22.0",
     "cors": "^2.8.5",

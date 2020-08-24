@@ -23,8 +23,6 @@ const { Schema, model, isValidObjectId } = require('mongoose');
  *        - retailer
  *        - wholesaler
  *      properties:
- *        retailer:
- *          type: string
  *        wholesaler:
  *          type: string
  *        products:

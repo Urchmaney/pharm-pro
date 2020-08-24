@@ -25,6 +25,7 @@ const invoiceRouter = (
   *      description: successfully created.
   */
   router.post('/', retailerAuthMiddleware, async (req, res) => {
+    req.body.retailer = req.user.id;
     const { statusCode, result } = await controller.create.action(req.body);
     res.status(statusCode).json(result);
   });
