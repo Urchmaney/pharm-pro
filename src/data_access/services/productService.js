@@ -45,9 +45,26 @@ const updateProduct = async (_id, newProduct) => {
   return Product.findOneAndUpdate({ _id }, newProduct, { new: true });
 };
 
+const createManyProducts = async (products) => {
+  try {
+    const result = await Product.insertMany(products);
+    return { status: true, result };
+  } catch (e) {
+    return { status: false, result: e.message };
+  }
+};
+
+const deleteProduct = async (_id) => {
+  try {
+    await Product.deleteOne({ _id });
+  } catch (e) { console.log(e.message); }
+};
+
 module.exports = {
   createProduct,
   getProducts,
   getProduct,
   updateProduct,
+  createManyProducts,
+  deleteProduct,
 };

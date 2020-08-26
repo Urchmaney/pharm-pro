@@ -71,7 +71,18 @@ const getWholesalerRetailers = async (wholesalerId) => WholesalerRetailer.aggreg
       active: '$active',
       fullName: '$fullName',
       phoneNumber: '$phoneNumber',
-      profileImage: { $arrayElemAt: ['$retailers', 0] },
+      location: '$location',
+      retailer: { $arrayElemAt: ['$retailers', 0] },
+    },
+  },
+  {
+    $project: {
+      wholesalerId: '$wholesalerId',
+      active: '$active',
+      fullName: '$fullName',
+      phoneNumber: '$phoneNumber',
+      location: '$location',
+      image: '$retailer.profileImage',
     },
   },
 ]);

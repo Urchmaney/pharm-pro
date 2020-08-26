@@ -99,6 +99,53 @@ const productRouter = (controller) => {
     res.status(statusCode).json(result);
   });
 
+  /**
+  * @swagger
+  * /api/products/many:
+  *  post:
+  *    description: Create many products.
+  *    tags:
+  *     - Products
+  *    parameters:
+  *     - in: body
+  *       name: product
+  *       required: true
+  *       schema:
+  *         type: array
+  *         items:
+  *           $ref: '#/definitions/Product'
+  *    responses:
+  *     '200':
+  *      description: successfully updated.
+  */
+  router.post('/many', async (req, res) => {
+    const { statusCode, result } = await controller.createMany.action(req.body);
+    res.status(statusCode).json(result);
+  });
+
+  /**
+  * @swagger
+  * /api/products/{id}:
+  *  delete:
+  *    description: Delete Product by id.
+  *    tags:
+  *      -  Products
+  *    name: Products
+  *    produces:
+  *      -  application/json
+  *    parameters:
+  *      - in: path
+  *        name: id
+  *    responses:
+  *     '200':
+  *      description: Delete product with id
+  *
+  */
+  router.delete('/:id', async (req, res) => {
+    const { statusCode, result } = await controller.deleteObj.action(req.params.id);
+    res.status(statusCode).json(result);
+  });
+
   return router;
 };
 

@@ -34,11 +34,30 @@ const productController = (productService) => {
     },
   };
 
+  const createMany = {
+    roles: [],
+    action: async (products) => {
+      const { status, result } = await productService.createManyProducts(products);
+      if (status) return { statusCode: 201, result };
+      return { statusCode: 400, result };
+    },
+  };
+
+  const deleteObj = {
+    roles: [],
+    action: async (id) => {
+      await productService.deleteProduct(id);
+      return { statusCode: 200, result: id };
+    },
+  };
+
   return {
     index,
     create,
     show,
     update,
+    createMany,
+    deleteObj,
   };
 };
 

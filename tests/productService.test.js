@@ -84,6 +84,53 @@ describe('Update Product', () => {
   });
 });
 
+describe('Insert Many products', () => {
+  it('should fail if one is invalid', async () => {
+    const products = [
+      {
+        name: 'kjfdfd',
+        companyName: 'kfdfe',
+      },
+      {
+        name: 'vfsdfcvsdf',
+      },
+      {
+        companyName: 'fsmds',
+      }];
+    const { status, result } = await service.createManyProducts(products);
+    expect((await service.getProducts()).length).toBe(4);
+    expect(status).toBe(false);
+    expect(typeof result).toBe('string');
+  });
+  it('should add many product if they valid', async () => {
+    const products = [{
+      name: 'Nenef',
+      companyName: 'fsmds',
+    },
+    {
+      name: 'kjfdfd',
+      companyName: 'kfdfe',
+    }];
+    const { status, result } = await service.createManyProducts(products);
+    expect(status).toBe(true);
+    expect((await service.getProducts()).length).toBe(6);
+    expect(Array.isArray(result)).toBe(true);
+  });
+  it('should fail if the products is not an array', async () => {
+    let result = await service.createManyProducts('');
+    expect(result.status).toBe(false);
+    expect(typeof result.result).toBe('string');
+
+    result = await service.createManyProducts({});
+    expect(result.status).toBe(false);
+    expect(typeof result.result).toBe('string');
+
+    result = await service.createManyProducts(undefined);
+    expect(result.status).toBe(false);
+    expect(typeof result.result).toBe('string');
+  });
+});
+
 afterAll(async done => {
   closeConn();
   done();

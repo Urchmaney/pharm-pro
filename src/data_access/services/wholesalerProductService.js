@@ -18,7 +18,10 @@ const createWholesalerProduct = async (wholesalerProduct) => {
         result: Object.keys(error.errors).map(ele => error.errors[ele].message),
       };
     }
+
     await wholesalerProduct.save();
+    await WholesalerProduct.populate(wholesalerProduct, { path: 'product' });
+
     return { status: true, result: wholesalerProduct };
   } catch (err) {
     return { status: false, result: ['product Id is Invalid.'] };
