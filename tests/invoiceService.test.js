@@ -1,4 +1,5 @@
 /* eslint-disable no-underscore-dangle */
+const { v4 } = require('uuid');
 const mongoConnect = require('../src/data_access/connect');
 
 
@@ -49,6 +50,7 @@ describe('Create Invoice', () => {
     let invoice = {
       retailer: '5f76d11c34efef00008298f2',
       wholesaler: '9f00d11c43efef01118298f0',
+      groupId: v4(),
     };
     let result = await service.createInvoice(invoice);
     expect(result.status).toBe(true);
@@ -57,8 +59,9 @@ describe('Create Invoice', () => {
     invoice = {
       retailer: '5f00d33c43efef02987698f9',
       wholesaler: '8f76d00c99efef02118298f2',
+      groupId: v4(),
       products: [{
-        product: 'dscs',
+        product: '5f00z21c43efef21800200f2',
         quantity: 7,
         quantityType: 'Packet',
       }],
@@ -74,24 +77,25 @@ describe('Update invoice product', () => {
     const oldInvoice = {
       retailer: '5f00d22c43efef21800200f2',
       wholesaler: '5f99d00c43efef02111198f2',
+      groupId: v4(),
       products: [{
-        product: 'ewjdweifjwe',
+        product: '3e01d00r62eggf21800287t1',
         quantity: 4,
         quantityType: 'Satchet',
       }, {
-        product: 'ewjdweiedwedwewe',
+        product: '3e01d00r62eggf21800200f2',
         quantity: 4,
         quantityType: 'Satchet',
       }],
     };
     const invoiceId = (await service.createInvoice(oldInvoice)).result._id;
     let updateProduct = {
-      product: 'ewjdweifjwe',
+      product: '3e01d00r62eggf21800200f2',
       costPrice: 200,
       quantity: 3,
     };
     let result = await service.updateInvoiceProduct(invoiceId, updateProduct);
-    const updatedProduct = result.products.find(e => e.product === 'ewjdweifjwe');
+    const updatedProduct = result.products.find(e => e.product === '3e01d00r62eggf21800200f2');
     expect(updatedProduct.costPrice).toBe(200);
     expect(updatedProduct.quantity).toBe(4);
 
@@ -118,35 +122,36 @@ describe('update many invoice products', () => {
     const oldInvoice = {
       retailer: '0f09d33c43efef00028298f1',
       wholesaler: '4f76y33b43efef02008000f8',
+      groupId: v4(),
       products: [{
-        product: 'ewjdweifjwe',
+        product: '5f00d22c00ehtf21800200f2',
         quantity: 4,
         quantityType: 'Satchet',
       }, {
-        product: 'ewjdweiedwedwewe',
+        product: '3e01d33c42eggf21800200f2',
         quantity: 4,
         quantityType: 'Satchet',
       }],
     };
     const invoiceId = (await service.createInvoice(oldInvoice)).result._id;
     const updateProducts = [{
-      product: 'ewjdweifjwe',
+      product: '5f00d22c00ehtf21800200f2',
       costPrice: 200,
       quantity: 3,
     },
     {
-      product: 'ewjdweiedwedwewe',
+      product: '3e01d33c42eggf21800200f2',
       costPrice: 300,
     },
     {
-      product: 'wdwqdwqdweqdqwed',
+      product: '5f00d22c43efef21811411f4',
       costPrice: 100,
     }];
     let result = await service.updateManyInvoiceProducts(invoiceId, updateProducts);
-    const firstProduct = result.products.find(e => e.product === 'ewjdweifjwe');
+    const firstProduct = result.products.find(e => e.product === '5f00d22c00ehtf21800200f2');
     expect(firstProduct.costPrice).toBe(200);
 
-    const secondProduct = result.products.find(e => e.product === 'ewjdweiedwedwewe');
+    const secondProduct = result.products.find(e => e.product === '3e01d33c42eggf21800200f2');
     expect(secondProduct.costPrice).toBe(300);
 
     result = await service.updateManyInvoiceProducts(invoiceId, [{ product: 'sfsdfsd', costPrice: 300 }]);
@@ -170,6 +175,7 @@ test('Get all retailer invoices', async () => {
   await service.createInvoice({
     retailer: '5f76d33c43efef02008298f2',
     wholesaler: '5f40d73c43efef02008298f2',
+    groupId: v4(),
   });
   expect((await service.getRetailerInvoices('5f76d33c43efef02008298f2')).length).toBe(1);
 });
@@ -178,6 +184,7 @@ test('Get all wholesaler invoices', async () => {
   await service.createInvoice({
     retailer: '2f40d73c43efef02008298f2',
     wholesaler: '1f40d73c28efef01008898f1',
+    groupId: v4(),
   });
   expect((await service.getWholesalerInvoices('1f40d73c28efef01008898f1')).length).toBe(1);
 });

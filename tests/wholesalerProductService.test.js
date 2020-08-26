@@ -115,6 +115,29 @@ describe('update wholesaler product', () => {
   });
 });
 
+describe('get wholesaler product cost price', () => {
+  it('should get price if present', async () => {
+    const wholesaler = '9f00d11c43efef01118298f0';
+    const product = '5f76d11c34efef00008298f2';
+    const wholesalerProduct = {
+      wholesaler,
+      product,
+      pricePerPacket: 100,
+      pricePerBox: 1000,
+      pricePerSatchet: 50,
+      pricePerCarton: 10000,
+      quantity: 100,
+    };
+    await service.createWholesalerProduct(wholesalerProduct);
+    expect(await service.getWholesalerProductCostPrice(wholesaler, product, 'Satchet')).toBe(50);
+    expect(await service.getWholesalerProductCostPrice(wholesaler, product, 'Packet')).toBe(100);
+    expect(await service.getWholesalerProductCostPrice(wholesaler, product, 'Box')).toBe(1000);
+    expect(await service.getWholesalerProductCostPrice(wholesaler, product, 'Carton')).toBe(10000);
+    expect(await service.getWholesalerProductCostPrice(wholesaler, product, 'unknwn')).toBe(0);
+    expect(await service.getWholesalerProductCostPrice('fwfcwefcwd', product, 'Satchet')).toBe(0);
+  });
+});
+
 afterAll(done => {
   closeConn();
   done();

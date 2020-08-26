@@ -1,7 +1,7 @@
 const express = require('express');
 
 const invoiceRouter = (
-  controller, authMiddleware, retailerAuthMiddleware, wholesaerAuthMiddleware,
+  controller, combineAuthMiddleware, retailerAuthMiddleware, wholesaerAuthMiddleware,
 ) => {
   const router = express.Router();
 
@@ -25,8 +25,7 @@ const invoiceRouter = (
   *      description: successfully created.
   */
   router.post('/', retailerAuthMiddleware, async (req, res) => {
-    req.body.retailer = req.user.id;
-    const { statusCode, result } = await controller.create.action(req.body);
+    const { statusCode, result } = await controller.create.action(req.body, req.user.id);
     res.status(statusCode).json(result);
   });
 
@@ -43,7 +42,7 @@ const invoiceRouter = (
    *      '200':
    *        description: Successfully fetched.
    */
-  router.get('/', authMiddleware, async (req, res) => {
+  router.get('/', combineAuthMiddleware, async (req, res) => {
     const { statusCode, result } = await controller.index.action(req.user.id, req.user.type);
     res.status(statusCode).json(result);
   });
@@ -65,7 +64,7 @@ const invoiceRouter = (
    *      '200':
    *        description: Successfully fetched.
    */
-  router.get('/:id', authMiddleware, async (req, res) => {
+  router.get('/:id', combineAuthMiddleware, async (req, res) => {
     const { statusCode, result } = await controller.show.action(req.params.id);
     res.status(statusCode).json(result);
   });

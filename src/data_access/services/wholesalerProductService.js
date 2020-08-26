@@ -39,6 +39,24 @@ const getWholesalerProduct = async (wholesaler, product) => WholesalerProduct.fi
   product,
 }).populate('product');
 
+const getWholesalerProductCostPrice = async (wholesalerId, productId, quantityType) => {
+  const wholesalerProduct = await getWholesalerProduct(wholesalerId, productId);
+  if (!wholesalerProduct) return 0;
+
+  switch (quantityType) {
+    case 'Satchet':
+      return wholesalerProduct.pricePerSatchet;
+    case 'Carton':
+      return wholesalerProduct.pricePerCarton;
+    case 'Box':
+      return wholesalerProduct.pricePerBox;
+    case 'Packet':
+      return wholesalerProduct.pricePerPacket;
+    default:
+      return 0;
+  }
+};
+
 const updateWholesalerProduct = async (_id, newWholesalerProduct) => {
   if (!mongoose.isValidObjectId(_id)) return null;
   return WholesalerProduct.findOneAndUpdate({
@@ -52,4 +70,5 @@ module.exports = {
   getWholesalerProducts,
   getWholesalerProduct,
   updateWholesalerProduct,
+  getWholesalerProductCostPrice,
 };
