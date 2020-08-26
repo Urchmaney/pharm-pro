@@ -23,8 +23,10 @@ const { Schema, model, isValidObjectId } = require('mongoose');
  *        - retailer
  *        - wholesaler
  *      properties:
- *        wholesaler:
- *          type: string
+ *        wholesalers:
+ *          type: array
+ *          items:
+ *            type: string
  *        products:
  *          type: array
  *          items:
@@ -41,6 +43,8 @@ const invoiceSchema = new Schema({
       message: 'Invalid retailer Id.',
     },
   },
+  isClosed: { type: Boolean, default: false },
+  groupId: { type: String, required: true },
   wholesaler: {
     type: String,
     required: true,
@@ -52,8 +56,16 @@ const invoiceSchema = new Schema({
   },
   products: [{
     quantity: { type: Number, required: true, min: 0.5 },
-    quantityType: { type: String, required: true, enum: ['Satchet', 'Packet', 'Box', 'Cartoon'] },
-    product: { type: String, required: true, ref: 'products' },
+    quantityType: { type: String, required: true, enum: ['Satchet', 'Packet', 'Box', 'Carton'] },
+    product: {
+      type: String,
+      required: true,
+      ref: 'products',
+      validate: {
+        validator: (_id) => isValidObjectId(_id),
+        message: 'Invalid product Id.',
+      },
+    },
     costPrice: { type: Number },
     accepted: { type: Boolean },
   }],
