@@ -3,16 +3,20 @@ const Wholesaler = require('../schemas/wholesaler_schema');
 const WholesalerRetailer = require('../schemas/wholesaler_retailer_schema');
 
 const createWholesaler = async (wholesalerObj) => {
-  const wholesaler = new Wholesaler(wholesalerObj);
-  const error = wholesaler.validateSync();
-  if (error) {
-    return {
-      status: false,
-      result: Object.keys(error.errors).map(ele => error.errors[ele].message),
-    };
+  try {
+    const wholesaler = new Wholesaler(wholesalerObj);
+    const error = wholesaler.validateSync();
+    if (error) {
+      return {
+        status: false,
+        result: Object.keys(error.errors).map(ele => error.errors[ele].message),
+      };
+    }
+    await wholesaler.save();
+    return { status: true, result: wholesaler };
+  } catch (e) {
+    return { status: false, result: [e.message] };
   }
-  await wholesaler.save();
-  return { status: true, result: wholesaler };
 };
 
 const getWholesalerById = async (id) => {
