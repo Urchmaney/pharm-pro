@@ -37,6 +37,7 @@ const {
 
 const wholesalerAuthMiddleware = authWholesalerMiddleware(authenticator);
 const retailerAuthMiddlewere = authRetailerMiddleware(authenticator);
+const combineAuthMiddleware = authMiddleware(authenticator);
 const fileUploadMiddleware = require('./middlewares/file_upload_middleware');
 
 const startApplication = async () => {
@@ -89,7 +90,7 @@ const startApplication = async () => {
 
   const invoiceController = invoiceControllerGen(invoiceService);
   const invoiceRouter = invoiceRouterGen(
-    invoiceController, authMiddleware, retailerAuthMiddlewere, wholesalerAuthMiddleware,
+    invoiceController, combineAuthMiddleware, retailerAuthMiddlewere, wholesalerAuthMiddleware,
   );
 
   app.use(cors());

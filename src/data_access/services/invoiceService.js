@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const InvoiceModel = require('../schemas/invoice_schema');
+const { getWholesalerProductCostPrice } = require('./wholesalerProductService');
 
 const getInvoiceById = (_id) => {
   if (!mongoose.isValidObjectId(_id)) return null;
@@ -10,23 +11,40 @@ const getRetailerInvoices = (retailerId) => InvoiceModel.find({ retailer: retail
 
 const getWholesalerInvoices = (wholesalerId) => InvoiceModel.find({ wholesaler: wholesalerId }).populate('retailer');
 
+const addInvoiceProductCostPrice = async (invoiceProduct, wholesaler) => {
+  const costPrice = await getWholesalerProductCostPrice(
+    wholesaler, invoiceProduct.product, invoiceProduct.quantityType,
+  );
+  invoiceProduct.costPrice = costPrice;
+};
+
 const createInvoice = async (invoice) => {
-  if (typeof invoice !== 'object') {
-    return {
-      status: false,
-      result: ['Invalid invoice instance.'],
-    };
+  try {
+    if (typeof invoice !== 'object') {
+      return {
+        status: false,
+        result: ['Invalid invoice instance.'],
+      };
+    }
+    invoice = new InvoiceModel(invoice);
+    const error = invoice.validateSync();
+    if (error) {
+      return {
+        status: false,
+        result: Object.keys(error.errors).map(ele => error.errors[ele].message),
+      };
+    }
+    const costProducts = [];
+    invoice.products.forEach(ele => {
+      costProducts.push(addInvoiceProductCostPrice(ele, invoice.wholesaler));
+    });
+    await Promise.all(costProducts);
+    await invoice.save();
+    return { status: true, result: invoice };
+  } catch (e) {
+    console.log(e);
+    return { status: false, result: e.message };
   }
-  invoice = new InvoiceModel(invoice);
-  const error = invoice.validateSync();
-  if (error) {
-    return {
-      status: false,
-      result: Object.keys(error.errors).map(ele => error.errors[ele].message),
-    };
-  }
-  await invoice.save();
-  return { status: true, result: invoice };
 };
 
 const updateInvoiceProduct = async (invoiceId, updateObj) => {

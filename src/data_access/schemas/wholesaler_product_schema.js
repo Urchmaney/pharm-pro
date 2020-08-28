@@ -20,6 +20,8 @@ const {
  *          type: number
  *        pricePerCarton:
  *          type: number
+ *        pricePerSatchet:
+ *          type: number
  *        quantity:
  *          type: number
  */
@@ -37,6 +39,7 @@ const wholesalerProductSchema = new Schema({
   pricePerPacket: { type: Number, default: 0, min: 0 },
   pricePerBox: { type: Number, default: 0, min: 0 },
   pricePerCarton: { type: Number, default: 0, min: 0 },
+  pricePerSatchet: { type: Number, default: 0, min: 0 },
   quantity: { type: Number, default: 0, min: 0 },
 });
 

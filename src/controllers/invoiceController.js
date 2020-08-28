@@ -1,11 +1,24 @@
+const { v4 } = require('uuid');
+
 const invoiceController = (invoiceService) => {
   const create = {
     roles: [],
-    action: async (invoice) => {
-      const { status, result } = await invoiceService.createInvoice(invoice);
-      if (!status) return { statusCode: 400, result };
-
-      return { statusCode: 201, result };
+    action: async (invoice, retailerId) => {
+      if (!Array.isArray(invoice.products) || !Array.isArray(invoice.wholesalers)) {
+        return { statusCode: 400, result: 'Invalid parameter. products and wholesaler must be arrays' };
+      }
+      const groupId = v4();
+      const invoices = [];
+      invoice.wholesalers.forEach(ele => {
+        const cInvoice = {
+          wholesaler: ele,
+          retailer: retailerId,
+          groupId,
+          products: invoice.products,
+        };
+        invoices.push(invoiceService.createInvoice(cInvoice));
+      });
+      return { statusCode: 201, result: await Promise.all(invoices) };
     },
   };
 
