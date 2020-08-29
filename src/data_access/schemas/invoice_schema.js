@@ -43,7 +43,7 @@ const invoiceSchema = new Schema({
       message: 'Invalid retailer Id.',
     },
   },
-  isClosed: { type: Boolean, default: false },
+  isActive: { type: Boolean, default: true },
   groupId: { type: String, required: true },
   wholesaler: {
     type: String,

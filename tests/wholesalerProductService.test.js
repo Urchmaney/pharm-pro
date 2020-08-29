@@ -103,6 +103,17 @@ describe('update wholesaler product', () => {
     );
     expect(result).toBeDefined();
     expect(result.pricePerBox).toBe(2000);
+
+    let updatedObj = await service.updateWholesalerProductQuantityTypePrice(
+      testWholesaler._id, testProduct._id, 'Box', 5,
+    );
+    expect(updatedObj.pricePerBox).toBe(5);
+
+    updatedObj = await service.updateWholesalerProductQuantityTypePrice(
+      testWholesaler._id, testProduct._id, 'Satchet', 105,
+    );
+    expect(updatedObj.pricePerBox).toBe(5);
+    expect(updatedObj.pricePerSatchet).toBe(105);
   });
   it('should return null if wholesaler and product is invalid', async () => {
     const newObj = { pricePerBox: 2000 };

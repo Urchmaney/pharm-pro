@@ -4,15 +4,21 @@ const mongoConnect = require('../src/data_access/connect');
 
 
 let service = null;
+let wpService = null;
+let pService = null;
 let closeConn = null;
 const products = [];
 
 beforeAll(async () => {
   const {
     invoiceService,
+    wholesalerProductService,
+    productService,
     closeConnect,
   } = await mongoConnect(global.__MONGO_URI__);
   service = invoiceService;
+  wpService = wholesalerProductService;
+  pService = productService;
   closeConn = closeConnect;
   await Promise.all(products);
 });
@@ -74,6 +80,7 @@ describe('Create Invoice', () => {
 
 describe('Update invoice product', () => {
   it('should update invoice product', async () => {
+    const pId = (await pService.createProduct({ name: 'Amalar' })).result._id;
     const oldInvoice = {
       retailer: '5f00d22c43efef21800200f2',
       wholesaler: '5f99d00c43efef02111198f2',
@@ -83,22 +90,31 @@ describe('Update invoice product', () => {
         quantity: 4,
         quantityType: 'Satchet',
       }, {
-        product: '3e01d00r62eggf21800200f2',
+        product: pId,
         quantity: 4,
         quantityType: 'Satchet',
       }],
     };
     const invoiceId = (await service.createInvoice(oldInvoice)).result._id;
+    const wId = '5f99d00c43efef02111198f2';
+    (await wpService.createWholesalerProduct({
+      wholesaler: wId,
+      product: pId,
+    }));
     let updateProduct = {
-      product: '3e01d00r62eggf21800200f2',
+      product: pId,
       costPrice: 200,
       quantity: 3,
+      quantityType: 'Box',
     };
-    let result = await service.updateInvoiceProduct(invoiceId, updateProduct);
-    const updatedProduct = result.products.find(e => e.product === '3e01d00r62eggf21800200f2');
+    let result = await service.updateInvoiceProduct(invoiceId, updateProduct, wId);
+    const updatedProduct = result.products.find(e => e.product === pId.toString());
     expect(updatedProduct.costPrice).toBe(200);
     expect(updatedProduct.quantity).toBe(4);
 
+    expect(await wpService.getWholesalerProductCostPrice(
+      wId, updateProduct.product, 'Box',
+    )).toBe(200);
     updateProduct = {
       product: 'dedwedwekjfkwefwe',
       costPrice: 100,
