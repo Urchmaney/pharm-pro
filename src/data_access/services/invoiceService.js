@@ -85,6 +85,16 @@ const updateManyInvoiceProducts = async (invoiceId, invoiceProducts, wholesalerI
   return (await Promise.all(updates)).filter(ele => ele !== null).pop() || null;
 };
 
+const getList = async (retailerId, status) => {
+  const option = { retailer: retailerId };
+  if (status !== undefined) option.isActive = (status.toLowerCase() === 'true');
+
+  return InvoiceModel.aggregate([
+    { $match: option },
+    { $group: { _id: '$groupId', products: { $first: '$products' } } },
+  ]);
+};
+
 module.exports = {
   getInvoiceById,
   getRetailerInvoices,
@@ -92,4 +102,5 @@ module.exports = {
   createInvoice,
   updateInvoiceProduct,
   updateManyInvoiceProducts,
+  getList,
 };

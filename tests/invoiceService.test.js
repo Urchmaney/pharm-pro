@@ -209,6 +209,12 @@ test('Get invoice by Id', async () => {
   expect((await service.getInvoiceById('hhqwudyqwdy'))).toBeNull();
 });
 
+test('get retailers lists', async () => {
+  const lists = await service.getList('0f09d33c43efef00028298f1');
+  expect(lists.length).toBe(1);
+  expect(lists[0].products.length).toBe(2);
+});
+
 afterAll(async done => {
   closeConn();
   done();
