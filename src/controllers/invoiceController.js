@@ -24,10 +24,10 @@ const invoiceController = (invoiceService) => {
 
   const index = {
     roles: [],
-    action: async (userId, userType) => {
+    action: async (userId, userType, status) => {
       let invoices = [];
-      if (userType === 1) invoices = await invoiceService.getWholesalerInvoices(userId);
-      if (userType === 2) invoices = await invoiceService.getRetailerInvoices(userId);
+      if (userType === 1) invoices = await invoiceService.getWholesalerInvoices(userId, status);
+      if (userType === 2) invoices = await invoiceService.getRetailerInvoices(userId, status);
 
       return { statusCode: 200, result: invoices };
     },
@@ -35,8 +35,10 @@ const invoiceController = (invoiceService) => {
 
   const update = {
     roles: [],
-    action: async (invoiceId, invoiceProduct) => {
-      const upateInvoice = await invoiceService.updateInvoiceProduct(invoiceId, invoiceProduct);
+    action: async (invoiceId, invoiceProduct, wholesalerId) => {
+      const upateInvoice = await invoiceService.updateInvoiceProduct(
+        invoiceId, invoiceProduct, wholesalerId,
+      );
       if (upateInvoice) return { statusCode: 200, result: upateInvoice };
 
       return { statusCode: 400, result: 'Either invoice Id or product is invalid' };
@@ -45,9 +47,9 @@ const invoiceController = (invoiceService) => {
 
   const updateMany = {
     roles: [],
-    action: async (invoiceId, invoiceProducts) => {
+    action: async (invoiceId, invoiceProducts, wholesalerId) => {
       const upateInvoice = await invoiceService.updateManyInvoiceProducts(
-        invoiceId, invoiceProducts,
+        invoiceId, invoiceProducts, wholesalerId,
       );
       if (upateInvoice) return { statusCode: 200, result: upateInvoice };
 

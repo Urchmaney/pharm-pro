@@ -6,7 +6,7 @@ const createWholesalerProduct = async (wholesalerProduct) => {
     if (typeof wholesalerProduct !== 'object') {
       return {
         status: false,
-        result: ['Invalid payload sent'],
+        result: ['Invalid payload sent.'],
       };
     }
 
@@ -57,6 +57,34 @@ const getWholesalerProductCostPrice = async (wholesalerId, productId, quantityTy
   }
 };
 
+const updateWholesalerProductQuantityTypePrice = async (
+  wholesalerId, productId, quantityType, price,
+) => {
+  if (!mongoose.isValidObjectId(wholesalerId)
+    || !mongoose.isValidObjectId(productId) || typeof price !== 'number') return null;
+
+  const option = {};
+  switch (quantityType) {
+    case 'Satchet':
+      option.pricePerSatchet = price;
+      break;
+    case 'Carton':
+      option.pricePerCarton = price;
+      break;
+    case 'Box':
+      option.pricePerBox = price;
+      break;
+    case 'Packet':
+      option.pricePerPacket = price;
+      break;
+    default:
+      break;
+  }
+  return WholesalerProduct.findOneAndUpdate({
+    wholesaler: wholesalerId, product: productId,
+  }, option, { new: true });
+};
+
 const updateWholesalerProduct = async (_id, newWholesalerProduct) => {
   if (!mongoose.isValidObjectId(_id)) return null;
   return WholesalerProduct.findOneAndUpdate({
@@ -71,4 +99,5 @@ module.exports = {
   getWholesalerProduct,
   updateWholesalerProduct,
   getWholesalerProductCostPrice,
+  updateWholesalerProductQuantityTypePrice,
 };

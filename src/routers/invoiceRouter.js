@@ -38,12 +38,18 @@ const invoiceRouter = (
    *      - bearerAuth: []
    *    tags:
    *      - Invoices
+   *    parameters:
+   *      - in : query
+   *        name: active
+   *        type: booleans
    *    responses:
    *      '200':
    *        description: Successfully fetched.
    */
   router.get('/', combineAuthMiddleware, async (req, res) => {
-    const { statusCode, result } = await controller.index.action(req.user.id, req.user.type);
+    const { statusCode, result } = await controller.index.action(
+      req.user.id, req.user.type, req.query.active,
+    );
     res.status(statusCode).json(result);
   });
 
@@ -92,7 +98,9 @@ const invoiceRouter = (
    *        description: successfully updated
    */
   router.put('/:id', wholesaerAuthMiddleware, async (req, res) => {
-    const { statusCode, result } = await controller.update.action(req.params.id, req.body);
+    const { statusCode, result } = await controller.update.action(
+      req.params.id, req.body, req.user.id,
+    );
     res.status(statusCode).json(result);
   });
 
@@ -121,7 +129,9 @@ const invoiceRouter = (
    *        description: successfully updated
    */
   router.put('/:id/many', wholesaerAuthMiddleware, async (req, res) => {
-    const { statusCode, result } = await controller.updateMany.action(req.params.id, req.body);
+    const { statusCode, result } = await controller.updateMany.action(
+      req.params.id, req.body, req.user.id,
+    );
     res.status(statusCode).json(result);
   });
 
