@@ -38,12 +38,15 @@ const wholesalerProductRouter = (controller, authMiddlewear) => {
    *      - bearerAuth: []
    *    tags:
    *      - Wholesaler Products
+   *    parameters:
+   *      - in: query
+   *        name: type
    *    responses:
    *      '200':
    *        description: Successfully fetched.
    */
   router.get('/', authMiddlewear, async (req, res) => {
-    const { statusCode, result } = await controller.index.action(req.user.id);
+    const { statusCode, result } = await controller.index.action(req.user.id, req.query.type);
     res.status(statusCode).json(result);
   });
 
