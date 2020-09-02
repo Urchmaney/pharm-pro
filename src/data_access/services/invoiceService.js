@@ -85,15 +85,45 @@ const updateManyInvoiceProducts = async (invoiceId, invoiceProducts, wholesalerI
   return (await Promise.all(updates)).filter(ele => ele !== null).pop() || null;
 };
 
-const getList = async (retailerId, status) => {
+const getLists = async (retailerId, status) => {
   const option = { retailer: retailerId };
   if (status !== undefined) option.isActive = (status.toLowerCase() === 'true');
 
   return InvoiceModel.aggregate([
     { $match: option },
-    { $group: { _id: '$groupId', products: { $first: '$products' } } },
+    { $group: { _id: '$listId', products: { $first: '$products' } } },
   ]);
 };
+
+const getList = async (retailerId, listId) => {
+  const invoice = await InvoiceModel.findOne({ listId, retailer: retailerId }).lean();
+  if (!invoice) return null;
+
+  return invoice.products;
+};
+
+const getListProductPrices = async (listId, productId) => {
+  const products = await InvoiceModel.aggregate([
+    { $match: { listId } },
+    { $unwind: '$products' },
+    { $match: { 'products.product': productId.toString() } },
+    {
+      $project: {
+        wholesaler: '$wholesaler',
+        listId: '$listId',
+        product: '$products',
+      },
+    },
+  ]);
+  return InvoiceModel.populate(products, {
+    path: 'wholesaler',
+    select: { fullName: 1 },
+  });
+};
+
+const closeList = async (listId, retailerId) => InvoiceModel.updateMany(
+  { listId, retailer: retailerId }, { isActive: false }, { new: true },
+);
 
 module.exports = {
   getInvoiceById,
@@ -102,5 +132,8 @@ module.exports = {
   createInvoice,
   updateInvoiceProduct,
   updateManyInvoiceProducts,
+  getLists,
   getList,
+  getListProductPrices,
+  closeList,
 };

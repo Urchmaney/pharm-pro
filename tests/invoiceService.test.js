@@ -5,22 +5,23 @@ const mongoConnect = require('../src/data_access/connect');
 
 let service = null;
 let wpService = null;
+let wService = null;
 let pService = null;
 let closeConn = null;
-const products = [];
 
 beforeAll(async () => {
   const {
     invoiceService,
     wholesalerProductService,
     productService,
+    wholesalerService,
     closeConnect,
   } = await mongoConnect(global.__MONGO_URI__);
   service = invoiceService;
   wpService = wholesalerProductService;
   pService = productService;
+  wService = wholesalerService;
   closeConn = closeConnect;
-  await Promise.all(products);
 });
 
 describe('Create Invoice', () => {
@@ -56,7 +57,7 @@ describe('Create Invoice', () => {
     let invoice = {
       retailer: '5f76d11c34efef00008298f2',
       wholesaler: '9f00d11c43efef01118298f0',
-      groupId: v4(),
+      listId: v4(),
     };
     let result = await service.createInvoice(invoice);
     expect(result.status).toBe(true);
@@ -65,7 +66,7 @@ describe('Create Invoice', () => {
     invoice = {
       retailer: '5f00d33c43efef02987698f9',
       wholesaler: '8f76d00c99efef02118298f2',
-      groupId: v4(),
+      listId: v4(),
       products: [{
         product: '5f00z21c43efef21800200f2',
         quantity: 7,
@@ -84,7 +85,7 @@ describe('Update invoice product', () => {
     const oldInvoice = {
       retailer: '5f00d22c43efef21800200f2',
       wholesaler: '5f99d00c43efef02111198f2',
-      groupId: v4(),
+      listId: v4(),
       products: [{
         product: '3e01d00r62eggf21800287t1',
         quantity: 4,
@@ -138,7 +139,7 @@ describe('update many invoice products', () => {
     const oldInvoice = {
       retailer: '0f09d33c43efef00028298f1',
       wholesaler: '4f76y33b43efef02008000f8',
-      groupId: v4(),
+      listId: v4(),
       products: [{
         product: '5f00d22c00ehtf21800200f2',
         quantity: 4,
@@ -191,7 +192,7 @@ test('Get all retailer invoices', async () => {
   await service.createInvoice({
     retailer: '5f76d33c43efef02008298f2',
     wholesaler: '5f40d73c43efef02008298f2',
-    groupId: v4(),
+    listId: v4(),
   });
   expect((await service.getRetailerInvoices('5f76d33c43efef02008298f2')).length).toBe(1);
 });
@@ -200,7 +201,7 @@ test('Get all wholesaler invoices', async () => {
   await service.createInvoice({
     retailer: '2f40d73c43efef02008298f2',
     wholesaler: '1f40d73c28efef01008898f1',
-    groupId: v4(),
+    listId: v4(),
   });
   expect((await service.getWholesalerInvoices('1f40d73c28efef01008898f1')).length).toBe(1);
 });
@@ -210,9 +211,115 @@ test('Get invoice by Id', async () => {
 });
 
 test('get retailers lists', async () => {
-  const lists = await service.getList('0f09d33c43efef00028298f1');
+  const lists = await service.getLists('0f09d33c43efef00028298f1');
   expect(lists.length).toBe(1);
   expect(lists[0].products.length).toBe(2);
+});
+
+describe('get list product prices', () => {
+  it('should return list prices', async () => {
+    const products = (await pService.createManyProducts([
+      { name: 'Artesuname', medicalName: 'Malaria' },
+      { name: 'Co-artem', medicalName: 'Malaria' },
+    ])).result;
+    const wholesalerId = (await wService.createWholesaler({
+      fullName: 'Bernad Bakens',
+      registrationNumber: '87672',
+      phoneNumber: '+2349078778256',
+    })).result._id;
+    await wpService.createWholesalerProduct({
+      wholesaler: wholesalerId,
+      product: products[0]._id,
+      pricePerBox: 3500,
+    });
+    await wpService.createWholesalerProduct({
+      wholesaler: wholesalerId,
+      product: products[1]._id,
+      pricePerBox: 5600,
+    });
+    const listId = v4();
+    await service.createInvoice({
+      retailer: '2f40d73c11efef02008298f2',
+      wholesaler: wholesalerId,
+      listId,
+      products: [{
+        product: products[0]._id,
+        quantity: 3,
+        quantityType: 'Box',
+      }, {
+        product: products[1]._id,
+        quantity: 2,
+        quantityType: 'Box',
+      }],
+    });
+    await service.createInvoice({
+      retailer: '2f40d73c11efef02008298f2',
+      wholesaler: '0f40d73c11efef02118000f2',
+      listId,
+      products: [{
+        product: products[0]._id,
+        quantity: 3,
+        quantityType: 'Box',
+      }, {
+        product: products[1]._id,
+        quantity: 2,
+        quantityType: 'Box',
+      }],
+    });
+    const listPrices = await service.getListProductPrices(listId, products[0]._id);
+    expect(Array.isArray(listPrices)).toBe(true);
+    expect(listPrices.length).toBe(2);
+  });
+});
+
+test('close list', async () => {
+  const listId = v4();
+  const retailerId = '2f40d73c11efef02008298f2';
+  await service.createInvoice({
+    retailer: retailerId,
+    wholesaler: '0f40d73c11efef02118000f2',
+    listId,
+    products: [{
+      product: '0g40d94c11efef02111111f2',
+      quantity: 3,
+      quantityType: 'Box',
+    }, {
+      product: '1f40d73c34ehth00008000f0',
+      quantity: 2,
+      quantityType: 'Box',
+    }],
+  });
+  const resultStatus = await service.closeList(listId, retailerId);
+  expect(resultStatus.nModified).toBe(1);
+});
+
+describe('get list', () => {
+  it('should return null if retailer list does not exoist', async () => {
+    const list = await service.getList('zf00t11c00esty032476743r2', 'hdqwedqwjhdwjhkqdqwyhgyduqw');
+    expect(list).toBeNull();
+  });
+
+  it('should return list products', async () => {
+    const listId = v4();
+    const retailerId = 'zf21t22c00ezz032476743r2';
+    await service.createInvoice({
+      retailer: retailerId,
+      wholesaler: 'zf21t22c00efef02118000f2',
+      listId,
+      products: [{
+        product: '0g40d94c11efef02111111f2',
+        quantity: 3,
+        quantityType: 'Box',
+      }, {
+        product: '1f40d73c34ehth00008000f0',
+        quantity: 2,
+        quantityType: 'Box',
+      }],
+    });
+    const list = await service.getList(retailerId, listId);
+    expect(Array.isArray(list)).toBe(true);
+    expect(list.length).toBe(2);
+  });
 });
 
 afterAll(async done => {
