@@ -1,21 +1,43 @@
 const express = require('express');
 
-const wholesalerRouter = (controller, fileUploadMiddleware, authMiddlewear) => {
+const retailerRouter = (controller, fileUploadMiddleware, authMiddlewear) => {
   const router = express.Router();
 
   /**
+  * @swagger
+  * /api/retailers:
+  *  post:
+  *    description: Create retailer.
+  *    tags:
+  *     - Retailers
+  *    parameters:
+  *     - name: retailer
+  *       in: body
+  *       required: true
+  *       schema:
+  *         $ref: '#/definitions/Retailer'
+  *    responses:
+  *     '200':
+  *      description: successfully created.
+  */
+  router.post('/', async (req, res) => {
+    const { statusCode, result } = await controller.create.action(req.body);
+    res.status(statusCode).json(result);
+  });
+
+  /**
    * @swagger
-   * /api/wholesalers:
+   * /api/retailers:
    *  get:
-   *    description: Get all wholesalers.
+   *    description: Get all retailers.
    *    tags:
-   *      -  Wholesalers
-   *    name: Wholesalers
+   *      -  Retailers
+   *    name: Retailers
    *    produces:
    *      -  application/json
    *    responses:
    *     '200':
-   *      description: A list of all wholesalers
+   *      description: A list of all retailers
    *      content:
    *        application/json:
    *          schema:
@@ -29,12 +51,12 @@ const wholesalerRouter = (controller, fileUploadMiddleware, authMiddlewear) => {
 
   /**
   * @swagger
-  * /api/wholesalers/{id}:
+  * /api/retailers/{id}:
   *  get:
-  *    description: Get wholesalers by id.
+  *    description: Get retailers by id.
   *    tags:
-  *      -  Wholesalers
-  *    name: Wholesalers
+  *      -  Retailers
+  *    name: Retailers
   *    produces:
   *      -  application/json
   *    parameters:
@@ -42,7 +64,7 @@ const wholesalerRouter = (controller, fileUploadMiddleware, authMiddlewear) => {
   *        name: id
   *    responses:
   *     '200':
-  *      description: wholesaler with id
+  *      description: retailer with id
   *
   */
   router.get('/:id', async (req, res) => {
@@ -52,41 +74,19 @@ const wholesalerRouter = (controller, fileUploadMiddleware, authMiddlewear) => {
 
   /**
   * @swagger
-  * /api/wholesalers:
-  *  post:
-  *    description: Create wholesaler.
-  *    tags:
-  *     - Wholesalers
-  *    parameters:
-  *     - name: wholesaler
-  *       in: body
-  *       required: true
-  *       schema:
-  *         $ref: '#/definitions/Wholesaler'
-  *    responses:
-  *     '200':
-  *      description: successfully created.
-  */
-  router.post('/', async (req, res) => {
-    const { statusCode, result } = await controller.create.action(req.body);
-    res.status(statusCode).json(result);
-  });
-
-  /**
-  * @swagger
-  * /api/wholesalers:
+  * /api/retailers:
   *  put:
-  *    description: update wholesaler.
+  *    description: update retailer.
   *    security:
   *      - bearerAuth: []
   *    tags:
-  *     - Wholesalers
+  *     - Retailers
   *    parameters:
   *     - in: body
-  *       name: wholesaler
+  *       name: retailer
   *       required: true
   *       schema:
-  *         $ref: '#/definitions/Wholesaler'
+  *         $ref: '#/definitions/Retailer'
   *    responses:
   *     '200':
   *      description: successfully updated.
@@ -96,18 +96,13 @@ const wholesalerRouter = (controller, fileUploadMiddleware, authMiddlewear) => {
     res.status(statusCode).json(result);
   });
 
-  router.delete('/:id', async (req, res) => {
-    const { statusCode, result } = await controller.deleteAction.action(req.params.id);
-    res.status(statusCode).json(result);
-  });
-
   /**
   * @swagger
-  * /api/wholesalers/login:
+  * /api/retailers/login:
   *  post:
-  *    description: login wholesaler with OTP.
+  *    description: login retailer with OTP.
   *    tags:
-  *     - Wholesalers
+  *     - Retailers
   *    parameters:
   *     - name: session
   *       in: body
@@ -130,11 +125,11 @@ const wholesalerRouter = (controller, fileUploadMiddleware, authMiddlewear) => {
 
   /**
   * @swagger
-  * /api/wholesalers/otp:
+  * /api/retailers/otp:
   *  post:
   *    description: send user OTP code.
   *    tags:
-  *     - Wholesalers
+  *     - Retailers
   *    parameters:
   *     - name: phone Number
   *       in: body
@@ -154,11 +149,11 @@ const wholesalerRouter = (controller, fileUploadMiddleware, authMiddlewear) => {
 
   /**
   * @swagger
-  * /api/wholesalers/profile_image:
+  * /api/retailers/profile_image:
   *  post:
   *    description: upload profile image.
   *    tags:
-  *     - Wholesalers
+  *     - Retailers
   *    security:
   *     - bearerAuth: []
   *    consumes:
@@ -184,4 +179,4 @@ const wholesalerRouter = (controller, fileUploadMiddleware, authMiddlewear) => {
   return router;
 };
 
-module.exports = wholesalerRouter;
+module.exports = retailerRouter;

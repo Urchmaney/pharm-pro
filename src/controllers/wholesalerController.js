@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-const wholesalerController = (wholesalerService, otpService, authenticator, notifier) => {
+const wholesalerController = (wholesalerService, otpService, authenticator, notifier, uploader) => {
   const create = {
     roles: [],
     action: async (wholesaler) => {
@@ -69,7 +69,9 @@ const wholesalerController = (wholesalerService, otpService, authenticator, noti
       let wholesaler = await wholesalerService.getWholesalerById(wholesalerId);
       if (!wholesaler) return { statusCode: 400, result: 'Please login.' };
       if (!profileImage) return { statusCode: 400, result: 'Please select an image.' };
-      wholesaler = await wholesalerService.uploadWholesalerProfile(wholesalerId, profileImage);
+      profileImage = await uploader.uploadImage(profileImage);
+      if (!profileImage) return { statusCode: 500, result: 'Internal server Error. Please contact admin.' };
+      wholesaler = await wholesalerService.updateWholesalerProfileImage(wholesalerId, profileImage);
       return { statusCode: 200, result: wholesaler };
     },
   };
@@ -89,6 +91,7 @@ const wholesalerController = (wholesalerService, otpService, authenticator, noti
             {
               id: wholesaler._id,
               phoneNumber: wholesaler.phoneNumber,
+              type: 1,
             },
           ),
         },

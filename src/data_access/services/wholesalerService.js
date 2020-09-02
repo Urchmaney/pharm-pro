@@ -1,25 +1,30 @@
 const mongoose = require('mongoose');
-const fs = require('fs');
 const Wholesaler = require('../schemas/wholesaler_schema');
 const WholesalerRetailer = require('../schemas/wholesaler_retailer_schema');
 
 const createWholesaler = async (wholesalerObj) => {
-  const wholesaler = new Wholesaler(wholesalerObj);
-  const error = wholesaler.validateSync();
-  if (error) {
-    return {
-      status: false,
-      result: Object.keys(error.errors).map(ele => error.errors[ele].message),
-    };
+  try {
+    const wholesaler = new Wholesaler(wholesalerObj);
+    const error = wholesaler.validateSync();
+    if (error) {
+      return {
+        status: false,
+        result: Object.keys(error.errors).map(ele => error.errors[ele].message),
+      };
+    }
+    await wholesaler.save();
+    return { status: true, result: wholesaler };
+  } catch (e) {
+    return { status: false, result: [e.message] };
   }
-  await wholesaler.save();
-  return { status: true, result: wholesaler };
 };
 
 const getWholesalerById = async (id) => {
   if (!mongoose.isValidObjectId(id)) return null;
   return Wholesaler.findOne({ _id: id, isDeleted: false });
 };
+
+const isWholesalerPhoneNumberExist = async (phoneNumber) => Wholesaler.exists({ phoneNumber });
 
 const getWholesalerByPhoneNumber = async (phoneNumber) => Wholesaler.findOne({ phoneNumber });
 
@@ -32,13 +37,8 @@ const deleteWholesaler = async (id) => {
 
 const getWholesalers = async () => Wholesaler.find({ isDeleted: false });
 
-const uploadWholesalerProfile = async (id, image) => {
-  const profileImage = {
-    contentType: image.contentType,
-    data: fs.readFileSync(image.path),
-  };
-  return updateWholesaler(id, { profileImage });
-};
+const updateWholesalerProfileImage = async (
+  id, image) => updateWholesaler(id, { profileImage: image });
 
 const createWholesalerRetailer = async (wholesalerRetailer) => {
   if (typeof wholesalerRetailer !== 'object') {
@@ -66,7 +66,7 @@ const getWholesalerRetailers = async (wholesalerId) => WholesalerRetailer.aggreg
       from: 'retailers',
       localField: 'phoneNumber',
       foreignField: 'phoneNumber',
-      as: 'retailer',
+      as: 'retailers',
     },
   },
   {
@@ -75,7 +75,18 @@ const getWholesalerRetailers = async (wholesalerId) => WholesalerRetailer.aggreg
       active: '$active',
       fullName: '$fullName',
       phoneNumber: '$phoneNumber',
-      profileImage: { $arrayElemAt: ['$countryInfo', 0] },
+      location: '$location',
+      retailer: { $arrayElemAt: ['$retailers', 0] },
+    },
+  },
+  {
+    $project: {
+      wholesalerId: '$wholesalerId',
+      active: '$active',
+      fullName: '$fullName',
+      phoneNumber: '$phoneNumber',
+      location: '$location',
+      image: '$retailer.profileImage',
     },
   },
 ]);
@@ -99,9 +110,10 @@ module.exports = {
   updateWholesaler,
   deleteWholesaler,
   getWholesalers,
-  uploadWholesalerProfile,
+  updateWholesalerProfileImage,
   createWholesalerRetailer,
   getWholesalerRetailers,
   getWholesalerRetailer,
   updateWholesalerRetailer,
+  isWholesalerPhoneNumberExist,
 };

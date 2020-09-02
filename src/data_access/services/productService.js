@@ -14,7 +14,26 @@ const createProduct = async (product) => {
   return { status: true, result: product };
 };
 
-const getProducts = async () => Product.find({});
+const getProducts = async (search) => {
+  const option = {};
+  if (search) {
+    option.$or = [
+      {
+        name: {
+          $regex: search,
+          $options: 'i',
+        },
+      },
+      {
+        medicalName: {
+          $regex: search,
+          $options: 'i',
+        },
+      },
+    ];
+  }
+  return Product.find(option);
+};
 
 const getProduct = async (id) => {
   if (!mongoose.isValidObjectId(id)) return null;
@@ -26,9 +45,26 @@ const updateProduct = async (_id, newProduct) => {
   return Product.findOneAndUpdate({ _id }, newProduct, { new: true });
 };
 
+const createManyProducts = async (products) => {
+  try {
+    const result = await Product.insertMany(products);
+    return { status: true, result };
+  } catch (e) {
+    return { status: false, result: e.message };
+  }
+};
+
+const deleteProduct = async (_id) => {
+  try {
+    await Product.deleteOne({ _id });
+  } catch (e) { console.log(e.message); }
+};
+
 module.exports = {
   createProduct,
   getProducts,
   getProduct,
   updateProduct,
+  createManyProducts,
+  deleteProduct,
 };

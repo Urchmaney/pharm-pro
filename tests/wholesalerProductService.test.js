@@ -3,6 +3,8 @@ const mongoConnect = require('../src/data_access/connect');
 
 let service = null;
 let testProduct = null;
+let testProductOne = null;
+let testProductTwo = null;
 let testWholesaler = null;
 let closeConn = null;
 
@@ -16,7 +18,9 @@ beforeAll(async () => {
   } = await mongoConnect(global.__MONGO_URI__);
   service = wholesalerProductService;
   db.collection('products').deleteMany({});
-  testProduct = (await productService.createProduct({ name: 'Amalar' })).result;
+  testProduct = (await productService.createProduct({ name: 'Amalar', medicalName: 'Amalare' })).result;
+  testProductOne = (await productService.createProduct({ name: 'Hamale', medicalName: 'Amalare' })).result;
+  testProductTwo = (await productService.createProduct({ name: 'Amoxil', medicalName: 'Amoxil' })).result;
   testWholesaler = (await wholesalerService.createWholesaler({
     fullName: 'Zemus kate',
     registrationNumber: '26dy3',
@@ -90,7 +94,7 @@ describe('update wholesaler product', () => {
   it('should update wholesaler product if wholesaler and product is valid', async () => {
     const wholesalerProduct = {
       wholesaler: testWholesaler._id,
-      product: testProduct._id,
+      product: testProductOne._id,
       pricePerPacket: 100,
       pricePerBox: 1000,
       pricePerCarton: 10000,
@@ -103,6 +107,17 @@ describe('update wholesaler product', () => {
     );
     expect(result).toBeDefined();
     expect(result.pricePerBox).toBe(2000);
+
+    let updatedObj = await service.updateWholesalerProductQuantityTypePrice(
+      testWholesaler._id, testProductOne._id, 'Box', 5,
+    );
+    expect(updatedObj.pricePerBox).toBe(5);
+
+    updatedObj = await service.updateWholesalerProductQuantityTypePrice(
+      testWholesaler._id, testProductOne._id, 'Satchet', 105,
+    );
+    expect(updatedObj.pricePerBox).toBe(5);
+    expect(updatedObj.pricePerSatchet).toBe(105);
   });
   it('should return null if wholesaler and product is invalid', async () => {
     const newObj = { pricePerBox: 2000 };
@@ -113,6 +128,43 @@ describe('update wholesaler product', () => {
     result = await service.updateWholesalerProduct('deuid3', newObj);
     expect(result).toBeNull();
   });
+});
+
+describe('get wholesaler product cost price', () => {
+  it('should get price if present', async () => {
+    const wholesaler = '9f00d11c43efef01118298f0';
+    const product = '5f76d11c34efef00008298f2';
+    const wholesalerProduct = {
+      wholesaler,
+      product,
+      pricePerPacket: 100,
+      pricePerBox: 1000,
+      pricePerSatchet: 50,
+      pricePerCarton: 10000,
+      quantity: 100,
+    };
+    await service.createWholesalerProduct(wholesalerProduct);
+    expect(await service.getWholesalerProductCostPrice(wholesaler, product, 'Satchet')).toBe(50);
+    expect(await service.getWholesalerProductCostPrice(wholesaler, product, 'Packet')).toBe(100);
+    expect(await service.getWholesalerProductCostPrice(wholesaler, product, 'Box')).toBe(1000);
+    expect(await service.getWholesalerProductCostPrice(wholesaler, product, 'Carton')).toBe(10000);
+    expect(await service.getWholesalerProductCostPrice(wholesaler, product, 'unknwn')).toBe(0);
+    expect(await service.getWholesalerProductCostPrice('fwfcwefcwd', product, 'Satchet')).toBe(0);
+  });
+});
+
+test('get wholesalers product by group by medical name', async () => {
+  const wholesalerProduct = {
+    wholesaler: testWholesaler._id,
+    product: testProductTwo._id,
+    pricePerPacket: 100,
+    pricePerBox: 1000,
+    pricePerCarton: 10000,
+    quantity: 100,
+  };
+  await service.createWholesalerProduct(wholesalerProduct);
+  const groupProducts = await service.getWholesalerProductsByGroups(testWholesaler._id);
+  expect(groupProducts.length).toBe(2);
 });
 
 afterAll(done => {

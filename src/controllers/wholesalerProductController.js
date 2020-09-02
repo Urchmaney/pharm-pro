@@ -13,8 +13,13 @@ const wholesalerProductController = (wholesalerProductService) => {
 
   const index = {
     roles: [],
-    action: async (wholesalerId) => {
-      const products = await wholesalerProductService.getWholesalerProducts(wholesalerId);
+    action: async (wholesalerId, type) => {
+      let products = [];
+      if (type && type.toLowerCase() === 'group') {
+        products = await wholesalerProductService.getWholesalerProductsByGroups(wholesalerId);
+      } else {
+        products = await wholesalerProductService.getWholesalerProducts(wholesalerId);
+      }
       return { statusCode: 200, result: products };
     },
   };

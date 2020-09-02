@@ -2,9 +2,7 @@ const {
   Schema,
   model,
   isValidObjectId,
-  Types,
 } = require('mongoose');
-const Product = require('./product_schema');
 
 /**
  * @swagger
@@ -22,6 +20,8 @@ const Product = require('./product_schema');
  *          type: number
  *        pricePerCarton:
  *          type: number
+ *        pricePerSatchet:
+ *          type: number
  *        quantity:
  *          type: number
  */
@@ -32,16 +32,14 @@ const wholesalerProductSchema = new Schema({
     required: true,
     ref: 'products',
     validate: {
-      validator: (_id) => {
-        if (!isValidObjectId(_id)) return false;
-        return Product.exists({ _id: Types.ObjectId(_id) });
-      },
+      validator: (_id) => isValidObjectId(_id),
       message: 'Invalid product Id.',
     },
   },
   pricePerPacket: { type: Number, default: 0, min: 0 },
   pricePerBox: { type: Number, default: 0, min: 0 },
   pricePerCarton: { type: Number, default: 0, min: 0 },
+  pricePerSatchet: { type: Number, default: 0, min: 0 },
   quantity: { type: Number, default: 0, min: 0 },
 });
 

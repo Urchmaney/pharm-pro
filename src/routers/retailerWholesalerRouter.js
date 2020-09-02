@@ -1,73 +1,70 @@
 const express = require('express');
 
-const wholesalerProductRouter = (controller, authMiddlewear) => {
+const retailerWholesalerRouter = (controller, authMiddlewear) => {
   const router = express.Router();
 
   /**
   * @swagger
-  * /api/wholesalers/products:
+  * /api/retailers/wholesalers:
   *  post:
-  *    description: add wholesaler product.
+  *    description: Create retailer wholesaler.
   *    security:
   *     - bearerAuth: []
   *    tags:
-  *     - Wholesaler Products
+  *     - Retailer Wholesalers
   *    parameters:
-  *     - name: wholesaler products
+  *     - name: retailer wholesaler
   *       in: body
   *       required: true
   *       schema:
-  *         $ref: '#/definitions/WholesalerProduct'
+  *         $ref: '#/definitions/RetailerWholesaler'
   *    responses:
   *     '200':
   *      description: successfully created.
   */
   router.post('/', authMiddlewear, async (req, res) => {
-    req.body.wholesaler = req.user.id;
+    req.body = req.body || {};
+    req.body.retailerId = req.user.id;
     const { statusCode, result } = await controller.create.action(req.body);
     res.status(statusCode).json(result);
   });
 
-
   /**
    * @swagger
-   * /api/wholesalers/products:
+   * /api/retailers/wholesalers:
    *  get:
-   *    description: Get all wholesaler products
+   *    description: Get all retailer wholesalers
    *    security:
    *      - bearerAuth: []
    *    tags:
-   *      - Wholesaler Products
-   *    parameters:
-   *      - in: query
-   *        name: type
+   *      - Retailer Wholesalers
    *    responses:
    *      '200':
    *        description: Successfully fetched.
    */
   router.get('/', authMiddlewear, async (req, res) => {
-    const { statusCode, result } = await controller.index.action(req.user.id, req.query.type);
+    const { statusCode, result } = await controller.index.action(req.user.id);
     res.status(statusCode).json(result);
   });
 
   /**
    * @swagger
-   * /api/wholesalers/products/{id}:
+   * /api/retailers/wholesalers/{id}:
    *  put:
-   *    description: Update wholesaler product
+   *    description: Update retailer Wholesaler
    *    security:
    *      - bearerAuth: []
    *    tags:
-   *      - Wholesaler Products
+   *      - Retailer Wholesalers
    *    parameters:
    *      - in : path
    *        name: id
    *        required: true
    *      - in: body
-   *        name: wholesaler Product
+   *        name: Retailer Wholesaler
    *        required: true
    *        schema:
-   *          $ref: '#/definitions/WholesalerProduct'
+   *          $ref: '#/definitions/RetailerWholesaler'
    *    responses:
    *      '200':
    *        description: successfully updated
@@ -76,7 +73,8 @@ const wholesalerProductRouter = (controller, authMiddlewear) => {
     const { statusCode, result } = await controller.update.action(req.params.id, req.body);
     res.status(statusCode).json(result);
   });
+
   return router;
 };
 
-module.exports = wholesalerProductRouter;
+module.exports = retailerWholesalerRouter;
