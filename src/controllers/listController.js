@@ -28,10 +28,19 @@ const listController = (invoiceService) => {
     },
   };
 
+  const productPrices = {
+    roles: [],
+    action: async (listId, productId) => {
+      const productPrices = await invoiceService.getListProductPrices(listId, productId);
+      return { statusCode: 200, result: productPrices };
+    },
+  };
+
   return {
     index,
     show,
     closeList,
+    productPrices,
   };
 };
 

@@ -58,6 +58,33 @@ const listRouter = (
 
   /**
    * @swagger
+   * /api/lists/product-prices:
+   *  get:
+   *    description: Get list product prices
+   *    security:
+   *      - bearerAuth: []
+   *    tags:
+   *      - Lists
+   *    parameters:
+   *      - in : query
+   *        name: listId
+   *        type: string
+   *      - in : query
+   *        name: productId
+   *        type: string
+   *    responses:
+   *      '200':
+   *        description: Successfully fetched.
+   */
+  router.get('/product-prices', retailerAuthMiddleware, async (req, res) => {
+    const { statusCode, result } = await controller.productPrices.action(
+      req.query.listId, req.query.productId,
+    );
+    res.status(statusCode).json(result);
+  });
+
+  /**
+   * @swagger
    * /api/lists/{id}:
    *  get:
    *    description: Get a single list
