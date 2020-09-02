@@ -31,6 +31,9 @@ const wholesalerProductRouterGen = require('./routers/wholesalerProductRouter');
 const invoiceControllerGen = require('./controllers/invoiceController');
 const invoiceRouterGen = require('./routers/invoiceRouter');
 
+const listControllerGen = require('./controllers/listController');
+const listRouterGen = require('./routers/listRouter');
+
 const {
   authWholesalerMiddleware, authRetailerMiddleware, authMiddleware,
 } = require('./middlewares/auth_middleware');
@@ -93,6 +96,9 @@ const startApplication = async () => {
     invoiceController, combineAuthMiddleware, retailerAuthMiddlewere, wholesalerAuthMiddleware,
   );
 
+  const listController = listControllerGen(invoiceService);
+  const listRouter = listRouterGen(listController, retailerAuthMiddlewere);
+
   app.use(cors());
 
   app.use(express.json());
@@ -112,6 +118,8 @@ const startApplication = async () => {
   app.use('/api/products', productRouter);
 
   app.use('/api/invoices', invoiceRouter);
+
+  app.use('/api/lists', listRouter);
 
   app.use('/', swaggerUI.serve, swaggerUI.setup(swaggerJsDoc));
 
