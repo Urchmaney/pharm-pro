@@ -7,13 +7,13 @@ const invoiceController = (invoiceService) => {
       if (!Array.isArray(invoice.products) || !Array.isArray(invoice.wholesalers)) {
         return { statusCode: 400, result: 'Invalid parameter. products and wholesaler must be arrays' };
       }
-      const groupId = v4();
+      const listId = v4();
       const invoices = [];
       invoice.wholesalers.forEach(ele => {
         const cInvoice = {
           wholesaler: ele,
           retailer: retailerId,
-          groupId,
+          listId,
           products: invoice.products,
         };
         invoices.push(invoiceService.createInvoice(cInvoice));

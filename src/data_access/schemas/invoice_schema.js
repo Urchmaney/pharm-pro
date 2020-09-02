@@ -44,7 +44,7 @@ const invoiceSchema = new Schema({
     },
   },
   isActive: { type: Boolean, default: true },
-  groupId: { type: String, required: true },
+  listId: { type: String, required: true },
   wholesaler: {
     type: String,
     required: true,
@@ -67,7 +67,7 @@ const invoiceSchema = new Schema({
       },
     },
     costPrice: { type: Number },
-    accepted: { type: Boolean },
+    accepted: { type: Boolean, default: false },
   }],
   totalAmount: { type: Number },
 }, { timestamps: true });
