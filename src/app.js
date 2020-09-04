@@ -55,13 +55,13 @@ const startApplication = async () => {
   } = await mongoDB(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/pharm-pro');
 
   const wholesalerController = wholesalerControllerGen(wholesalerService,
-    otpService, authenticator, notifier, uploader);
+    retailerService, otpService, authenticator, notifier, uploader);
   const wholesalerRouter = wholesalerRouterGen(
     wholesalerController, fileUploadMiddleware, wholesalerAuthMiddleware,
   );
 
   const retailerController = retailerControllerGen(
-    retailerService, otpService, authenticator, notifier, uploader,
+    retailerService, wholesalerService, otpService, authenticator, notifier, uploader,
   );
   const retailerRouter = retailerRouterGen(
     retailerController, fileUploadMiddleware, retailerAuthMiddlewere,

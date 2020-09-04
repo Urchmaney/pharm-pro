@@ -1,10 +1,14 @@
 /* eslint-disable no-underscore-dangle */
-const retailerController = (retailerService, otpService, authenticator, notifier, uploader) => {
+const retailerController = (
+  retailerService, wholesalerService, otpService, authenticator, notifier, uploader,
+) => {
   const create = {
     roles: [],
     action: async (retailer) => {
       const { status, result } = await retailerService.createRetailer(retailer);
       if (!status) return { statusCode: 400, result };
+
+      await wholesalerService.activateRetailerInWholesalerRetailer(result.phoneNumber);
       const otp = await otpService.createOTP(result.phoneNumber, 2);
       const success = await notifier.sendSMS(`Garhia otp code:    ${otp}`, result.phoneNumber);
       if (success) {
