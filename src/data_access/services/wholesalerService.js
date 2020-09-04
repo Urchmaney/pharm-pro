@@ -87,6 +87,7 @@ const getWholesalerRetailers = async (wholesalerId) => WholesalerRetailer.aggreg
       phoneNumber: '$phoneNumber',
       location: '$location',
       image: '$retailer.profileImage',
+      retailerId: '$retailer._id',
     },
   },
 ]);
@@ -102,6 +103,8 @@ const updateWholesalerRetailer = async (_id, newWholesalerRetailer) => {
   );
 };
 
+const activateRetailerInWholesalerRetailer = async (
+  phoneNumber) => WholesalerRetailer.updateMany({ phoneNumber }, { active: true });
 
 module.exports = {
   createWholesaler,
@@ -116,4 +119,5 @@ module.exports = {
   getWholesalerRetailer,
   updateWholesalerRetailer,
   isWholesalerPhoneNumberExist,
+  activateRetailerInWholesalerRetailer,
 };
