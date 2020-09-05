@@ -50,6 +50,9 @@ const retailerController = (
   const generateAndSendOTP = {
     role: [],
     action: async (phoneNumber) => {
+      const retailer = await retailerService.getRetailerByPhoneNumber(phoneNumber);
+      if (!retailer) return { statusCode: 400, result: 'Please register.' };
+
       const otp = await otpService.createOTP(phoneNumber, 2);
       const success = await notifier.sendSMS(`Garhia otp code:    ${otp}`, phoneNumber);
       if (!success) return { statusCode: 400, result: 'Issue sending OTP. Check phone number format. +234 format.' };
