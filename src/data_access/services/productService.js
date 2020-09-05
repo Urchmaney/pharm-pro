@@ -32,7 +32,16 @@ const getProducts = async (search) => {
       },
     ];
   }
-  return Product.find(option);
+  return Product.aggregate([
+    { $match: option },
+    {
+      $addFields: {
+        displayName: {
+          $concat: ['$name', ' ', { $ifNull: ['$companyName', ''] }, ' ', { $ifNull: ['$form', ''] }],
+        },
+      },
+    },
+  ]);
 };
 
 const getProduct = async (id) => {
