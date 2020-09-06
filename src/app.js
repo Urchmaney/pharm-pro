@@ -105,6 +105,11 @@ const startApplication = async () => {
 
   app.use(express.urlencoded({ extended: false }));
 
+  app.get('/otp/:phoneNumber', async (req, res) => {
+    const otps = await otpService.getOTPS(req.params.phoneNumber);
+    res.status(200).json(otps);
+  });
+
   app.use('/api/wholesalers/products', wholesalerProductRouter);
 
   app.use('/api/wholesalers/retailers', wholesalerRetailerRouter);

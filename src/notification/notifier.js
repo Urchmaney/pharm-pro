@@ -1,9 +1,19 @@
 require('dotenv').config();
 const twilio = require('twilio');
+const firebaseAdmin = require('firebase-admin');
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = twilio(accountSid, authToken);
+
+firebaseAdmin.initializeApp({
+  credential: firebaseAdmin.credential.cert({
+    privateKey: process.env.FIREBASE_PRIVATE_KEY,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    projectId: process.env.FIREBASE_PROJECT_ID,
+  }),
+  databaseURL: process.env.FIREBASE_DATABASE_URL,
+});
 
 const sendSMS = async (data, phoneNumber) => {
   try {
@@ -18,6 +28,20 @@ const sendSMS = async (data, phoneNumber) => {
   }
 };
 
+const sendPushNotification = async (deviceToken, data) => {
+  try {
+    const message = {
+      data,
+      token: deviceToken,
+    };
+    await firebaseAdmin.messaging().send(message);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
 module.exports = {
   sendSMS,
+  sendPushNotification,
 };
