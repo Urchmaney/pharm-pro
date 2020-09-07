@@ -28,13 +28,13 @@ const sendSMS = async (data, phoneNumber) => {
   }
 };
 
-const sendPushNotification = async (deviceToken, data) => {
+const sendPushNotification = async (userTokens, data) => {
   try {
     const message = {
       data,
-      token: deviceToken,
+      token: userTokens,
     };
-    await firebaseAdmin.messaging().send(message);
+    await firebaseAdmin.messaging().sendMulticast(message);
     return true;
   } catch (e) {
     return false;
