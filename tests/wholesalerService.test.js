@@ -158,7 +158,7 @@ describe(' Wholesaler Service', () => {
       const oldWholeRetailer = (await service.createWholesalerRetailer({
         fullName: 'Menga man',
         wholesalerId: '1e03ujde3d',
-        phoneNumber: '+234906535533',
+        phoneNumber: '+2349065355331',
         active: false,
       })).result;
       const newWholeRetailer = {
@@ -169,7 +169,7 @@ describe(' Wholesaler Service', () => {
       );
       expect(updateObj).toBeDefined();
       expect(updateObj.fullName).toBe('new Man');
-      expect(updateObj.phoneNumber).toBe('+234906535533');
+      expect(updateObj.phoneNumber).toBe('+2349065355331');
     });
 
     it('should return null if _id is invalid', async () => {

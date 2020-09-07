@@ -19,7 +19,7 @@ describe('Add create product', () => {
     expect(result.length).toBe(1);
   });
   it('should create product if name is present', async () => {
-    const product = { name: 'Phenobab' };
+    const product = { name: 'Phenobab', companyName: 'Emzor', form: 'Syrup' };
     const { status, result } = await service.createProduct(product);
     expect(status).toBe(true);
     expect(result._id).toBeDefined();
