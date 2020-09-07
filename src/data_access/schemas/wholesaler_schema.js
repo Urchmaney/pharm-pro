@@ -54,6 +54,9 @@ const wholesalerSchema = new Schema({
   isDeleted: { type: Boolean, default: false },
   profileImage: { type: String },
   deletedAt: Date,
+  tokens: [{
+    type: String, required: true,
+  }],
 }, { timestamps: true });
 
 const Wholesaler = model('wholesalers', wholesalerSchema);
