@@ -96,6 +96,13 @@ const retailerController = (
     },
   };
 
+  const logout = {
+    roles: [],
+    action: async () => {
+
+    },
+  };
+
   return {
     create,
     index,
@@ -104,6 +111,7 @@ const retailerController = (
     generateAndSendOTP,
     uploadProfileImage,
     login,
+    logout,
   };
 };
 

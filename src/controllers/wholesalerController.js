@@ -106,6 +106,12 @@ const wholesalerController = (
     },
   };
 
+  const logout = {
+    roles: [],
+    action: async () => {
+    },
+  };
+
   return {
     login,
     create,
@@ -115,6 +121,7 @@ const wholesalerController = (
     deleteAction,
     generateAndSendOTP,
     uploadProfileImage,
+    logout,
   };
 };
 
