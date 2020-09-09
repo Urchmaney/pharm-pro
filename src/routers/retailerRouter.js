@@ -113,6 +113,8 @@ const retailerRouter = (controller, fileUploadMiddleware, authMiddlewear) => {
   *             type: string
   *           otp:
   *             type: string
+  *           token:
+  *             type: string
   *    responses:
   *     '200':
   *      description: Successfully logged in.
@@ -120,6 +122,32 @@ const retailerRouter = (controller, fileUploadMiddleware, authMiddlewear) => {
   router.post('/login', async (req, res) => {
     const { statusCode, result } = await controller.login.action(req.body.phoneNumber,
       req.body.otp);
+    res.status(statusCode).json(result);
+  });
+
+  /**
+   * @swagger
+   * /api/retailers/logout:
+   *  post:
+   *    description: logout retailer.
+   *    tags:
+   *      - Retailers
+   *    security:
+   *      - bearerAuth: []
+   *    parameters:
+   *     - name: session
+   *       in: body
+   *       required: true
+   *       schema:
+   *         properties:
+   *           token:
+   *             type: string
+   *    responses:
+   *      '200':
+   *       description: Successfully log out.
+   */
+  router.post('/logout', authMiddlewear, async (req, res) => {
+    const { statusCode, result } = await controller.logout.action(req.body.token);
     res.status(statusCode).json(result);
   });
 
