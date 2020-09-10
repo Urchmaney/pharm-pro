@@ -184,6 +184,28 @@ describe(' Wholesaler Service', () => {
     });
   });
 
+  describe('Add and remove wholesaler Token', () => {
+    it('should add and remove wholesaler token', async () => {
+      let wholesalerM = (await service.createWholesaler({
+        fullName: 'Zemus kate',
+        registrationNumber: '26dy3',
+        phoneNumber: '+2348145778445',
+      })).result;
+      expect(wholesalerM.tokens.length).toBe(0);
+      wholesalerM = await service.addWholesalerToken(wholesalerM._id, 'New oken fton');
+      expect(wholesalerM.tokens.length).toBe(1);
+      wholesalerM = await service.addWholesalerToken(wholesalerM._id, 'Another New oken fton');
+      expect(wholesalerM.tokens.length).toBe(2);
+      wholesalerM = await service.addWholesalerToken(wholesalerM._id, 'New oken fton');
+      expect(wholesalerM.tokens.length).toBe(2);
+
+      wholesalerM = await service.removeWholesalerToken(wholesalerM._id, 'Another New oken fton');
+      expect(wholesalerM.tokens.length).toBe(1);
+      wholesalerM = await service.removeWholesalerToken(wholesalerM._id, 'Wrong token');
+      expect(wholesalerM.tokens.length).toBe(1);
+    });
+  });
+
   afterAll(async done => {
     closeConn();
     done();

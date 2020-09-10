@@ -147,7 +147,9 @@ const retailerRouter = (controller, fileUploadMiddleware, authMiddlewear) => {
    *       description: Successfully log out.
    */
   router.post('/logout', authMiddlewear, async (req, res) => {
-    const { statusCode, result } = await controller.logout.action(req.user.id, req.body.token);
+    const { statusCode, result } = await controller.logout.action(
+      req.user.id, req.user.deviceToken,
+    );
     res.status(statusCode).json(result);
   });
 
