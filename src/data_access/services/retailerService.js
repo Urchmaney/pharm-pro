@@ -112,6 +112,13 @@ const updateRetailerWholesaler = async (_id, { fullName, phoneNumber, location }
 const activateWholesalerInRetailerWholesaler = async (
   phoneNumber) => RetailerWholesaler.updateMany({ phoneNumber }, { active: true });
 
+const addRetailerToken = async (_id, token) => Retailer.findOneAndUpdate(
+  { _id }, { $addToSet: { tokens: token } }, { new: true },
+);
+
+const removeRetailerToken = async (
+  _id, token) => Retailer.findOneAndUpdate({ _id }, { $pull: { tokens: token } }, { new: true });
+
 module.exports = {
   createRetailer,
   isRetailerPhoneNumberExist,
@@ -126,4 +133,6 @@ module.exports = {
   updateRetailerWholesaler,
   getRetailerWholesaler,
   activateWholesalerInRetailerWholesaler,
+  addRetailerToken,
+  removeRetailerToken,
 };

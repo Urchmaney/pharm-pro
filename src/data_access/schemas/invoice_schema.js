@@ -44,6 +44,7 @@ const invoiceSchema = new Schema({
     },
   },
   isActive: { type: Boolean, default: true },
+  hasWholesalerAddedPrice: { type: Boolean, default: false },
   listId: { type: String, required: true },
   wholesaler: {
     type: String,

@@ -121,7 +121,7 @@ const retailerRouter = (controller, fileUploadMiddleware, authMiddlewear) => {
   */
   router.post('/login', async (req, res) => {
     const { statusCode, result } = await controller.login.action(req.body.phoneNumber,
-      req.body.otp);
+      req.body.otp, req.body.token);
     res.status(statusCode).json(result);
   });
 
@@ -147,7 +147,7 @@ const retailerRouter = (controller, fileUploadMiddleware, authMiddlewear) => {
    *       description: Successfully log out.
    */
   router.post('/logout', authMiddlewear, async (req, res) => {
-    const { statusCode, result } = await controller.logout.action(req.body.token);
+    const { statusCode, result } = await controller.logout.action(req.user.id, req.body.token);
     res.status(statusCode).json(result);
   });
 
