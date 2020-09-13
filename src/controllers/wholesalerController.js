@@ -85,11 +85,13 @@ const wholesalerController = (
 
   const login = {
     roles: [],
-    action: async (phoneNumber, otp) => {
+    action: async (phoneNumber, otp, token) => {
       const wholesaler = await wholesalerService.getWholesalerByPhoneNumber(phoneNumber);
       if (!wholesaler) return { statusCode: 400, result: 'Error Loging. Check your details.' };
       const valid = await otpService.validateOTP(phoneNumber, 1, otp, new Date());
       if (!valid) return { statusCode: 400, result: 'Invalid OTP.' };
+
+      if (token) await wholesalerService.addWholesalerToken(wholesaler._id, token);
       return {
         statusCode: 200,
         result: {
@@ -99,6 +101,7 @@ const wholesalerController = (
               id: wholesaler._id,
               phoneNumber: wholesaler.phoneNumber,
               type: 1,
+              deviceToken: token || '',
             },
           ),
         },
@@ -108,7 +111,9 @@ const wholesalerController = (
 
   const logout = {
     roles: [],
-    action: async () => {
+    action: async (id, token) => {
+      await wholesalerService.removeWholesalerToken(id, token);
+      return { statusCode: 200, result: 'successfully logged out.' };
     },
   };
 

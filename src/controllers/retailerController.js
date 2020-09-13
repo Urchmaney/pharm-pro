@@ -80,6 +80,7 @@ const retailerController = (
               id: retailer._id,
               phoneNumber: retailer.phoneNumber,
               type: 2,
+              deviceToken: token || '',
             },
           ),
         },
