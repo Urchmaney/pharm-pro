@@ -15,6 +15,7 @@ const createRetailer = async (retailer) => {
     await retailer.save();
     return { status: true, result: retailer };
   } catch (e) {
+    if (e.code === 11000) return { status: false, result: ['phone number is already in use.'] };
     return { status: false, result: [e.message] };
   }
 };
