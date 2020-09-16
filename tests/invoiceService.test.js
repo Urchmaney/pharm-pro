@@ -234,7 +234,7 @@ test('get retailers lists', async () => {
 });
 
 describe('get list product prices', () => {
-  it('should return list prices', async () => {
+  it('should return list product prices', async () => {
     const products = (await pService.createManyProducts([
       { name: 'Artesuname', medicalName: 'Malaria' },
       { name: 'Co-artem', medicalName: 'Malaria' },
@@ -287,6 +287,60 @@ describe('get list product prices', () => {
     expect(Array.isArray(listPrices)).toBe(true);
     expect(listPrices.length).toBe(2);
   });
+});
+
+test('should return list product prices', async () => {
+  const products = (await pService.createManyProducts([
+    { name: 'P-Alaxin', medicalName: 'Malaria' },
+    { name: 'Calcimax', medicalName: 'Malaria' },
+  ])).result;
+  const wholesalerId = (await wService.createWholesaler({
+    fullName: 'Bernad Bakens',
+    registrationNumber: '87672',
+    phoneNumber: '+2349078778256',
+  })).result._id;
+  await wpService.createWholesalerProduct({
+    wholesaler: wholesalerId,
+    product: products[0]._id,
+    pricePerBox: 3500,
+  });
+  await wpService.createWholesalerProduct({
+    wholesaler: wholesalerId,
+    product: products[1]._id,
+    pricePerBox: 5600,
+  });
+  const listId = v4();
+  await service.createInvoice({
+    retailer: '2f40d73c11efef02008298f2',
+    wholesaler: wholesalerId,
+    listId,
+    products: [{
+      product: products[0]._id,
+      quantity: 3,
+      quantityType: 'Box',
+    }, {
+      product: products[1]._id,
+      quantity: 2,
+      quantityType: 'Box',
+    }],
+  });
+  await service.createInvoice({
+    retailer: '2f40d73c11efef02008298f2',
+    wholesaler: '0f40d73c11efef02118000f2',
+    listId,
+    products: [{
+      product: products[0]._id,
+      quantity: 3,
+      quantityType: 'Box',
+    }, {
+      product: products[1]._id,
+      quantity: 2,
+      quantityType: 'Box',
+    }],
+  });
+  const listPrices = await service.getListProductsPrices(listId);
+  expect(Array.isArray(listPrices)).toBe(true);
+  expect(listPrices.length).toBe(2);
 });
 
 test('close list', async () => {
