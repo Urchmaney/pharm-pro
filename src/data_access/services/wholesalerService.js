@@ -15,6 +15,7 @@ const createWholesaler = async (wholesalerObj) => {
     await wholesaler.save();
     return { status: true, result: wholesaler };
   } catch (e) {
+    if (e.code === 11000) return { status: false, result: ['phone number is already in use.'] };
     return { status: false, result: [e.message] };
   }
 };

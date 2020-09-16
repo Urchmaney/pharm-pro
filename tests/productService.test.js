@@ -3,12 +3,17 @@ const mongoConnect = require('../src/data_access/connect');
 
 let service = null;
 let closeConn = null;
+let dbase = null;
 
 beforeAll(async () => {
   const { productService, closeConnect, db } = await mongoConnect(global.__MONGO_URI__);
   service = productService;
   closeConn = closeConnect;
-  db.collection('products').deleteMany({});
+  dbase = db;
+});
+
+beforeEach(async () => {
+  await dbase.collection('products').deleteMany({});
 });
 
 describe('Add create product', () => {
@@ -29,8 +34,25 @@ describe('Add create product', () => {
 
 describe('All products', () => {
   it('should return all products', async () => {
+    await service.createManyProducts([
+      { name: 'Analgin', medicalName: 'ome' },
+      { name: 'Ibuprofen', medicalName: 'Analgesic' },
+      { name: 'Abuprofen', medicalName: 'Analgesic' },
+      { name: 'Profen', medicalName: 'Analgesic' },
+    ]);
     const products = await service.getProducts();
-    expect(products.length).toBe(1);
+    expect(products.length).toBe(4);
+  });
+  it('should return based on the search string index', async () => {
+    await service.createManyProducts([
+      { name: 'Analgin', medicalName: 'ome' },
+      { name: 'Ibuprofen', medicalName: 'Analgesic' },
+      { name: 'Abuleprofen', medicalName: 'Analgesic' },
+      { name: 'Profen', medicalName: 'Analgesic' },
+    ]);
+    const products = await service.getProducts('pro');
+    expect(products.length).toBe(3);
+    expect(products[0].name).toBe('Profen');
   });
 });
 
@@ -98,7 +120,8 @@ describe('Insert Many products', () => {
         companyName: 'fsmds',
       }];
     const { status, result } = await service.createManyProducts(products);
-    expect((await service.getProducts()).length).toBe(4);
+    const ps = await service.getProducts();
+    expect(ps.length).toBe(0);
     expect(status).toBe(false);
     expect(typeof result).toBe('string');
   });
@@ -113,7 +136,7 @@ describe('Insert Many products', () => {
     }];
     const { status, result } = await service.createManyProducts(products);
     expect(status).toBe(true);
-    expect((await service.getProducts()).length).toBe(6);
+    expect((await service.getProducts()).length).toBe(2);
     expect(Array.isArray(result)).toBe(true);
   });
   it('should fail if the products is not an array', async () => {
@@ -131,7 +154,7 @@ describe('Insert Many products', () => {
   });
 });
 
-afterAll(async done => {
+afterAll(done => {
   closeConn();
   done();
 });

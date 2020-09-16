@@ -14,7 +14,7 @@ const createProduct = async (product) => {
   return { status: true, result: product };
 };
 
-const getProducts = async (search) => {
+const getProducts = async (search = '') => {
   const option = {};
   if (search) {
     option.$or = [
@@ -39,7 +39,16 @@ const getProducts = async (search) => {
         displayName: {
           $concat: ['$name', ' ', { $ifNull: ['$companyName', ''] }, ' ', { $ifNull: ['$form', ''] }],
         },
+        sIndex: {
+          $indexOfBytes: [
+            { $toLower: { $concat: ['$name', ' ', { $ifNull: ['$companyName', ''] }, ' ', { $ifNull: ['$form', ''] }] } },
+            search.toLocaleLowerCase(),
+          ],
+        },
       },
+    },
+    {
+      $sort: { sIndex: 1 },
     },
   ]);
 };

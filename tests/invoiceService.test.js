@@ -63,12 +63,13 @@ describe('Create Invoice', () => {
     expect(result.status).toBe(true);
     expect(typeof result.result).toBe('object');
 
+    const prod = (await pService.createProduct({ name: 'Emzor' })).result._id;
     invoice = {
       retailer: '5f00d33c43efef02987698f9',
       wholesaler: '8f76d00c99efef02118298f2',
       listId: v4(),
       products: [{
-        product: '5f00z21c43efef21800200f2',
+        product: prod,
         quantity: 7,
         quantityType: 'Packet',
       }],
@@ -82,24 +83,29 @@ describe('Create Invoice', () => {
 describe('Update invoice product', () => {
   it('should update invoice product', async () => {
     const pId = (await pService.createProduct({ name: 'Amalar' })).result._id;
+    const p2Id = (await pService.createProduct({ name: 'Orephtal' })).result._id;
+    const whId = (await wService.createWholesaler({
+      fullName: 'Bernad Ned',
+      registrationNumber: '87672',
+      phoneNumber: '+2349056778256',
+    })).result._id.toString();
     const oldInvoice = {
       retailer: '5f00d22c43efef21800200f2',
-      wholesaler: '5f99d00c43efef02111198f2',
+      wholesaler: whId,
       listId: v4(),
       products: [{
-        product: '3e01d00r62eggf21800287t1',
+        product: pId,
         quantity: 4,
         quantityType: 'Satchet',
       }, {
-        product: pId,
+        product: p2Id,
         quantity: 4,
         quantityType: 'Satchet',
       }],
     };
     const invoiceId = (await service.createInvoice(oldInvoice)).result._id;
-    const wId = '5f99d00c43efef02111198f2';
     (await wpService.createWholesalerProduct({
-      wholesaler: wId,
+      wholesaler: whId,
       product: pId,
     }));
     let updateProduct = {
@@ -108,13 +114,14 @@ describe('Update invoice product', () => {
       quantity: 3,
       quantityType: 'Box',
     };
-    let result = await service.updateInvoiceProduct(invoiceId, updateProduct, wId);
+    let result = await service.updateInvoiceProduct(invoiceId, updateProduct, whId);
+
     const updatedProduct = result.products.find(e => e.product === pId.toString());
     expect(updatedProduct.costPrice).toBe(200);
     expect(updatedProduct.quantity).toBe(4);
 
     expect(await wpService.getWholesalerProductCostPrice(
-      wId, updateProduct.product, 'Box',
+      whId, updateProduct.product, 'Box',
     )).toBe(200);
     updateProduct = {
       product: 'dedwedwekjfkwefwe',
@@ -136,28 +143,35 @@ describe('Update invoice product', () => {
 
 describe('update many invoice products', () => {
   it('should update all valid invoice projects', async () => {
+    const p1 = (await pService.createProduct({ name: 'Procold' })).result._id;
+    const p2 = (await pService.createProduct({ name: 'Mixanal' })).result._id;
+    const whId = (await wService.createWholesaler({
+      fullName: 'John Ned',
+      registrationNumber: '87672',
+      phoneNumber: '+2349056778211',
+    })).result._id.toString();
     const oldInvoice = {
       retailer: '0f09d33c43efef00028298f1',
-      wholesaler: '4f76y33b43efef02008000f8',
+      wholesaler: whId,
       listId: v4(),
       products: [{
-        product: '5f00d22c00ehtf21800200f2',
+        product: p1,
         quantity: 4,
         quantityType: 'Satchet',
       }, {
-        product: '3e01d33c42eggf21800200f2',
+        product: p2,
         quantity: 4,
         quantityType: 'Satchet',
       }],
     };
     const invoiceId = (await service.createInvoice(oldInvoice)).result._id;
     const updateProducts = [{
-      product: '5f00d22c00ehtf21800200f2',
+      product: p1,
       costPrice: 200,
       quantity: 3,
     },
     {
-      product: '3e01d33c42eggf21800200f2',
+      product: p2,
       costPrice: 300,
     },
     {
@@ -165,14 +179,17 @@ describe('update many invoice products', () => {
       costPrice: 100,
     }];
     let result = await service.updateManyInvoiceProducts(invoiceId, updateProducts);
-    const firstProduct = result.products.find(e => e.product === '5f00d22c00ehtf21800200f2');
+
+    const firstProduct = result.products.find(e => e.product._id.toString() === p1.toString());
     expect(firstProduct.costPrice).toBe(200);
 
-    const secondProduct = result.products.find(e => e.product === '3e01d33c42eggf21800200f2');
+    const secondProduct = result.products.find(e => e.product._id.toString() === p2.toString());
     expect(secondProduct.costPrice).toBe(300);
 
     result = await service.updateManyInvoiceProducts(invoiceId, [{ product: 'sfsdfsd', costPrice: 300 }]);
-    expect(result).toBeNull();
+    const wrongProduct = result.products.find(e => e.product === 'sfsdfsd');
+    expect(wrongProduct).not.toBeDefined();
+    expect(result.hasWholesalerAddedPrice).toBe(true);
   });
   it('should return null if invoice id is wrong', async () => {
     const updateProducts = [{

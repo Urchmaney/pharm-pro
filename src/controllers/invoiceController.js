@@ -1,6 +1,6 @@
 const { v4 } = require('uuid');
 
-const invoiceController = (invoiceService) => {
+const invoiceController = (invoiceService, retailerService, notifier) => {
   const create = {
     roles: [],
     action: async (invoice, retailerId) => {
@@ -51,9 +51,13 @@ const invoiceController = (invoiceService) => {
       const upateInvoice = await invoiceService.updateManyInvoiceProducts(
         invoiceId, invoiceProducts, wholesalerId,
       );
-      if (upateInvoice) return { statusCode: 200, result: upateInvoice };
+      if (upateInvoice) {
+        const retailerTokens = (await retailerService.getRetailer(upateInvoice.retailer)).tokens;
+        await notifier.sendPushNotification(retailerTokens, upateInvoice);
+        return { statusCode: 200, result: upateInvoice };
+      }
 
-      return { statusCode: 400, result: 'Either invoice Id or products is invalid' };
+      return { statusCode: 400, result: 'Incorrect invoice Id.' };
     },
   };
 
