@@ -1,4 +1,6 @@
-const { Schema, model, isValidObjectId } = require('mongoose');
+const {
+  Schema, model, isValidObjectId, Types,
+} = require('mongoose');
 
 /**
  * @swagger
@@ -10,9 +12,8 @@ const { Schema, model, isValidObjectId } = require('mongoose');
  *      properties:
  *        quantity:
  *          type: number
- *        quantityType:
- *          type: enum
- *          enum: [Carton, Satchet, Packet, Box]
+ *        quantityForm:
+ *          type: String
  *        product:
  *          type: string
  *        costPrice:
@@ -57,7 +58,7 @@ const invoiceSchema = new Schema({
   },
   products: [{
     quantity: { type: Number, required: true, min: 0.5 },
-    quantityType: { type: String, required: true, enum: ['Satchet', 'Packet', 'Box', 'Carton'] },
+    quantityForm: { type: Types.ObjectId, required: true },
     product: {
       type: String,
       required: true,
