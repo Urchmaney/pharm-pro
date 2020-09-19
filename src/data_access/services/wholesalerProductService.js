@@ -9,7 +9,6 @@ const createWholesalerProduct = async (wholesalerProduct) => {
         result: ['Invalid payload sent.'],
       };
     }
-
     wholesalerProduct = new WholesalerProduct(wholesalerProduct);
     const error = await wholesalerProduct.validate();
     if (error) {
@@ -32,88 +31,78 @@ const getWholesalerProducts = async (wholesaler) => WholesalerProduct.find(
   {
     wholesaler,
   },
-).populate('product');
+).populate('product').populate('formPrices.form');
 
-const getWholesalerProductsByGroups = async (wholesaler) => WholesalerProduct.aggregate([
-  { $match: { wholesaler: wholesaler.toString() } },
-  { $addFields: { product_id: { $toObjectId: '$product' } } },
-  {
-    $lookup: {
-      from: 'products',
-      localField: 'product_id',
-      foreignField: '_id',
-      as: 'whproduct',
-    },
-  },
-  { $unwind: '$whproduct' },
-  {
-    $group: {
-      _id: '$whproduct.medicalName',
-      products: {
-        $push: '$$ROOT',
+const getWholesalerProductsByGroups = async (wholesaler) => {
+  WholesalerProduct.aggregate([
+    { $match: { wholesaler: wholesaler.toString() } },
+    { $addFields: { product_id: { $toObjectId: '$product' } } },
+    {
+      $lookup: {
+        from: 'products',
+        localField: 'product_id',
+        foreignField: '_id',
+        as: 'whproduct',
       },
     },
-  },
-]);
+    { $unwind: '$whproduct' },
+    {
+      $group: {
+        _id: '$whproduct.medicalName',
+        products: {
+          $push: '$$ROOT',
+        },
+      },
+    },
+  ]);
+};
 
-const getWholesalerProduct = async (wholesaler, product) => WholesalerProduct.findOne({
-  wholesaler,
-  product,
-}).populate('product');
+const getWholesalerProduct = async (wholesaler, product) => {
+  try {
+    const wP = await WholesalerProduct.findOne({ wholesaler, product }).populate('product');
+    return wP;
+  } catch (e) {
+    return null;
+  }
+};
 
-const getWholesalerProductCostPrice = async (wholesalerId, productId, quantityType) => {
+const getWholesalerProductWithProductObj = async (
+  wholesaler, product) => {
+  try {
+    const wP = await WholesalerProduct.findOne({ wholesaler, product });
+    return wP;
+  } catch (e) {
+    return null;
+  }
+};
+
+const getWholesalerProductCostPrice = async (wholesalerId, productId, formId) => {
   const wholesalerProduct = await getWholesalerProduct(wholesalerId, productId);
   if (!wholesalerProduct) return 0;
 
-  switch (quantityType) {
-    case 'Satchet':
-      return wholesalerProduct.pricePerSatchet;
-    case 'Carton':
-      return wholesalerProduct.pricePerCarton;
-    case 'Box':
-      return wholesalerProduct.pricePerBox;
-    case 'Packet':
-      return wholesalerProduct.pricePerPacket;
-    default:
-      return 0;
-  }
+  const form = wholesalerProduct.formPrices.find(e => e.form.toString() === formId.toString());
+  return form ? form.price : 0;
+};
+
+const updateWholesalerProduct = async (wholesaler, product, updateObj) => {
+  if (!mongoose.isValidObjectId(wholesaler)
+    || !mongoose.isValidObjectId(product)
+    || !mongoose.isValidObjectId(updateObj.form)
+    || typeof updateObj.price !== 'number') return null;
+
+  const wP = await getWholesalerProductWithProductObj(wholesaler, product);
+  if (!wP) return null;
+  const p = wP.formPrices.find(e => e.form.toString() === updateObj.form.toString());
+  if (p) p.price = updateObj.price;
+  else { wP.formPrices.push({ form: updateObj.form, price: updateObj.price }); }
+
+  await wP.save();
+  return wP;
 };
 
 const updateWholesalerProductQuantityTypePrice = async (
-  wholesalerId, productId, quantityType, price,
-) => {
-  if (!mongoose.isValidObjectId(wholesalerId)
-    || !mongoose.isValidObjectId(productId) || typeof price !== 'number') return null;
-
-  const option = {};
-  switch (quantityType) {
-    case 'Satchet':
-      option.pricePerSatchet = price;
-      break;
-    case 'Carton':
-      option.pricePerCarton = price;
-      break;
-    case 'Box':
-      option.pricePerBox = price;
-      break;
-    case 'Packet':
-      option.pricePerPacket = price;
-      break;
-    default:
-      break;
-  }
-  return WholesalerProduct.findOneAndUpdate({
-    wholesaler: wholesalerId, product: productId,
-  }, option, { new: true });
-};
-
-const updateWholesalerProduct = async (_id, newWholesalerProduct) => {
-  if (!mongoose.isValidObjectId(_id)) return null;
-  return WholesalerProduct.findOneAndUpdate({
-    _id,
-  }, newWholesalerProduct, { new: true });
-};
-
+  wholesalerId, productId, formId, price,
+) => updateWholesalerProduct(wholesalerId, productId, { form: formId, price });
 
 module.exports = {
   createWholesalerProduct,

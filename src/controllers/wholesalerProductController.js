@@ -1,8 +1,16 @@
-const wholesalerProductController = (wholesalerProductService) => {
+const wholesalerProductController = (wholesalerProductService, productService) => {
   const create = {
     roles: [],
     action: async (wholesalerProduct) => {
       wholesalerProduct = wholesalerProduct || {};
+      if (typeof wholesalerProduct.product === 'object') {
+        wholesalerProduct.product.isVerified = false;
+        const product = await productService.createProduct(wholesalerProduct.product);
+        if (!product.status) return { statusCode: 400, result: product.result };
+
+        wholesalerProduct.product = product.result._id;
+      }
+
       const {
         status, result,
       } = await wholesalerProductService.createWholesalerProduct(wholesalerProduct);
