@@ -37,11 +37,11 @@ const getProducts = async (search = '') => {
     {
       $addFields: {
         displayName: {
-          $concat: ['$name', ' ', { $ifNull: ['$companyName', ''] }, ' ', { $ifNull: ['$form', ''] }],
+          $concat: ['$name', ' ', ' ', { $ifNull: ['$form', ''] }, '-', { $ifNull: ['$companyName', ''] }],
         },
         sIndex: {
           $indexOfBytes: [
-            { $toLower: { $concat: ['$name', ' ', { $ifNull: ['$companyName', ''] }, ' ', { $ifNull: ['$form', ''] }] } },
+            { $toLower: { $concat: ['$name', ' ', { $ifNull: ['$medicalName', ''] }] } },
             search.toLocaleLowerCase(),
           ],
         },
