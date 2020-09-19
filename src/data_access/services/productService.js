@@ -37,7 +37,7 @@ const getProducts = async (search = '') => {
     {
       $addFields: {
         displayName: {
-          $concat: ['$name', ' ', ' ', { $ifNull: ['$form', ''] }, '-', { $ifNull: ['$companyName', ''] }],
+          $concat: ['$name', ' ', ' ', { $ifNull: ['$form', ''] }, ' - ', { $ifNull: ['$companyName', ''] }],
         },
         sIndex: {
           $indexOfBytes: [
