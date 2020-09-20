@@ -99,7 +99,9 @@ const startApplication = async () => {
     wholesalerProductController, wholesalerAuthMiddleware,
   );
 
-  const invoiceController = invoiceControllerGen(invoiceService, retailerService, notifier);
+  const invoiceController = invoiceControllerGen(
+    invoiceService, retailerService, productService, notifier,
+  );
   const invoiceRouter = invoiceRouterGen(
     invoiceController, combineAuthMiddleware, retailerAuthMiddlewere, wholesalerAuthMiddleware,
   );

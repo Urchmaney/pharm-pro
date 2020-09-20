@@ -1,12 +1,29 @@
+/* eslint-disable no-underscore-dangle */
 const { v4 } = require('uuid');
 
-const invoiceController = (invoiceService, retailerService, notifier) => {
+const invoiceController = (invoiceService, retailerService, productService, notifier) => {
   const create = {
     roles: [],
     action: async (invoice, retailerId) => {
       if (!Array.isArray(invoice.products) || !Array.isArray(invoice.wholesalers)) {
         return { statusCode: 400, result: 'Invalid parameter. products and wholesaler must be arrays' };
       }
+      const aux = async (prod) => {
+        const { result } = await productService.createProduct(prod.product);
+        prod.product = result._id;
+        return prod;
+      };
+
+      const iProducts = [];
+      invoice.products.forEach(ele => {
+        if (typeof ele.product === 'string') iProducts.push(ele);
+        else if (typeof ele.product === 'object') {
+          ele.product.isVerified = false;
+          iProducts.push(aux(ele));
+        }
+      });
+
+      invoice.products = await Promise.all(iProducts);
       const listId = v4();
       const invoices = [];
       invoice.wholesalers.forEach(ele => {
