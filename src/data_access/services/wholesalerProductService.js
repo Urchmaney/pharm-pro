@@ -33,29 +33,27 @@ const getWholesalerProducts = async (wholesaler) => WholesalerProduct.find(
   },
 ).populate('product').populate('formPrices.form');
 
-const getWholesalerProductsByGroups = async (wholesaler) => {
-  WholesalerProduct.aggregate([
-    { $match: { wholesaler: wholesaler.toString() } },
-    { $addFields: { product_id: { $toObjectId: '$product' } } },
-    {
-      $lookup: {
-        from: 'products',
-        localField: 'product_id',
-        foreignField: '_id',
-        as: 'whproduct',
+const getWholesalerProductsByGroups = async (wholesaler) => WholesalerProduct.aggregate([
+  { $match: { wholesaler: wholesaler.toString() } },
+  { $addFields: { product_id: { $toObjectId: '$product' } } },
+  {
+    $lookup: {
+      from: 'products',
+      localField: 'product_id',
+      foreignField: '_id',
+      as: 'whproduct',
+    },
+  },
+  { $unwind: '$whproduct' },
+  {
+    $group: {
+      _id: '$whproduct.medicalName',
+      products: {
+        $push: '$$ROOT',
       },
     },
-    { $unwind: '$whproduct' },
-    {
-      $group: {
-        _id: '$whproduct.medicalName',
-        products: {
-          $push: '$$ROOT',
-        },
-      },
-    },
-  ]);
-};
+  },
+]);
 
 const getWholesalerProduct = async (wholesaler, product) => {
   try {

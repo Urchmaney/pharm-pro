@@ -196,14 +196,19 @@ describe('get wholesaler product cost price', () => {
 });
 
 test('get wholesalers product by group by medical name', async () => {
+  const q1 = (await fService.createQuantityForm({ name: 'Box', shortForm: 'Box' })).result._id;
+  const q2 = (await fService.createQuantityForm({ name: 'Packet', shortForm: 'Pkt' })).result._id;
+  const q3 = (await fService.createQuantityForm({ name: 'Satchet', shortForm: 'Scht' })).result._id;
+
   const testProduct = (await pS.createProduct({ name: 'Zinat', medicalName: 'Worm' })).result;
   const wholesalerProduct = {
     wholesaler: testWholesaler._id,
     product: testProduct._id,
-    pricePerPacket: 100,
-    pricePerBox: 1000,
-    pricePerCarton: 10000,
-    quantity: 100,
+    formPrices: [
+      { form: q2, price: 100 },
+      { form: q1, price: 1000 },
+      { form: q3, price: 100 },
+    ],
   };
   await service.createWholesalerProduct(wholesalerProduct);
   const groupProducts = await service.getWholesalerProductsByGroups(testWholesaler._id);
