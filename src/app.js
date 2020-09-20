@@ -100,7 +100,7 @@ const startApplication = async () => {
     invoiceController, combineAuthMiddleware, retailerAuthMiddlewere, wholesalerAuthMiddleware,
   );
 
-  const listController = listControllerGen(invoiceService);
+  const listController = listControllerGen(invoiceService, productService);
   const listRouter = listRouterGen(listController, retailerAuthMiddlewere);
 
   const reportController = reportControllerGen(reportService);

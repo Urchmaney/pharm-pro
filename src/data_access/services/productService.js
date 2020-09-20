@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const mongoose = require('mongoose');
 const Product = require('../schemas/product_schema');
 
@@ -58,6 +59,25 @@ const getProduct = async (id) => {
   return Product.findById(id);
 };
 
+
+const getRelatedProducts = async (products) => {
+  try {
+    const objectIdProducts = products.map(e => mongoose.Types.ObjectId(e));
+    let medicalNames = await Product.aggregate([
+      { $match: { _id: { $in: objectIdProducts } } },
+      { $group: { _id: '$medicalName' } },
+    ]);
+    medicalNames = medicalNames.map(e => e._id);
+    const result = await Product.aggregate([
+      { $match: { _id: { $nin: objectIdProducts } } },
+      { $match: { medicalName: { $in: medicalNames } } },
+    ]);
+    return result;
+  } catch (e) {
+    return [];
+  }
+};
+
 const updateProduct = async (_id, newProduct) => {
   if (!mongoose.isValidObjectId(_id)) return null;
   return Product.findOneAndUpdate({ _id }, newProduct, { new: true });
@@ -85,4 +105,5 @@ module.exports = {
   updateProduct,
   createManyProducts,
   deleteProduct,
+  getRelatedProducts,
 };
