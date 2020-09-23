@@ -105,6 +105,30 @@ const listRouter = (
     res.status(statusCode).json(result);
   });
 
+  /**
+   * @swagger
+   * /api/lists/{id}/related-products:
+   *  get:
+   *    description: Get a list related products
+   *    security:
+   *      - bearerAuth: []
+   *    tags:
+   *      - Lists
+   *    parameters:
+   *      - in : path
+   *        name: id
+   *        required: true
+   *    responses:
+   *      '200':
+   *        description: Successfully fetched.
+   */
+  router.get('/:id/related-products', retailerAuthMiddleware, async (req, res) => {
+    const {
+      statusCode, result,
+    } = await controller.relatedProducts.action(req.user.id, req.params.id);
+    res.status(statusCode).json(result);
+  });
+
   return router;
 };
 

@@ -1,4 +1,4 @@
-const listController = (invoiceService) => {
+const listController = (invoiceService, productService) => {
   const index = {
     roles: [],
     action: async (retailerId, active) => {
@@ -36,11 +36,24 @@ const listController = (invoiceService) => {
     },
   };
 
+  const relatedProducts = {
+    roles: [],
+    action: async (retailerId, listId) => {
+      const listProducts = (await invoiceService.getList(retailerId, listId));
+      if (!listProducts) return { statusCode: 400, result: ['Invalid list Id.'] };
+
+      const listProductsIds = listProducts.map(e => e.product);
+      const relatedProducts = await productService.getRelatedProducts(listProductsIds);
+      return { statusCode: 200, result: relatedProducts };
+    },
+  };
+
   return {
     index,
     show,
     closeList,
     productPrices,
+    relatedProducts,
   };
 };
 

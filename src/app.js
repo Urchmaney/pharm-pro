@@ -60,6 +60,7 @@ const startApplication = async () => {
     invoiceService,
     reportService,
     quantityFormService,
+    helpService,
   } = await mongoDB(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/pharm-pro');
 
   const wholesalerController = wholesalerControllerGen(wholesalerService,
@@ -106,7 +107,7 @@ const startApplication = async () => {
     invoiceController, combineAuthMiddleware, retailerAuthMiddlewere, wholesalerAuthMiddleware,
   );
 
-  const listController = listControllerGen(invoiceService);
+  const listController = listControllerGen(invoiceService, productService);
   const listRouter = listRouterGen(listController, retailerAuthMiddlewere);
 
   const reportController = reportControllerGen(reportService);
@@ -145,6 +146,10 @@ const startApplication = async () => {
   app.use('/api/reports', reportRouter);
 
   app.use('/api/quantity_forms', quantityFormRouter);
+  app.get('/helps', (req, res) => {
+    const helps = helpService.getHelpContacts();
+    res.status(200).json(helps);
+  });
 
   app.use('/', swaggerUI.serve, swaggerUI.setup(swaggerJsDoc));
 

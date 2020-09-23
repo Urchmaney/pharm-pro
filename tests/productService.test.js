@@ -154,6 +154,46 @@ describe('Insert Many products', () => {
   });
 });
 
+test('get related products', async () => {
+  const p1 = (await service.createProduct({ name: 'Artesunate', medicalName: 'Artheme' })).result;
+  const p2 = (await service.createProduct({ name: 'Amalar', medicalName: 'Artheme' })).result;
+  const p3 = (await service.createProduct({ name: 'Cambosunate', medicalName: 'Artheme' })).result;
+  const p4 = (await service.createProduct({ name: 'Buton', medicalName: 'Tonic' })).result;
+  const p5 = (await service.createProduct({ name: 'Millcap', medicalName: 'Tonic' })).result;
+  const p6 = (await service.createProduct({ name: 'Orheptal', medicalName: 'Tonic' })).result;
+  const p7 = (await service.createProduct({ name: 'Diclofenac', medicalName: 'Analgesic' })).result;
+  const p8 = (await service.createProduct({ name: 'Ibuprofen', medicalName: 'Analgesic' })).result;
+  const p9 = (await service.createProduct({ name: 'For Pain', medicalName: 'Analgesic' })).result;
+  const p10 = (await service.createProduct({ name: 'Amoxil', medicalName: 'Amoxyciliin' })).result;
+
+  let result = await service.getRelatedProducts([p2._id.toString(), p4._id]);
+  expect(result.length).toBe(4);
+
+  result = await service.getRelatedProducts([p10._id, p4._id]);
+  expect(result.length).toBe(2);
+
+  result = await service.getRelatedProducts([p10._id, p3._id, p4._id]);
+  expect(result.length).toBe(4);
+
+  result = await service.getRelatedProducts([p10._id, p3._id, p4._id]);
+  expect(result.length).toBe(4);
+
+  result = await service.getRelatedProducts([p10._id, p3._id, p4._id, p1._id]);
+  expect(result.length).toBe(3);
+
+  result = await service.getRelatedProducts([p10._id, p9._id, p3._id, p4._id]);
+  expect(result.length).toBe(6);
+
+  result = await service.getRelatedProducts([p5._id]);
+  expect(result.length).toBe(2);
+
+  result = await service.getRelatedProducts([p6._id, p7._id, p8._id]);
+  expect(result.length).toBe(3);
+
+  result = await service.getRelatedProducts([['ewwefewewde']]);
+  expect(result.length).toBe(0);
+});
+
 afterAll(done => {
   closeConn();
   done();

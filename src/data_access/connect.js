@@ -7,6 +7,7 @@ const retailerService = require('./services/retailerService');
 const invoiceService = require('./services/invoiceService');
 const reportService = require('./services/reportService');
 const quantityFormService = require('./services/quantityFormService');
+const helpService = require('./services/helpService');
 
 const mongoConnect = async (URI) => {
   await connect(URI,
@@ -30,6 +31,7 @@ const mongoConnect = async (URI) => {
     invoiceService,
     quantityFormService,
     reportService,
+    helpService,
     closeConnect: () => connection.close(),
     db: connection.db,
   };
