@@ -48,6 +48,9 @@ const retailerSchema = new Schema({
   body: String,
   registrationNumber: String,
   profileImage: { type: String },
+  tokens: [{
+    type: String, required: true,
+  }],
 }, { timestamps: true });
 
 module.exports = model('retailers', retailerSchema);

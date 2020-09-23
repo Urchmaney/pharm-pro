@@ -2,11 +2,9 @@
 const mongoConnect = require('../src/data_access/connect');
 
 let service = null;
-let testProduct = null;
-let testProductOne = null;
-let testProductTwo = null;
 let testWholesaler = null;
 let closeConn = null;
+let pS = null;
 
 beforeAll(async () => {
   const {
@@ -14,23 +12,21 @@ beforeAll(async () => {
     productService,
     wholesalerService,
     closeConnect,
-    db,
   } = await mongoConnect(global.__MONGO_URI__);
   service = wholesalerProductService;
-  db.collection('products').deleteMany({});
-  testProduct = (await productService.createProduct({ name: 'Amalar', medicalName: 'Amalare' })).result;
-  testProductOne = (await productService.createProduct({ name: 'Hamale', medicalName: 'Amalare' })).result;
-  testProductTwo = (await productService.createProduct({ name: 'Amoxil', medicalName: 'Amoxil' })).result;
+
   testWholesaler = (await wholesalerService.createWholesaler({
     fullName: 'Zemus kate',
     registrationNumber: '26dy3',
     phoneNumber: '+2348167255286',
   })).result;
   closeConn = closeConnect;
+  pS = productService;
 });
 
 describe('create wholesaler product', () => {
   it('should add product if object is valid', async () => {
+    const testProduct = (await pS.createProduct({ name: 'Hamale', medicalName: 'Amalare' })).result;
     const wholesalerProduct = {
       wholesaler: testWholesaler._id,
       product: testProduct._id,
@@ -74,6 +70,16 @@ describe('wholesaler products', () => {
 
 describe('wholesaler product', () => {
   it('should return product if it exists', async () => {
+    const testProduct = (await pS.createProduct({ name: 'Vargil', medicalName: 'Amalare' })).result;
+    const nWholesalerProduct = {
+      wholesaler: testWholesaler._id,
+      product: testProduct._id.toString(),
+      pricePerPacket: 100,
+      pricePerBox: 1000,
+      pricePerCarton: 10000,
+      quantity: 100,
+    };
+    await service.createWholesalerProduct(nWholesalerProduct);
     const product = await service.getWholesalerProduct(testWholesaler._id, testProduct._id);
     expect(product).toBeDefined();
     expect(product.product.name).toBeDefined();
@@ -85,16 +91,24 @@ describe('wholesaler product', () => {
     expect(product).toBeNull();
     product = await service.getWholesalerProduct(testWholesaler._id, 'wiuyqw');
     expect(product).toBeNull();
-    product = await service.getWholesalerProduct('wiuyqw', testProduct._id);
-    expect(product).toBeNull();
   });
 });
 
 describe('update wholesaler product', () => {
   it('should update wholesaler product if wholesaler and product is valid', async () => {
+    const testProduct = (await pS.createProduct({ name: 'Calcimax', medicalName: 'Amalare' })).result;
+    const nWholesalerProduct = {
+      wholesaler: testWholesaler._id,
+      product: testProduct._id.toString(),
+      pricePerPacket: 100,
+      pricePerBox: 1000,
+      pricePerCarton: 10000,
+      quantity: 100,
+    };
+    await service.createWholesalerProduct(nWholesalerProduct);
     const wholesalerProduct = {
       wholesaler: testWholesaler._id,
-      product: testProductOne._id,
+      product: testProduct._id,
       pricePerPacket: 100,
       pricePerBox: 1000,
       pricePerCarton: 10000,
@@ -109,12 +123,12 @@ describe('update wholesaler product', () => {
     expect(result.pricePerBox).toBe(2000);
 
     let updatedObj = await service.updateWholesalerProductQuantityTypePrice(
-      testWholesaler._id, testProductOne._id, 'Box', 5,
+      testWholesaler._id, testProduct._id, 'Box', 5,
     );
     expect(updatedObj.pricePerBox).toBe(5);
 
     updatedObj = await service.updateWholesalerProductQuantityTypePrice(
-      testWholesaler._id, testProductOne._id, 'Satchet', 105,
+      testWholesaler._id, testProduct._id, 'Satchet', 105,
     );
     expect(updatedObj.pricePerBox).toBe(5);
     expect(updatedObj.pricePerSatchet).toBe(105);
@@ -154,9 +168,10 @@ describe('get wholesaler product cost price', () => {
 });
 
 test('get wholesalers product by group by medical name', async () => {
+  const testProduct = (await pS.createProduct({ name: 'Zinat', medicalName: 'Worm' })).result;
   const wholesalerProduct = {
     wholesaler: testWholesaler._id,
-    product: testProductTwo._id,
+    product: testProduct._id,
     pricePerPacket: 100,
     pricePerBox: 1000,
     pricePerCarton: 10000,

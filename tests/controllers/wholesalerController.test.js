@@ -21,7 +21,7 @@ let uploadProfileImage = null;
 
 beforeAll(async () => {
   const {
-    wholesalerService, otpService, closeConnect, db,
+    wholesalerService, retailerService, otpService, closeConnect, db,
   } = await mongoConnect(global.__MONGO_URI__);
 
   dbObj = db;
@@ -29,7 +29,7 @@ beforeAll(async () => {
   closeConn = closeConnect;
 
   const wholesalerController = wholesalerControllerGenerator(wholesalerService,
-    otpService, authenticator, notifier, uploader);
+    retailerService, otpService, authenticator, notifier, uploader);
 
   create = wholesalerController.create;
   index = wholesalerController.index;
@@ -47,6 +47,11 @@ beforeEach(async () => {
     registrationNumber: '87672',
     phoneNumber: '+2349787782399',
   })).result;
+  await service.createWholesaler({
+    fullName: 'Mike Adenuga',
+    registrationNumber: 'mded',
+    phoneNumber: '+2348164292882',
+  });
 });
 
 describe('wholesaler controller create action', () => {
@@ -70,7 +75,7 @@ describe('wholesaler controller index action', () => {
   it('should return status code 200 and wholesaler list', async () => {
     const { statusCode, result } = await index.action();
     expect(statusCode).toBe(200);
-    expect(result.length).toBe(1);
+    expect(result.length).toBe(2);
   });
 });
 

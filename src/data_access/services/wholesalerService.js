@@ -15,6 +15,7 @@ const createWholesaler = async (wholesalerObj) => {
     await wholesaler.save();
     return { status: true, result: wholesaler };
   } catch (e) {
+    if (e.code === 11000) return { status: false, result: ['phone number is already in use.'] };
     return { status: false, result: [e.message] };
   }
 };
@@ -87,6 +88,7 @@ const getWholesalerRetailers = async (wholesalerId) => WholesalerRetailer.aggreg
       phoneNumber: '$phoneNumber',
       location: '$location',
       image: '$retailer.profileImage',
+      retailerId: '$retailer._id',
     },
   },
 ]);
@@ -102,6 +104,16 @@ const updateWholesalerRetailer = async (_id, newWholesalerRetailer) => {
   );
 };
 
+const activateRetailerInWholesalerRetailer = async (
+  phoneNumber) => WholesalerRetailer.updateMany({ phoneNumber }, { active: true });
+
+const addWholesalerToken = async (_id, token) => Wholesaler.findOneAndUpdate(
+  { _id }, { $addToSet: { tokens: token } }, { new: true },
+);
+
+const removeWholesalerToken = async (
+  _id, token) => Wholesaler.findOneAndUpdate({ _id }, { $pull: { tokens: token } }, { new: true });
+
 
 module.exports = {
   createWholesaler,
@@ -116,4 +128,7 @@ module.exports = {
   getWholesalerRetailer,
   updateWholesalerRetailer,
   isWholesalerPhoneNumberExist,
+  activateRetailerInWholesalerRetailer,
+  addWholesalerToken,
+  removeWholesalerToken,
 };

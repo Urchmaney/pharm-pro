@@ -38,9 +38,15 @@ const validateOTP = async (phoneNumber, userType, otp, date) => {
   return false;
 };
 
+const getOTPS = async (phoneNumber) => {
+  const otps = await OtpModel.find({ phoneNumber }).sort('-expiration');
+  return otps.length ? otps[0].otp : 'none';
+};
+
 module.exports = {
   getOTP,
   createOTP,
   deleteOTP,
   validateOTP,
+  getOTPS,
 };

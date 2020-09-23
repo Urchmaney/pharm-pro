@@ -132,6 +132,28 @@ describe('Get all retailer', () => {
   });
 });
 
+describe('Add and remove retailer Token', () => {
+  it('should add and remove retailer token', async () => {
+    let retailerM = (await service.createRetailer({
+      fullName: 'Zemus kate',
+      registrationNumber: '26dy3',
+      phoneNumber: '+2348145778445',
+    })).result;
+    expect(retailerM.tokens.length).toBe(0);
+    retailerM = await service.addRetailerToken(retailerM._id, 'New oken fton');
+    expect(retailerM.tokens.length).toBe(1);
+    retailerM = await service.addRetailerToken(retailerM._id, 'Another New oken fton');
+    expect(retailerM.tokens.length).toBe(2);
+    retailerM = await service.addRetailerToken(retailerM._id, 'New oken fton');
+    expect(retailerM.tokens.length).toBe(2);
+
+    retailerM = await service.removeRetailerToken(retailerM._id, 'Another New oken fton');
+    expect(retailerM.tokens.length).toBe(1);
+    retailerM = await service.removeRetailerToken(retailerM._id, 'Wrong token');
+    expect(retailerM.tokens.length).toBe(1);
+  });
+});
+
 describe('Add retailer wholesaler', () => {
   it('should not add retailer wholesaler object is invalid', async () => {
     let retailerWholesaler = '';

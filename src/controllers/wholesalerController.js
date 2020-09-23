@@ -1,10 +1,14 @@
 /* eslint-disable no-underscore-dangle */
-const wholesalerController = (wholesalerService, otpService, authenticator, notifier, uploader) => {
+const wholesalerController = (
+  wholesalerService, retailerService, otpService, authenticator, notifier, uploader,
+) => {
   const create = {
     roles: [],
     action: async (wholesaler) => {
       const { status, result } = await wholesalerService.createWholesaler(wholesaler);
       if (!status) return { statusCode: 400, result };
+
+      await retailerService.activateWholesalerInRetailerWholesaler(result.phoneNumber);
       const otp = await otpService.createOTP(result.phoneNumber, 1);
       const success = await notifier.sendSMS(`Garhia otp code:    ${otp}`, result.phoneNumber);
       if (success) {
@@ -56,6 +60,9 @@ const wholesalerController = (wholesalerService, otpService, authenticator, noti
   const generateAndSendOTP = {
     role: [],
     action: async (phoneNumber) => {
+      const wholesaler = await wholesalerService.getWholesalerByPhoneNumber(phoneNumber);
+      if (!wholesaler) return { statusCode: 400, result: 'Please register.' };
+
       const otp = await otpService.createOTP(phoneNumber, 1);
       const success = await notifier.sendSMS(`Garhia otp code:    ${otp}`, phoneNumber);
       if (!success) return { statusCode: 400, result: 'Issue sending OTP. Check phone number format. +234 format.' };
@@ -78,11 +85,13 @@ const wholesalerController = (wholesalerService, otpService, authenticator, noti
 
   const login = {
     roles: [],
-    action: async (phoneNumber, otp) => {
+    action: async (phoneNumber, otp, token) => {
       const wholesaler = await wholesalerService.getWholesalerByPhoneNumber(phoneNumber);
       if (!wholesaler) return { statusCode: 400, result: 'Error Loging. Check your details.' };
       const valid = await otpService.validateOTP(phoneNumber, 1, otp, new Date());
       if (!valid) return { statusCode: 400, result: 'Invalid OTP.' };
+
+      if (token) await wholesalerService.addWholesalerToken(wholesaler._id, token);
       return {
         statusCode: 200,
         result: {
@@ -92,10 +101,19 @@ const wholesalerController = (wholesalerService, otpService, authenticator, noti
               id: wholesaler._id,
               phoneNumber: wholesaler.phoneNumber,
               type: 1,
+              deviceToken: token || '',
             },
           ),
         },
       };
+    },
+  };
+
+  const logout = {
+    roles: [],
+    action: async (id, token) => {
+      await wholesalerService.removeWholesalerToken(id, token);
+      return { statusCode: 200, result: 'successfully logged out.' };
     },
   };
 
@@ -108,6 +126,7 @@ const wholesalerController = (wholesalerService, otpService, authenticator, noti
     deleteAction,
     generateAndSendOTP,
     uploadProfileImage,
+    logout,
   };
 };
 

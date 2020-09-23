@@ -158,7 +158,7 @@ describe(' Wholesaler Service', () => {
       const oldWholeRetailer = (await service.createWholesalerRetailer({
         fullName: 'Menga man',
         wholesalerId: '1e03ujde3d',
-        phoneNumber: '+234906535533',
+        phoneNumber: '+2349065355331',
         active: false,
       })).result;
       const newWholeRetailer = {
@@ -169,7 +169,7 @@ describe(' Wholesaler Service', () => {
       );
       expect(updateObj).toBeDefined();
       expect(updateObj.fullName).toBe('new Man');
-      expect(updateObj.phoneNumber).toBe('+234906535533');
+      expect(updateObj.phoneNumber).toBe('+2349065355331');
     });
 
     it('should return null if _id is invalid', async () => {
@@ -181,6 +181,28 @@ describe(' Wholesaler Service', () => {
         'dfjdiusdsd', newWholeRetailer,
       );
       expect(updateObj).toBeNull();
+    });
+  });
+
+  describe('Add and remove wholesaler Token', () => {
+    it('should add and remove wholesaler token', async () => {
+      let wholesalerM = (await service.createWholesaler({
+        fullName: 'Zemus kate',
+        registrationNumber: '26dy3',
+        phoneNumber: '+2348145778445',
+      })).result;
+      expect(wholesalerM.tokens.length).toBe(0);
+      wholesalerM = await service.addWholesalerToken(wholesalerM._id, 'New oken fton');
+      expect(wholesalerM.tokens.length).toBe(1);
+      wholesalerM = await service.addWholesalerToken(wholesalerM._id, 'Another New oken fton');
+      expect(wholesalerM.tokens.length).toBe(2);
+      wholesalerM = await service.addWholesalerToken(wholesalerM._id, 'New oken fton');
+      expect(wholesalerM.tokens.length).toBe(2);
+
+      wholesalerM = await service.removeWholesalerToken(wholesalerM._id, 'Another New oken fton');
+      expect(wholesalerM.tokens.length).toBe(1);
+      wholesalerM = await service.removeWholesalerToken(wholesalerM._id, 'Wrong token');
+      expect(wholesalerM.tokens.length).toBe(1);
     });
   });
 

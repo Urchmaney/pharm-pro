@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const mongoose = require('mongoose');
 const Product = require('../schemas/product_schema');
 
@@ -14,7 +15,7 @@ const createProduct = async (product) => {
   return { status: true, result: product };
 };
 
-const getProducts = async (search) => {
+const getProducts = async (search = '') => {
   const option = {};
   if (search) {
     option.$or = [
@@ -32,12 +33,49 @@ const getProducts = async (search) => {
       },
     ];
   }
-  return Product.find(option);
+  return Product.aggregate([
+    { $match: option },
+    {
+      $addFields: {
+        displayName: {
+          $concat: ['$name', ' ', ' ', { $ifNull: ['$form', ''] }, ' - ', { $ifNull: ['$companyName', ''] }],
+        },
+        sIndex: {
+          $indexOfBytes: [
+            { $toLower: { $concat: ['$name', ' ', { $ifNull: ['$medicalName', ''] }] } },
+            search.toLocaleLowerCase(),
+          ],
+        },
+      },
+    },
+    {
+      $sort: { sIndex: 1 },
+    },
+  ]);
 };
 
 const getProduct = async (id) => {
   if (!mongoose.isValidObjectId(id)) return null;
   return Product.findById(id);
+};
+
+
+const getRelatedProducts = async (products) => {
+  try {
+    const objectIdProducts = products.map(e => mongoose.Types.ObjectId(e));
+    let medicalNames = await Product.aggregate([
+      { $match: { _id: { $in: objectIdProducts } } },
+      { $group: { _id: '$medicalName' } },
+    ]);
+    medicalNames = medicalNames.map(e => e._id);
+    const result = await Product.aggregate([
+      { $match: { _id: { $nin: objectIdProducts } } },
+      { $match: { medicalName: { $in: medicalNames } } },
+    ]);
+    return result;
+  } catch (e) {
+    return [];
+  }
 };
 
 const updateProduct = async (_id, newProduct) => {
@@ -67,4 +105,5 @@ module.exports = {
   updateProduct,
   createManyProducts,
   deleteProduct,
+  getRelatedProducts,
 };

@@ -3,12 +3,17 @@ const mongoConnect = require('../src/data_access/connect');
 
 let service = null;
 let closeConn = null;
+let dbase = null;
 
 beforeAll(async () => {
   const { productService, closeConnect, db } = await mongoConnect(global.__MONGO_URI__);
   service = productService;
   closeConn = closeConnect;
-  db.collection('products').deleteMany({});
+  dbase = db;
+});
+
+beforeEach(async () => {
+  await dbase.collection('products').deleteMany({});
 });
 
 describe('Add create product', () => {
@@ -19,7 +24,7 @@ describe('Add create product', () => {
     expect(result.length).toBe(1);
   });
   it('should create product if name is present', async () => {
-    const product = { name: 'Phenobab' };
+    const product = { name: 'Phenobab', companyName: 'Emzor', form: 'Syrup' };
     const { status, result } = await service.createProduct(product);
     expect(status).toBe(true);
     expect(result._id).toBeDefined();
@@ -29,8 +34,25 @@ describe('Add create product', () => {
 
 describe('All products', () => {
   it('should return all products', async () => {
+    await service.createManyProducts([
+      { name: 'Analgin', medicalName: 'ome' },
+      { name: 'Ibuprofen', medicalName: 'Analgesic' },
+      { name: 'Abuprofen', medicalName: 'Analgesic' },
+      { name: 'Profen', medicalName: 'Analgesic' },
+    ]);
     const products = await service.getProducts();
-    expect(products.length).toBe(1);
+    expect(products.length).toBe(4);
+  });
+  it('should return based on the search string index', async () => {
+    await service.createManyProducts([
+      { name: 'Analgin', medicalName: 'ome' },
+      { name: 'Ibuprofen', medicalName: 'Analgesic' },
+      { name: 'Abuleprofen', medicalName: 'Analgesic' },
+      { name: 'Profen', medicalName: 'Analgesic' },
+    ]);
+    const products = await service.getProducts('pro');
+    expect(products.length).toBe(3);
+    expect(products[0].name).toBe('Profen');
   });
 });
 
@@ -98,7 +120,8 @@ describe('Insert Many products', () => {
         companyName: 'fsmds',
       }];
     const { status, result } = await service.createManyProducts(products);
-    expect((await service.getProducts()).length).toBe(4);
+    const ps = await service.getProducts();
+    expect(ps.length).toBe(0);
     expect(status).toBe(false);
     expect(typeof result).toBe('string');
   });
@@ -113,7 +136,7 @@ describe('Insert Many products', () => {
     }];
     const { status, result } = await service.createManyProducts(products);
     expect(status).toBe(true);
-    expect((await service.getProducts()).length).toBe(6);
+    expect((await service.getProducts()).length).toBe(2);
     expect(Array.isArray(result)).toBe(true);
   });
   it('should fail if the products is not an array', async () => {
@@ -131,7 +154,47 @@ describe('Insert Many products', () => {
   });
 });
 
-afterAll(async done => {
+test('get related products', async () => {
+  const p1 = (await service.createProduct({ name: 'Artesunate', medicalName: 'Artheme' })).result;
+  const p2 = (await service.createProduct({ name: 'Amalar', medicalName: 'Artheme' })).result;
+  const p3 = (await service.createProduct({ name: 'Cambosunate', medicalName: 'Artheme' })).result;
+  const p4 = (await service.createProduct({ name: 'Buton', medicalName: 'Tonic' })).result;
+  const p5 = (await service.createProduct({ name: 'Millcap', medicalName: 'Tonic' })).result;
+  const p6 = (await service.createProduct({ name: 'Orheptal', medicalName: 'Tonic' })).result;
+  const p7 = (await service.createProduct({ name: 'Diclofenac', medicalName: 'Analgesic' })).result;
+  const p8 = (await service.createProduct({ name: 'Ibuprofen', medicalName: 'Analgesic' })).result;
+  const p9 = (await service.createProduct({ name: 'For Pain', medicalName: 'Analgesic' })).result;
+  const p10 = (await service.createProduct({ name: 'Amoxil', medicalName: 'Amoxyciliin' })).result;
+
+  let result = await service.getRelatedProducts([p2._id.toString(), p4._id]);
+  expect(result.length).toBe(4);
+
+  result = await service.getRelatedProducts([p10._id, p4._id]);
+  expect(result.length).toBe(2);
+
+  result = await service.getRelatedProducts([p10._id, p3._id, p4._id]);
+  expect(result.length).toBe(4);
+
+  result = await service.getRelatedProducts([p10._id, p3._id, p4._id]);
+  expect(result.length).toBe(4);
+
+  result = await service.getRelatedProducts([p10._id, p3._id, p4._id, p1._id]);
+  expect(result.length).toBe(3);
+
+  result = await service.getRelatedProducts([p10._id, p9._id, p3._id, p4._id]);
+  expect(result.length).toBe(6);
+
+  result = await service.getRelatedProducts([p5._id]);
+  expect(result.length).toBe(2);
+
+  result = await service.getRelatedProducts([p6._id, p7._id, p8._id]);
+  expect(result.length).toBe(3);
+
+  result = await service.getRelatedProducts([['ewwefewewde']]);
+  expect(result.length).toBe(0);
+});
+
+afterAll(done => {
   closeConn();
   done();
 });

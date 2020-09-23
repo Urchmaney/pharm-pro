@@ -1,10 +1,14 @@
 /* eslint-disable no-underscore-dangle */
-const retailerController = (retailerService, otpService, authenticator, notifier, uploader) => {
+const retailerController = (
+  retailerService, wholesalerService, otpService, authenticator, notifier, uploader,
+) => {
   const create = {
     roles: [],
     action: async (retailer) => {
       const { status, result } = await retailerService.createRetailer(retailer);
       if (!status) return { statusCode: 400, result };
+
+      await wholesalerService.activateRetailerInWholesalerRetailer(result.phoneNumber);
       const otp = await otpService.createOTP(result.phoneNumber, 2);
       const success = await notifier.sendSMS(`Garhia otp code:    ${otp}`, result.phoneNumber);
       if (success) {
@@ -46,6 +50,9 @@ const retailerController = (retailerService, otpService, authenticator, notifier
   const generateAndSendOTP = {
     role: [],
     action: async (phoneNumber) => {
+      const retailer = await retailerService.getRetailerByPhoneNumber(phoneNumber);
+      if (!retailer) return { statusCode: 400, result: 'Please register.' };
+
       const otp = await otpService.createOTP(phoneNumber, 2);
       const success = await notifier.sendSMS(`Garhia otp code:    ${otp}`, phoneNumber);
       if (!success) return { statusCode: 400, result: 'Issue sending OTP. Check phone number format. +234 format.' };
@@ -55,11 +62,15 @@ const retailerController = (retailerService, otpService, authenticator, notifier
 
   const login = {
     roles: [],
-    action: async (phoneNumber, otp) => {
+    action: async (phoneNumber, otp, token) => {
       const retailer = await retailerService.getRetailerByPhoneNumber(phoneNumber);
       if (!retailer) return { statusCode: 400, result: 'Error Loging in. Check your details.' };
+
       const valid = await otpService.validateOTP(phoneNumber, 2, otp, new Date());
       if (!valid) return { statusCode: 400, result: 'Invalid OTP.' };
+
+      if (token) await retailerService.addRetailerToken(retailer._id, token);
+
       return {
         statusCode: 200,
         result: {
@@ -69,6 +80,7 @@ const retailerController = (retailerService, otpService, authenticator, notifier
               id: retailer._id,
               phoneNumber: retailer.phoneNumber,
               type: 2,
+              deviceToken: token || '',
             },
           ),
         },
@@ -89,6 +101,14 @@ const retailerController = (retailerService, otpService, authenticator, notifier
     },
   };
 
+  const logout = {
+    roles: [],
+    action: async (id, token) => {
+      await retailerService.removeRetailerToken(id, token);
+      return { statusCode: 200, result: 'successfully logged out.' };
+    },
+  };
+
   return {
     create,
     index,
@@ -97,6 +117,7 @@ const retailerController = (retailerService, otpService, authenticator, notifier
     generateAndSendOTP,
     uploadProfileImage,
     login,
+    logout,
   };
 };
 

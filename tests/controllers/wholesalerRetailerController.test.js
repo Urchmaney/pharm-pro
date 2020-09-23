@@ -60,7 +60,7 @@ describe('create action', () => {
     const wholesalerRetailer = {
       wholesalerId: 'deihde382r3fdhe4j',
       fullName: 'Mike Adenuga',
-      phoneNumber: '080675646632',
+      phoneNumber: '+2348067564663',
     };
     const { statusCode, result } = await create.action(wholesalerRetailer);
     expect(statusCode).toBe(201);
