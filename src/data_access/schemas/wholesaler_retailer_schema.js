@@ -31,4 +31,6 @@ const wholesalerRetailerSchema = new Schema({
   location: { type: String, default: '' },
 }, { timestamps: true });
 
+wholesalerRetailerSchema.index({ wholesalerId: 1, phoneNumber: 1 }, { unique: true });
+
 module.exports = model('wholesalerRetailers', wholesalerRetailerSchema);
