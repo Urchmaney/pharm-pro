@@ -1,13 +1,19 @@
+/* eslint-disable no-underscore-dangle */
 const retailerWholesalerController = (retailerService, wholesalerService) => {
   const create = {
     roles: [],
     action: async (retailerWholesaler) => {
       retailerWholesaler = retailerWholesaler || {};
-      retailerWholesaler.active = await wholesalerService.isWholesalerPhoneNumberExist(
+      let wholesaler = await wholesalerService.getWholesalerByPhoneNumber(
         retailerWholesaler.phoneNumber,
       );
+      retailerWholesaler.active = wholesaler !== null;
       const { status, result } = await retailerService.addRetailerWholesaler(retailerWholesaler);
-      if (status) return { statusCode: 201, result };
+      if (status) {
+        wholesaler = wholesaler || {};
+        const image = wholesaler.profileImage || '';
+        return { statusCode: 201, result: { ...result._doc, image } };
+      }
 
       return { statusCode: 400, result };
     },
