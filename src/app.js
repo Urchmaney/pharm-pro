@@ -56,6 +56,7 @@ const startApplication = async () => {
     retailerService,
     invoiceService,
     reportService,
+    helpService,
   } = await mongoDB(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/pharm-pro');
 
   const wholesalerController = wholesalerControllerGen(wholesalerService,
@@ -134,6 +135,11 @@ const startApplication = async () => {
   app.use('/api/lists', listRouter);
 
   app.use('/api/reports', reportRouter);
+
+  app.get('/helps', (req, res) => {
+    const helps = helpService.getHelpContacts();
+    res.status(200).json(helps);
+  });
 
   app.use('/', swaggerUI.serve, swaggerUI.setup(swaggerJsDoc));
 
