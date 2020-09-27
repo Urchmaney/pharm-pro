@@ -37,8 +37,6 @@ const getProducts = async (search = '', page = 1) => {
   }
   return Product.aggregate([
     { $match: option },
-    { $skip: skip },
-    { $limit: limit },
     {
       $addFields: {
         displayName: {
@@ -55,6 +53,8 @@ const getProducts = async (search = '', page = 1) => {
     {
       $sort: { sIndex: 1 },
     },
+    { $skip: skip },
+    { $limit: limit },
   ]);
 };
 
