@@ -15,7 +15,9 @@ const createProduct = async (product) => {
   return { status: true, result: product };
 };
 
-const getProducts = async (search = '') => {
+const getProducts = async (search = '', page = 1) => {
+  const limit = 20;
+  const skip = (page - 1) * limit;
   const option = {};
   if (search) {
     option.$or = [
@@ -35,6 +37,8 @@ const getProducts = async (search = '') => {
   }
   return Product.aggregate([
     { $match: option },
+    { $skip: skip },
+    { $limit: limit },
     {
       $addFields: {
         displayName: {
