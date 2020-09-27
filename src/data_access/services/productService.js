@@ -27,12 +27,12 @@ const getProducts = async (search = '', page = 1) => {
           $options: 'i',
         },
       },
-      {
-        medicalName: {
-          $regex: search,
-          $options: 'i',
-        },
-      },
+      // {
+      //   medicalName: {
+      //     $regex: search,
+      //     $options: 'i',
+      //   },
+      // },
     ];
   }
   return Product.aggregate([
