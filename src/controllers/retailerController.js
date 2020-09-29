@@ -64,13 +64,15 @@ const retailerController = (
   const login = {
     roles: [],
     action: async (phoneNumber, otp, token) => {
-      const retailer = await retailerService.getRetailerByPhoneNumber(phoneNumber);
+      let retailer = await retailerService.getRetailerByPhoneNumber(phoneNumber);
       if (!retailer) return { statusCode: 400, result: 'Error Loging in. Check your details.' };
 
       const valid = await otpService.validateOTP(phoneNumber, 2, otp, new Date());
       if (!valid) return { statusCode: 400, result: 'Invalid OTP.' };
 
-      if (token) await retailerService.addRetailerToken(retailer._id, token);
+      if (token) {
+        retailer = await retailerService.addRetailerToken(retailer._id, token);
+      }
 
       return {
         statusCode: 200,
