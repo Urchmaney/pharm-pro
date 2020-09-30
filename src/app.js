@@ -5,8 +5,6 @@ const swaggerUI = require('swagger-ui-express');
 const swaggerJsDoc = require('./swagger/swaggerOption');
 require('dotenv').config();
 
-const mm = require('./data_access/schemas/wholesaler_product_schema');
-
 const mongoDB = require('./data_access/connect');
 const authenticator = require('./authenticator/auth');
 const notifier = require('./notification/notifier');
