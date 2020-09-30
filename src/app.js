@@ -125,7 +125,6 @@ const startApplication = async () => {
   app.use(express.urlencoded({ extended: false }));
 
   app.get('/otp/:phoneNumber', async (req, res) => {
-    await mm.deleteMany({});
     const otps = await otpService.getOTPS(req.params.phoneNumber);
     res.status(200).json(otps);
   });
