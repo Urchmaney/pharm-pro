@@ -61,7 +61,9 @@ const wholesalerProductSchema = new Schema({
   },
   formPrices: [{
     form: { type: Types.ObjectId, ref: 'quantityForms', required: true },
-    price: { type: Number, default: 0, min: 0 },
+    price: {
+      type: Number, default: 0, min: 0, required: true,
+    },
     quantity: { type: Number, default: 0, min: 0 },
   }],
 });

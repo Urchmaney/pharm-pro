@@ -53,14 +53,27 @@ describe('create wholesaler product', () => {
     expect(result).toBeDefined();
     expect(result.formPrices.find(e => e.form._id.toString() === q1.toString()).price).toBe(4000);
   });
-  it('should return null if product Id is valid', async () => {
-    const wholesalerProduct = {
+  it('should return null if object is invalid', async () => {
+    let wholesalerProduct = {
       wholesaler: testWholesaler._id,
       product: '823823jedee',
     };
-    const { result, status } = await service.createWholesalerProduct(wholesalerProduct);
-    expect(status).toBe(false);
-    expect(Array.isArray(result)).toBe(true);
+    let result = await service.createWholesalerProduct(wholesalerProduct);
+    expect(result.status).toBe(false);
+    expect(Array.isArray(result.result)).toBe(true);
+
+    const testProduct = (await pS.createProduct({ name: 'Hamale', medicalName: 'Amalare' })).result;
+    const q2 = (await fService.createQuantityForm({ name: 'Packet', shortForm: 'Pkt' })).result._id;
+    wholesalerProduct = {
+      wholesaler: testWholesaler._id,
+      product: testProduct._id,
+      formPrices: [
+        { form: q2, price: null, quantity: 6 },
+      ],
+    };
+    result = await service.createWholesalerProduct(wholesalerProduct);
+    expect(result.status).toBe(false);
+    expect(Array.isArray(result.result)).toBe(true);
   });
   it('should return no Id is valid', async () => {
     const wholesalerProduct = {
