@@ -66,6 +66,6 @@ const wholesalerProductSchema = new Schema({
   }],
 });
 
-const wholesalerProduct = model('wholesaleProducts', wholesalerProductSchema);
+const wholesalerProduct = model('wholesalerProducts', wholesalerProductSchema);
 
 module.exports = wholesalerProduct;

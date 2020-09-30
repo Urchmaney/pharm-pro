@@ -10,7 +10,7 @@ const createWholesalerProduct = async (wholesalerProduct) => {
       };
     }
     wholesalerProduct = new WholesalerProduct(wholesalerProduct);
-    const error = await wholesalerProduct.validate();
+    const error = wholesalerProduct.validateSync();
     if (error) {
       return {
         status: false,
@@ -19,11 +19,10 @@ const createWholesalerProduct = async (wholesalerProduct) => {
     }
 
     await wholesalerProduct.save();
-    await WholesalerProduct.populate(wholesalerProduct, { path: 'product' });
-
+    await wholesalerProduct.populate('product').populate('formPrices.form').execPopulate();
     return { status: true, result: wholesalerProduct };
   } catch (err) {
-    return { status: false, result: ['product Id is Invalid.'] };
+    return { status: false, result: [err.message] };
   }
 };
 

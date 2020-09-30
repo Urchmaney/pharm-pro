@@ -5,6 +5,8 @@ const swaggerUI = require('swagger-ui-express');
 const swaggerJsDoc = require('./swagger/swaggerOption');
 require('dotenv').config();
 
+const mm = require('./data_access/schemas/wholesaler_product_schema');
+
 const mongoDB = require('./data_access/connect');
 const authenticator = require('./authenticator/auth');
 const notifier = require('./notification/notifier');
@@ -123,6 +125,7 @@ const startApplication = async () => {
   app.use(express.urlencoded({ extended: false }));
 
   app.get('/otp/:phoneNumber', async (req, res) => {
+    await mm.deleteMany({});
     const otps = await otpService.getOTPS(req.params.phoneNumber);
     res.status(200).json(otps);
   });

@@ -42,7 +42,7 @@ describe('create wholesaler product', () => {
     const q2 = (await fService.createQuantityForm({ name: 'Packet', shortForm: 'Pkt' })).result._id;
     const wholesalerProduct = {
       wholesaler: testWholesaler._id,
-      product: testProduct._id.toString(),
+      product: testProduct._id,
       formPrices: [
         { form: q1, price: 4000, quantity: 2 },
         { form: q2, price: 2500, quantity: 6 },
@@ -51,7 +51,7 @@ describe('create wholesaler product', () => {
     const { status, result } = await service.createWholesalerProduct(wholesalerProduct);
     expect(status).toBe(true);
     expect(result).toBeDefined();
-    expect(result.formPrices.find(e => e.form.toString() === q1.toString()).price).toBe(4000);
+    expect(result.formPrices.find(e => e.form._id.toString() === q1.toString()).price).toBe(4000);
   });
   it('should return null if product Id is valid', async () => {
     const wholesalerProduct = {
