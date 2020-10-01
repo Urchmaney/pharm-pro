@@ -34,17 +34,17 @@ const addInvoiceProductCostPrice = async (invoiceProduct, wholesaler) => {
 const objectToSendRetailerNotification = (invoice) => ({
   listId: invoice.listId,
   invoiceId: invoice._id.toString(),
-  retailerId: invoice.retailer._id.toString(),
-  retailerFullName: invoice.retailer.fullName,
-  retailerProfileImage: invoice.retailer.profileImage,
+  wholesalerId: invoice.wholesaler._id.toString(),
+  wholesalerFullName: invoice.wholesaler.fullName,
+  wholesalerProfileImage: invoice.wholesaler.profileImage || '',
 });
 
 const objectToSendWholesalerNotification = (invoice) => ({
   listId: invoice.listId,
   invoiceId: invoice._id.toString(),
-  wholesalerId: invoice.wholesaler._id.toString(),
-  wholesalerFullName: invoice.wholesaler.fullName,
-  wholesalerProfileImage: invoice.wholesaler.profileImage || '',
+  retailerId: invoice.retailer._id.toString(),
+  retailerFullName: invoice.retailer.fullName,
+  retailerProfileImage: invoice.retailer.profileImage,
 });
 
 const createInvoice = async (invoice) => {
@@ -73,7 +73,10 @@ const createInvoice = async (invoice) => {
     console.log(objectToSendWholesalerNotification(invoice));
     if (invoice.wholesaler) {
       await notifier.sendPushNotification(
-        invoice.wholesaler.tokens, objectToSendWholesalerNotification(invoice),
+        invoice.wholesaler.tokens,
+        objectToSendWholesalerNotification(invoice),
+        'Invoice',
+        `new invoice from ${invoice.retailer.fullName}.`,
       );
     }
     return { status: true, result: invoice };
@@ -83,7 +86,7 @@ const createInvoice = async (invoice) => {
 };
 
 const markInvoiceAsHasSentprice = async (
-  invoiceId) => InvoiceModel.findOneAndUpdate({ _id: invoiceId }, { hasWholesalerAddedPrice: true }, { new: true }).populate('products.product').populate('retailer');
+  invoiceId) => InvoiceModel.findOneAndUpdate({ _id: invoiceId }, { hasWholesalerAddedPrice: true }, { new: true }).populate('wholesaler').populate('retailer');
 
 const updateInvoiceProduct = async (invoiceId, updateObj, wholesalerId) => {
   if (!mongoose.isValidObjectId(invoiceId)) return null;

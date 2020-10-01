@@ -28,9 +28,13 @@ const sendSMS = async (data, phoneNumber) => {
   }
 };
 
-const sendPushNotification = async (userTokens, data) => {
+const sendPushNotification = async (userTokens, data, title, body) => {
   try {
     const message = {
+      notification: {
+        title,
+        body,
+      },
       data,
       tokens: userTokens,
     };
