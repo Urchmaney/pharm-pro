@@ -1,12 +1,33 @@
 const {
   Schema,
   model,
-  isValidObjectId,
+  Types,
 } = require('mongoose');
 
 /**
  * @swagger
  *  definitions:
+ *    UnregisteWholesalerProduct:
+ *      type: object
+ *      require:
+ *        - product
+ *      properties:
+ *        product:
+ *          $ref: '#/definitions/UnregisterProduct'
+ *        formPrices:
+ *          type: array
+ *          items:
+ *            $ref: '#/definitions/FormPrice'
+ *    UnregisterProduct:
+ *      type: object
+ *      require:
+ *        - name
+ *        - medicalName
+ *      properties:
+ *        name:
+ *          type: string
+ *        medicalName:
+ *          type: string
  *    WholesalerProduct:
  *      type: object
  *      required:
@@ -14,35 +35,39 @@ const {
  *      properties:
  *        product:
  *          type: string
- *        pricePerPacket:
- *          type: number
- *        pricePerBox:
- *          type: number
- *        pricePerCarton:
- *          type: number
- *        pricePerSatchet:
- *          type: number
- *        quantity:
- *          type: number
+ *        formPrices:
+ *          type: array
+ *          items:
+ *            $ref: '#/definitions/FormPrice'
+ *    FormPrice:
+ *        type: object
+ *        required:
+ *          - form
+ *          - price
+ *        properties:
+ *          form:
+ *            type: string
+ *          price:
+ *            type: number
+ *          quantity:
+ *            type: number
  */
 const wholesalerProductSchema = new Schema({
   wholesaler: { type: String, required: true, ref: 'wholesalers' },
   product: {
-    type: String,
+    type: Types.ObjectId,
     required: true,
     ref: 'products',
-    validate: {
-      validator: (_id) => isValidObjectId(_id),
-      message: 'Invalid product Id.',
-    },
   },
-  pricePerPacket: { type: Number, default: 0, min: 0 },
-  pricePerBox: { type: Number, default: 0, min: 0 },
-  pricePerCarton: { type: Number, default: 0, min: 0 },
-  pricePerSatchet: { type: Number, default: 0, min: 0 },
-  quantity: { type: Number, default: 0, min: 0 },
+  formPrices: [{
+    form: { type: Types.ObjectId, ref: 'quantityForms', required: true },
+    price: {
+      type: Number, default: 0, min: 0, required: true,
+    },
+    quantity: { type: Number, default: 0, min: 0 },
+  }],
 });
 
-const wholesalerProduct = model('wholesaleProducts', wholesalerProductSchema);
+const wholesalerProduct = model('wholesalerProducts', wholesalerProductSchema);
 
 module.exports = wholesalerProduct;

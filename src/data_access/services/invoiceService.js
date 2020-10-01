@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const mongoose = require('mongoose');
 const InvoiceModel = require('../schemas/invoice_schema');
 const {
@@ -25,10 +26,26 @@ const getWholesalerInvoices = (wholesalerId, status) => {
 
 const addInvoiceProductCostPrice = async (invoiceProduct, wholesaler) => {
   const costPrice = await getWholesalerProductCostPrice(
-    wholesaler, invoiceProduct.product, invoiceProduct.quantityType,
+    wholesaler, invoiceProduct.product, invoiceProduct.quantityForm,
   );
   invoiceProduct.costPrice = costPrice;
 };
+
+const objectToSendRetailerNotification = (invoice) => ({
+  listId: invoice.listId,
+  invoiceId: invoice._id,
+  retailerId: invoice.retailer._id,
+  retailerFullName: invoice.retailer.fullName,
+  retailerProfileImage: invoice.retailer.profileImage,
+});
+
+const objectToSendWholesalerNotification = (invoice) => ({
+  listId: invoice.listId,
+  invoiceId: invoice._id,
+  wholesalerId: invoice.wholesaler._id,
+  wholesalerFullName: invoice.wholesaler.fullName,
+  wholesalerProfileImage: invoice.wholesaler.profileImage,
+});
 
 const createInvoice = async (invoice) => {
   try {
@@ -52,8 +69,12 @@ const createInvoice = async (invoice) => {
     });
     await Promise.all(costProducts);
     await invoice.save();
-    await invoice.populate('products.product').populate('retailer').populate('wholesaler').execPopulate();
-    if (invoice.wholesaler) await notifier.sendPushNotification(invoice.wholesaler.tokens, invoice);
+    await invoice.populate('retailer').populate('wholesaler').execPopulate();
+    if (invoice.wholesaler) {
+      await notifier.sendPushNotification(
+        invoice.wholesaler.tokens, objectToSendWholesalerNotification(invoice),
+      );
+    }
     return { status: true, result: invoice };
   } catch (e) {
     return { status: false, result: e.message };
@@ -67,7 +88,7 @@ const updateInvoiceProduct = async (invoiceId, updateObj, wholesalerId) => {
   if (!mongoose.isValidObjectId(invoiceId)) return null;
 
   await updateWholesalerProductQuantityTypePrice(
-    wholesalerId, updateObj.product, updateObj.quantityType, updateObj.costPrice,
+    wholesalerId, updateObj.product, updateObj.quantityForm, updateObj.costPrice,
   );
 
   return InvoiceModel.findOneAndUpdate(
@@ -119,7 +140,7 @@ const getListProductPrices = async (listId, productId) => InvoiceModel.aggregate
       wholesaler: { $toObjectId: '$wholesaler' },
       listId: '$listId',
       pId: { $toObjectId: '$products.product' },
-      quantityType: '$products.quantityType',
+      quantityForm: '$products.quantityForm',
       costPrice: '$products.costPrice',
       quantity: '$products.quantity',
     },
@@ -145,7 +166,7 @@ const getListProductPrices = async (listId, productId) => InvoiceModel.aggregate
       productId: '$pId',
       wholesaler: { $arrayElemAt: ['$wholesalers.fullName', 0] },
       listId: '$listId',
-      quantityType: '$quantityType',
+      quantityForm: '$quantityForm',
       costPrice: '$costPrice',
       quantity: '$quantity',
       productName: { $arrayElemAt: ['$product.name', 0] },
@@ -161,7 +182,7 @@ const getListProductsPrices = async (listId) => InvoiceModel.aggregate([
       wholesaler: { $toObjectId: '$wholesaler' },
       listId: '$listId',
       pId: { $toObjectId: '$products.product' },
-      quantityType: '$products.quantityType',
+      quantityForm: '$products.quantityForm',
       costPrice: '$products.costPrice',
       quantity: '$products.quantity',
     },
@@ -187,7 +208,7 @@ const getListProductsPrices = async (listId) => InvoiceModel.aggregate([
       productId: '$pId',
       wholesaler: { $arrayElemAt: ['$wholesalers.fullName', 0] },
       listId: '$listId',
-      quantityType: '$quantityType',
+      quantityForm: '$quantityForm',
       costPrice: '$costPrice',
       quantity: '$quantity',
       productName: { $arrayElemAt: ['$product.name', 0] },
@@ -212,4 +233,5 @@ module.exports = {
   getListProductPrices,
   getListProductsPrices,
   closeList,
+  objectToSendRetailerNotification,
 };
