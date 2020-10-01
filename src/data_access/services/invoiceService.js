@@ -49,6 +49,7 @@ const objectToSendWholesalerNotification = (invoice) => ({
 
 const createInvoice = async (invoice) => {
   try {
+    console.log(invoice);
     if (typeof invoice !== 'object') {
       return {
         status: false,
@@ -119,7 +120,7 @@ const updateManyInvoiceProducts = async (invoiceId, invoiceProducts, wholesalerI
 };
 
 const getLists = async (retailerId, status) => {
-  const option = { retailer: retailerId };
+  const option = { retailer: mongoose.Types.ObjectId(retailerId) };
   if (status !== undefined) option.isActive = (status.toLowerCase() === 'true');
 
   return InvoiceModel.aggregate([
@@ -129,10 +130,16 @@ const getLists = async (retailerId, status) => {
 };
 
 const getList = async (retailerId, listId) => {
-  const invoice = await InvoiceModel.findOne({ listId, retailer: retailerId }).lean();
-  if (!invoice) return null;
+  try {
+    const invoice = await InvoiceModel.findOne(
+      { listId, retailer: mongoose.Types.ObjectId(retailerId) },
+    ).lean();
+    if (!invoice) return null;
 
-  return invoice.products;
+    return invoice.products;
+  } catch (e) {
+    return null;
+  }
 };
 
 const getListProductPrices = async (listId, productId) => InvoiceModel.aggregate([
@@ -141,7 +148,7 @@ const getListProductPrices = async (listId, productId) => InvoiceModel.aggregate
   { $match: { 'products.product': mongoose.Types.ObjectId(productId) } },
   {
     $project: {
-      wholesaler: { $toObjectId: '$wholesaler' },
+      wholesaler: '$wholesaler',
       listId: '$listId',
       pId: { $toObjectId: '$products.product' },
       quantityForm: '$products.quantityForm',
