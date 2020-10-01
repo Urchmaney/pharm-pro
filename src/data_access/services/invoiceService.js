@@ -82,7 +82,7 @@ const createInvoice = async (invoice) => {
 };
 
 const markInvoiceAsHasSentprice = async (
-  invoiceId) => InvoiceModel.findOneAndUpdate({ _id: invoiceId }, { hasWholesalerAddedPrice: true }, { new: true }).populate('products.product');
+  invoiceId) => InvoiceModel.findOneAndUpdate({ _id: invoiceId }, { hasWholesalerAddedPrice: true }, { new: true }).populate('products.product').populate('retailer');
 
 const updateInvoiceProduct = async (invoiceId, updateObj, wholesalerId) => {
   if (!mongoose.isValidObjectId(invoiceId)) return null;

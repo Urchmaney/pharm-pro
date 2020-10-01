@@ -32,7 +32,7 @@ const sendPushNotification = async (userTokens, data) => {
   try {
     const message = {
       data,
-      token: userTokens,
+      tokens: userTokens,
     };
     await firebaseAdmin.messaging().sendMulticast(message);
     return true;

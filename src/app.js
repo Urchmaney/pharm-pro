@@ -146,6 +146,7 @@ const startApplication = async () => {
   app.use('/api/reports', reportRouter);
 
   app.use('/api/quantity_forms', quantityFormRouter);
+
   app.get('/helps', (req, res) => {
     const helps = helpService.getHelpContacts();
     res.status(200).json(helps);

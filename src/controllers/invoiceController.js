@@ -70,7 +70,9 @@ const invoiceController = (invoiceService, retailerService, productService, noti
       );
       if (upateInvoice) {
         const retailerTokens = (await retailerService.getRetailer(upateInvoice.retailer)).tokens;
-        await notifier.sendPushNotification(retailerTokens, upateInvoice);
+        await notifier.sendPushNotification(
+          retailerTokens, invoiceService.objectToSendRetailerNotification(upateInvoice),
+        );
         return { statusCode: 200, result: upateInvoice };
       }
 
