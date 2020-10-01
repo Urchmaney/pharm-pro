@@ -34,9 +34,11 @@ const sendPushNotification = async (userTokens, data) => {
       data,
       tokens: userTokens,
     };
-    await firebaseAdmin.messaging().sendMulticast(message);
+    const result = await firebaseAdmin.messaging().sendMulticast(message);
+    console.log(result);
     return true;
   } catch (e) {
+    console.log(e);
     return false;
   }
 };
