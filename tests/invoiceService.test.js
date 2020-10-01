@@ -129,7 +129,7 @@ describe('Update invoice product', () => {
       quantityForm: q1,
     };
     let result = await service.updateInvoiceProduct(invoiceId, updateProduct, whId);
-    const updatedProduct = result.products.find(e => e.product === pId.toString());
+    const updatedProduct = result.products.find(e => e.product.toString() === pId.toString());
     expect(updatedProduct.costPrice).toBe(200);
     expect(updatedProduct.quantity).toBe(4);
 
@@ -292,7 +292,6 @@ describe('get list product prices', () => {
         quantityForm: q2,
       }],
     });
-
     await service.createInvoice({
       retailer: '2f40d73c11efef02008298f2',
       wholesaler: '0f40d73c11efef02118000f2',

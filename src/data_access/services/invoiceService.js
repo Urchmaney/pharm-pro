@@ -34,17 +34,17 @@ const addInvoiceProductCostPrice = async (invoiceProduct, wholesaler) => {
 const objectToSendRetailerNotification = (invoice) => ({
   listId: invoice.listId,
   invoiceId: invoice._id.toString(),
-  wholesalerId: invoice.wholesaler._id.toString(),
-  wholesalerFullName: invoice.wholesaler.fullName,
-  wholesalerProfileImage: invoice.wholesaler.profileImage || '',
+  wholesalerId: invoice.wholesaler ? invoice.wholesaler._id.toString() : '',
+  wholesalerFullName: invoice.wholesaler ? invoice.wholesaler.fullName : '',
+  wholesalerProfileImage: invoice.wholesaler ? invoice.wholesaler.profileImage : '',
 });
 
 const objectToSendWholesalerNotification = (invoice) => ({
   listId: invoice.listId,
   invoiceId: invoice._id.toString(),
-  retailerId: invoice.retailer._id.toString(),
-  retailerFullName: invoice.retailer.fullName,
-  retailerProfileImage: invoice.retailer.profileImage,
+  retailerId: invoice.retailer ? invoice.retailer._id.toString() : '',
+  retailerFullName: invoice.retailer ? invoice.retailer.fullName : '',
+  retailerProfileImage: invoice.retailer ? invoice.retailer.profileImage : '',
 });
 
 const createInvoice = async (invoice) => {
@@ -70,18 +70,17 @@ const createInvoice = async (invoice) => {
     await Promise.all(costProducts);
     await invoice.save();
     await invoice.populate('retailer').populate('wholesaler').execPopulate();
-    console.log(objectToSendWholesalerNotification(invoice));
     if (invoice.wholesaler) {
       await notifier.sendPushNotification(
         invoice.wholesaler.tokens,
         objectToSendWholesalerNotification(invoice),
         'Invoice',
-        `new invoice from ${invoice.retailer.fullName}.`,
+        `new invoice from ${invoice.retailer ? invoice.retailer.fullName : ''}.`,
       );
     }
     return { status: true, result: invoice };
   } catch (e) {
-    return { status: false, result: e.message };
+    return { status: false, result: [e.message] };
   }
 };
 
@@ -89,7 +88,8 @@ const markInvoiceAsHasSentprice = async (
   invoiceId) => InvoiceModel.findOneAndUpdate({ _id: invoiceId }, { hasWholesalerAddedPrice: true }, { new: true }).populate('wholesaler').populate('retailer');
 
 const updateInvoiceProduct = async (invoiceId, updateObj, wholesalerId) => {
-  if (!mongoose.isValidObjectId(invoiceId)) return null;
+  if (!mongoose.isValidObjectId(invoiceId)
+  || !mongoose.isValidObjectId(updateObj.product)) return null;
 
   await updateWholesalerProductQuantityTypePrice(
     wholesalerId, updateObj.product, updateObj.quantityForm, updateObj.costPrice,
@@ -138,7 +138,7 @@ const getList = async (retailerId, listId) => {
 const getListProductPrices = async (listId, productId) => InvoiceModel.aggregate([
   { $match: { listId } },
   { $unwind: '$products' },
-  { $match: { 'products.product': productId.toString() } },
+  { $match: { 'products.product': mongoose.Types.ObjectId(productId) } },
   {
     $project: {
       wholesaler: { $toObjectId: '$wholesaler' },

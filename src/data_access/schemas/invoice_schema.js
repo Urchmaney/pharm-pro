@@ -58,15 +58,11 @@ const invoiceSchema = new Schema({
   },
   products: [{
     quantity: { type: Number, required: true, min: 0.5 },
-    quantityForm: { type: Types.ObjectId, required: true },
+    quantityForm: { type: Types.ObjectId, ref: 'quantityForms', required: true },
     product: {
-      type: String,
+      type: Types.ObjectId,
       required: true,
       ref: 'products',
-      validate: {
-        validator: (_id) => isValidObjectId(_id),
-        message: 'Invalid product Id.',
-      },
     },
     costPrice: { type: Number },
     accepted: { type: Boolean, default: false },
