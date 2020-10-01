@@ -47,9 +47,26 @@ const objectToSendWholesalerNotification = (invoice) => ({
   retailerProfileImage: invoice.retailer ? invoice.retailer.profileImage : '',
 });
 
+const validateInvoice = (invoice) => {
+  if (typeof invoice !== 'object') {
+    return {
+      status: false,
+      result: ['Invalid invoice instance.'],
+    };
+  }
+  invoice = new InvoiceModel(invoice);
+  const error = invoice.validateSync();
+  if (error) {
+    return {
+      status: false,
+      result: Object.keys(error.errors).map(ele => error.errors[ele].message),
+    };
+  }
+  return { status: true, result: invoice };
+};
+
 const createInvoice = async (invoice) => {
   try {
-    console.log(invoice);
     if (typeof invoice !== 'object') {
       return {
         status: false,
@@ -233,6 +250,7 @@ const closeList = async (listId, retailerId) => InvoiceModel.updateMany(
 );
 
 module.exports = {
+  validateInvoice,
   getInvoiceById,
   getRetailerInvoices,
   getWholesalerInvoices,

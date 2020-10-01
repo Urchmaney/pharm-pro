@@ -1,5 +1,5 @@
 const {
-  Schema, model, isValidObjectId, Types,
+  Schema, model, Types,
 } = require('mongoose');
 
 /**
