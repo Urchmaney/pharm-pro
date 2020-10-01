@@ -33,18 +33,18 @@ const addInvoiceProductCostPrice = async (invoiceProduct, wholesaler) => {
 
 const objectToSendRetailerNotification = (invoice) => ({
   listId: invoice.listId,
-  invoiceId: invoice._id,
-  retailerId: invoice.retailer._id,
+  invoiceId: invoice._id.toString(),
+  retailerId: invoice.retailer._id.toString(),
   retailerFullName: invoice.retailer.fullName,
   retailerProfileImage: invoice.retailer.profileImage,
 });
 
 const objectToSendWholesalerNotification = (invoice) => ({
   listId: invoice.listId,
-  invoiceId: invoice._id,
-  wholesalerId: invoice.wholesaler._id,
+  invoiceId: invoice._id.toString(),
+  wholesalerId: invoice.wholesaler._id.toString(),
   wholesalerFullName: invoice.wholesaler.fullName,
-  wholesalerProfileImage: invoice.wholesaler.profileImage,
+  wholesalerProfileImage: invoice.wholesaler.profileImage || '',
 });
 
 const createInvoice = async (invoice) => {
