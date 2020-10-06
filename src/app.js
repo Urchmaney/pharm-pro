@@ -129,8 +129,11 @@ const startApplication = async () => {
 
   app.post('/hook', async (req, res) => {
     console.log(`body:  ${req.body}`);
+    console.log(req.body);
     console.log(`params: ${req.params}`);
+    console.log(req.params);
     console.log(`query: ${req.query}`);
+    console.log(req.query);
     res.status(200).json('Hooked');
   });
 
