@@ -203,6 +203,7 @@ describe('Add retailer wholesaler', () => {
     const retailerWholesaler = {
       retailerId: '6776765676',
       phoneNumber: '+2348164292882',
+      wholesalerId: null,
       active: true,
       fullName: 'Abdul Musa',
     };

@@ -8,6 +8,7 @@ const retailerWholesalerController = (retailerService, wholesalerService) => {
         retailerWholesaler.phoneNumber,
       );
       retailerWholesaler.active = wholesaler !== null;
+      retailerWholesaler.wholesalerId = wholesaler ? wholesaler._id : null;
       const { status, result } = await retailerService.addRetailerWholesaler(retailerWholesaler);
       if (status) {
         wholesaler = wholesaler || {};

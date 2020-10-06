@@ -1,4 +1,4 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model, Types } = require('mongoose');
 
 /**
  * @swagger
@@ -18,6 +18,7 @@ const { Schema, model } = require('mongoose');
  */
 const retailerWholesalerSchema = new Schema({
   retailerId: { type: String, required: true },
+  wholesalerId: { type: Types.ObjectId, ref: 'wholesalers' },
   fullName: { type: String, required: true },
   active: { type: Boolean, required: true },
   phoneNumber: {
