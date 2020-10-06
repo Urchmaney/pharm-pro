@@ -127,6 +127,13 @@ const startApplication = async () => {
     res.status(200).json(otps);
   });
 
+  app.post('/hook', async (req, res) => {
+    console.log(`body:  ${req.body}`);
+    console.log(`params: ${req.params}`);
+    console.log(`query: ${req.query}`);
+    res.status(200).json('Hooked');
+  });
+
   app.use('/api/wholesalers/products', wholesalerProductRouter);
 
   app.use('/api/wholesalers/retailers', wholesalerRetailerRouter);
