@@ -73,6 +73,7 @@ const createInvoice = async (invoice) => {
         result: ['Invalid invoice instance.'],
       };
     }
+    console.log(invoice);
     invoice = new InvoiceModel(invoice);
     const error = invoice.validateSync();
     if (error) {
