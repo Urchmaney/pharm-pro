@@ -34,6 +34,7 @@ const sendPushNotification = async (userTokens, data, title, body) => {
       notification: {
         title,
         body,
+        click_action: 'FLUTTER_NOTIFICATION_CLICK',
       },
       data,
       tokens: userTokens,
