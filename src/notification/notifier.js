@@ -30,13 +30,11 @@ const sendSMS = async (data, phoneNumber) => {
 
 const sendPushNotification = async (userTokens, data, title, body) => {
   try {
+    Object.assign(data, { click_action: 'FLUTTER_NOTIFICATION_CLICK' });
     const message = {
       notification: {
         title,
         body,
-      },
-      android: {
-        click_action: 'FLUTTER_NOTIFICATION_CLICK',
       },
       data,
       tokens: userTokens,
