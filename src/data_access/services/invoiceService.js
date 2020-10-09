@@ -33,19 +33,37 @@ const addInvoiceProductCostPrice = async (invoiceProduct, wholesaler) => {
 
 const objectToSendRetailerNotification = (invoice) => ({
   listId: invoice.listId,
-  invoiceId: invoice._id,
-  retailerId: invoice.retailer._id,
-  retailerFullName: invoice.retailer.fullName,
-  retailerProfileImage: invoice.retailer.profileImage,
+  invoiceId: invoice._id.toString(),
+  wholesalerId: invoice.wholesaler ? invoice.wholesaler._id.toString() : '',
+  wholesalerFullName: invoice.wholesaler ? invoice.wholesaler.fullName : '',
+  wholesalerProfileImage: invoice.wholesaler ? invoice.wholesaler.profileImage : '',
 });
 
 const objectToSendWholesalerNotification = (invoice) => ({
   listId: invoice.listId,
-  invoiceId: invoice._id,
-  wholesalerId: invoice.wholesaler._id,
-  wholesalerFullName: invoice.wholesaler.fullName,
-  wholesalerProfileImage: invoice.wholesaler.profileImage,
+  invoiceId: invoice._id.toString(),
+  retailerId: invoice.retailer ? invoice.retailer._id.toString() : '',
+  retailerFullName: invoice.retailer ? invoice.retailer.fullName : '',
+  retailerProfileImage: invoice.retailer ? invoice.retailer.profileImage : '',
 });
+
+const validateInvoice = (invoice) => {
+  if (typeof invoice !== 'object') {
+    return {
+      status: false,
+      result: ['Invalid invoice instance.'],
+    };
+  }
+  invoice = new InvoiceModel(invoice);
+  const error = invoice.validateSync();
+  if (error) {
+    return {
+      status: false,
+      result: Object.keys(error.errors).map(ele => error.errors[ele].message),
+    };
+  }
+  return { status: true, result: invoice };
+};
 
 const createInvoice = async (invoice) => {
   try {
@@ -55,6 +73,7 @@ const createInvoice = async (invoice) => {
         result: ['Invalid invoice instance.'],
       };
     }
+    console.log(invoice);
     invoice = new InvoiceModel(invoice);
     const error = invoice.validateSync();
     if (error) {
@@ -72,20 +91,24 @@ const createInvoice = async (invoice) => {
     await invoice.populate('retailer').populate('wholesaler').execPopulate();
     if (invoice.wholesaler) {
       await notifier.sendPushNotification(
-        invoice.wholesaler.tokens, objectToSendWholesalerNotification(invoice),
+        invoice.wholesaler.tokens,
+        objectToSendWholesalerNotification(invoice),
+        'Invoice',
+        `new invoice from ${invoice.retailer ? invoice.retailer.fullName : ''}.`,
       );
     }
     return { status: true, result: invoice };
   } catch (e) {
-    return { status: false, result: e.message };
+    return { status: false, result: [e.message] };
   }
 };
 
 const markInvoiceAsHasSentprice = async (
-  invoiceId) => InvoiceModel.findOneAndUpdate({ _id: invoiceId }, { hasWholesalerAddedPrice: true }, { new: true }).populate('products.product');
+  invoiceId) => InvoiceModel.findOneAndUpdate({ _id: invoiceId }, { hasWholesalerAddedPrice: true }, { new: true }).populate('wholesaler').populate('retailer');
 
 const updateInvoiceProduct = async (invoiceId, updateObj, wholesalerId) => {
-  if (!mongoose.isValidObjectId(invoiceId)) return null;
+  if (!mongoose.isValidObjectId(invoiceId)
+  || !mongoose.isValidObjectId(updateObj.product)) return null;
 
   await updateWholesalerProductQuantityTypePrice(
     wholesalerId, updateObj.product, updateObj.quantityForm, updateObj.costPrice,
@@ -115,7 +138,7 @@ const updateManyInvoiceProducts = async (invoiceId, invoiceProducts, wholesalerI
 };
 
 const getLists = async (retailerId, status) => {
-  const option = { retailer: retailerId };
+  const option = { retailer: mongoose.Types.ObjectId(retailerId) };
   if (status !== undefined) option.isActive = (status.toLowerCase() === 'true');
 
   return InvoiceModel.aggregate([
@@ -125,19 +148,25 @@ const getLists = async (retailerId, status) => {
 };
 
 const getList = async (retailerId, listId) => {
-  const invoice = await InvoiceModel.findOne({ listId, retailer: retailerId }).lean();
-  if (!invoice) return null;
+  try {
+    const invoice = await InvoiceModel.findOne(
+      { listId, retailer: mongoose.Types.ObjectId(retailerId) },
+    ).lean();
+    if (!invoice) return null;
 
-  return invoice.products;
+    return invoice.products;
+  } catch (e) {
+    return null;
+  }
 };
 
 const getListProductPrices = async (listId, productId) => InvoiceModel.aggregate([
   { $match: { listId } },
   { $unwind: '$products' },
-  { $match: { 'products.product': productId.toString() } },
+  { $match: { 'products.product': mongoose.Types.ObjectId(productId) } },
   {
     $project: {
-      wholesaler: { $toObjectId: '$wholesaler' },
+      wholesaler: '$wholesaler',
       listId: '$listId',
       pId: { $toObjectId: '$products.product' },
       quantityForm: '$products.quantityForm',
@@ -222,6 +251,7 @@ const closeList = async (listId, retailerId) => InvoiceModel.updateMany(
 );
 
 module.exports = {
+  validateInvoice,
   getInvoiceById,
   getRetailerInvoices,
   getWholesalerInvoices,

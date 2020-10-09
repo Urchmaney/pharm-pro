@@ -127,6 +127,16 @@ const startApplication = async () => {
     res.status(200).json(otps);
   });
 
+  app.post('/hook', async (req, res) => {
+    console.log(`body:  ${req.body}`);
+    console.log(req.body);
+    console.log(`params: ${req.params}`);
+    console.log(req.params);
+    console.log(`query: ${req.query}`);
+    console.log(req.query);
+    res.status(200).json('Hooked');
+  });
+
   app.use('/api/wholesalers/products', wholesalerProductRouter);
 
   app.use('/api/wholesalers/retailers', wholesalerRetailerRouter);
@@ -146,6 +156,7 @@ const startApplication = async () => {
   app.use('/api/reports', reportRouter);
 
   app.use('/api/quantity_forms', quantityFormRouter);
+
   app.get('/helps', (req, res) => {
     const helps = helpService.getHelpContacts();
     res.status(200).json(helps);

@@ -1,5 +1,5 @@
 const {
-  Schema, model, isValidObjectId, Types,
+  Schema, model, Types,
 } = require('mongoose');
 
 /**
@@ -36,37 +36,25 @@ const {
  */
 const invoiceSchema = new Schema({
   retailer: {
-    type: String,
+    type: Types.ObjectId,
     required: true,
     ref: 'retailers',
-    validate: {
-      validator: (_id) => isValidObjectId(_id),
-      message: 'Invalid retailer Id.',
-    },
   },
   isActive: { type: Boolean, default: true },
   hasWholesalerAddedPrice: { type: Boolean, default: false },
   listId: { type: String, required: true },
   wholesaler: {
-    type: String,
+    type: Types.ObjectId,
     required: true,
     ref: 'wholesalers',
-    validate: {
-      validator: (_id) => isValidObjectId(_id),
-      message: 'Invalid wholesaler Id.',
-    },
   },
   products: [{
     quantity: { type: Number, required: true, min: 0.5 },
-    quantityForm: { type: Types.ObjectId, required: true },
+    quantityForm: { type: Types.ObjectId, ref: 'quantityForms', required: true },
     product: {
-      type: String,
+      type: Types.ObjectId,
       required: true,
       ref: 'products',
-      validate: {
-        validator: (_id) => isValidObjectId(_id),
-        message: 'Invalid product Id.',
-      },
     },
     costPrice: { type: Number },
     accepted: { type: Boolean, default: false },

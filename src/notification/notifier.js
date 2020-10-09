@@ -28,15 +28,22 @@ const sendSMS = async (data, phoneNumber) => {
   }
 };
 
-const sendPushNotification = async (userTokens, data) => {
+const sendPushNotification = async (userTokens, data, title, body) => {
   try {
     const message = {
+      notification: {
+        title,
+        body,
+        click_action: 'FLUTTER_NOTIFICATION_CLICK',
+      },
       data,
-      token: userTokens,
+      tokens: userTokens,
     };
-    await firebaseAdmin.messaging().sendMulticast(message);
+    const result = await firebaseAdmin.messaging().sendMulticast(message);
+    console.log(result);
     return true;
   } catch (e) {
+    console.log(e);
     return false;
   }
 };

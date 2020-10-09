@@ -129,7 +129,7 @@ describe('Update invoice product', () => {
       quantityForm: q1,
     };
     let result = await service.updateInvoiceProduct(invoiceId, updateProduct, whId);
-    const updatedProduct = result.products.find(e => e.product === pId.toString());
+    const updatedProduct = result.products.find(e => e.product.toString() === pId.toString());
     expect(updatedProduct.costPrice).toBe(200);
     expect(updatedProduct.quantity).toBe(4);
 
@@ -245,6 +245,7 @@ test('Get invoice by Id', async () => {
 
 test('get retailers lists', async () => {
   const lists = await service.getLists('0f09d33c43efef00028298f1');
+  console.log(lists);
   expect(lists.length).toBe(1);
   expect(lists[0].products.length).toBe(2);
 });
@@ -292,7 +293,6 @@ describe('get list product prices', () => {
         quantityForm: q2,
       }],
     });
-
     await service.createInvoice({
       retailer: '2f40d73c11efef02008298f2',
       wholesaler: '0f40d73c11efef02118000f2',
@@ -419,10 +419,10 @@ describe('get list', () => {
     ])).result;
 
     const listId = v4();
-    const retailerId = 'zf21t22c00ezz032476743r2';
+    const retailerId = '5d6ede6a0ba62570afcedd3a';
     await service.createInvoice({
       retailer: retailerId,
-      wholesaler: 'zf21t22c00efef02118000f2',
+      wholesaler: '5d6ede6a0ba62570afcedd3b',
       listId,
       products: [{
         product: products[0]._id,

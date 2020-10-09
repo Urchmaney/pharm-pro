@@ -26,15 +26,18 @@ const invoiceController = (invoiceService, retailerService, productService, noti
       invoice.products = await Promise.all(iProducts);
       const listId = v4();
       const invoices = [];
-      invoice.wholesalers.forEach(ele => {
+      for (let i = 0; i < invoice.wholesalers.length; i += 1) {
         const cInvoice = {
-          wholesaler: ele,
+          wholesaler: invoice.wholesalers[i],
           retailer: retailerId,
           listId,
           products: invoice.products,
         };
+        const { status, result } = invoiceService.validateInvoice(cInvoice);
+        if (!status) return { statusCode: 400, result };
+
         invoices.push(invoiceService.createInvoice(cInvoice));
-      });
+      }
       return { statusCode: 201, result: await Promise.all(invoices) };
     },
   };
@@ -70,7 +73,12 @@ const invoiceController = (invoiceService, retailerService, productService, noti
       );
       if (upateInvoice) {
         const retailerTokens = (await retailerService.getRetailer(upateInvoice.retailer)).tokens;
-        await notifier.sendPushNotification(retailerTokens, upateInvoice);
+        await notifier.sendPushNotification(
+          retailerTokens,
+          invoiceService.objectToSendRetailerNotification(upateInvoice),
+          'Invoice',
+          `update from ${upateInvoice.wholesaler.fullName}.`,
+        );
         return { statusCode: 200, result: upateInvoice };
       }
 
