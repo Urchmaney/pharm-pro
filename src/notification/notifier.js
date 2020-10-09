@@ -34,6 +34,8 @@ const sendPushNotification = async (userTokens, data, title, body) => {
       notification: {
         title,
         body,
+      },
+      android: {
         click_action: 'FLUTTER_NOTIFICATION_CLICK',
       },
       data,
@@ -41,6 +43,7 @@ const sendPushNotification = async (userTokens, data, title, body) => {
     };
     const result = await firebaseAdmin.messaging().sendMulticast(message);
     console.log(result);
+    console.log(result.responses[0].error);
     return true;
   } catch (e) {
     console.log(e);
