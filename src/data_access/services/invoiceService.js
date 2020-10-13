@@ -9,7 +9,7 @@ const notifier = require('../../notification/notifier');
 
 const getInvoiceById = (_id) => {
   if (!mongoose.isValidObjectId(_id)) return null;
-  return InvoiceModel.findOne({ _id }).lean();
+  return InvoiceModel.findOne({ _id }).populate('products.product').populate('products.quantityForm').lean();
 };
 
 const getRetailerInvoices = (retailerId, status) => {
