@@ -40,6 +40,7 @@ const sendPushNotification = async (userTokens, data, title, body) => {
       //   title,
       //   body,
       // },
+      priority: 'high',
       data,
       tokens: userTokens,
     };
