@@ -44,11 +44,14 @@ const invoiceController = (invoiceService, retailerService, productService, noti
 
   const index = {
     roles: [],
-    action: async (userId, userType, status) => {
+    action: async (userId, userType, status, priceAdded) => {
       let invoices = [];
-      if (userType === 1) invoices = await invoiceService.getWholesalerInvoices(userId, status);
-      if (userType === 2) invoices = await invoiceService.getRetailerInvoices(userId, status);
-
+      if (userType === 1) {
+        invoices = await invoiceService.getWholesalerInvoices(userId, status, priceAdded);
+      }
+      if (userType === 2) {
+        invoices = await invoiceService.getRetailerInvoices(userId, status, priceAdded);
+      }
       return { statusCode: 200, result: invoices };
     },
   };

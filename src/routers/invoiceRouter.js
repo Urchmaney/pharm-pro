@@ -42,13 +42,16 @@ const invoiceRouter = (
    *      - in : query
    *        name: active
    *        type: booleans
+   *      - in : query
+   *        name: priceAdded
+   *        type: booleans
    *    responses:
    *      '200':
    *        description: Successfully fetched.
    */
   router.get('/', combineAuthMiddleware, async (req, res) => {
     const { statusCode, result } = await controller.index.action(
-      req.user.id, req.user.type, req.query.active,
+      req.user.id, req.user.type, req.query.active, req.query.priceAdded,
     );
     res.status(statusCode).json(result);
   });
