@@ -139,6 +139,19 @@ const updateManyInvoiceProducts = async (invoiceId, invoiceProducts, wholesalerI
   return markInvoiceAsHasSentprice(invoiceId);
 };
 
+const acceptInvoiceProduct = async (retailerId, invoiceId, productId) => {
+  if (!mongoose.isValidObjectId(retailerId) || !mongoose.isValidObjectId(invoiceId)
+  || !mongoose.isValidObjectId(productId)) return null;
+
+  return InvoiceModel.findOneAndUpdate(
+    { _id: invoiceId, retailer: retailerId, 'products.product': productId },
+    {
+      $set: { 'products.$.accepted': true },
+    },
+    { new: true },
+  );
+};
+
 const getLists = async (retailerId, status) => {
   const option = { retailer: mongoose.Types.ObjectId(retailerId) };
   if (status !== undefined) option.isActive = (status.toLowerCase() === 'true');
@@ -193,11 +206,19 @@ const getListProductPrices = async (listId, productId) => InvoiceModel.aggregate
     },
   },
   {
+    $lookup: {
+      from: 'quantityforms',
+      localField: 'quantityForm',
+      foreignField: '_id',
+      as: 'quantityForms',
+    },
+  },
+  {
     $project: {
       productId: '$pId',
       wholesaler: { $arrayElemAt: ['$wholesalers.fullName', 0] },
       listId: '$listId',
-      quantityForm: '$quantityForm',
+      quantityForm: { $arrayElemAt: ['$quantityForms', 0] },
       costPrice: '$costPrice',
       quantity: '$quantity',
       productName: { $arrayElemAt: ['$product.name', 0] },
@@ -260,6 +281,7 @@ module.exports = {
   createInvoice,
   updateInvoiceProduct,
   updateManyInvoiceProducts,
+  acceptInvoiceProduct,
   getLists,
   getList,
   getListProductPrices,

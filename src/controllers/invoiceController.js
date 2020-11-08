@@ -99,12 +99,29 @@ const invoiceController = (invoiceService, retailerService, productService, noti
     },
   };
 
+  const acceptProducts = {
+    roles: [],
+    action: async (retailerId, invoiceProducts) => {
+      if (!Array.isArray(invoiceProducts)) return { statusCode: 400, result: 'Body should be an array.' };
+
+      const arr = [];
+      invoiceProducts.forEach(invoiceProduct => {
+        arr.push(invoiceService.acceptInvoiceProduct(
+          retailerId, invoiceProduct.invoiceId, invoiceProduct.productId,
+        ));
+      });
+      await Promise.all(arr);
+      return { statusCode: 200, result: 'invoice products has been accepted' };
+    },
+  };
+
   return {
     create,
     index,
     update,
     updateMany,
     show,
+    acceptProducts,
   };
 };
 
