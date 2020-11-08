@@ -25,6 +25,7 @@ const productShema = new Schema({
   companyName: { type: String },
   form: { type: String },
   image: { type: String },
+  isVerified: { type: Boolean, default: true },
 });
 
 const product = model('products', productShema);

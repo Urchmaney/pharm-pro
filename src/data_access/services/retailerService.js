@@ -44,22 +44,27 @@ const updateRetailerProfileImage = async (
 const getRetailers = async () => Retailer.find({}).lean();
 
 const addRetailerWholesaler = async (retailerWholesaler) => {
-  if (typeof retailerWholesaler !== 'object') {
-    return {
-      status: false,
-      result: ['Invalid payload sent'],
-    };
+  try {
+    if (typeof retailerWholesaler !== 'object') {
+      return {
+        status: false,
+        result: ['Invalid payload sent'],
+      };
+    }
+    retailerWholesaler = new RetailerWholesaler(retailerWholesaler);
+    const error = retailerWholesaler.validateSync();
+    if (error) {
+      return {
+        status: false,
+        result: Object.keys(error.errors).map(ele => error.errors[ele].message),
+      };
+    }
+    await retailerWholesaler.save();
+    return { status: true, result: retailerWholesaler };
+  } catch (e) {
+    if (e.code === 11000) return { status: false, result: ['wholesaler already added.'] };
+    return { status: false, result: [e.message] };
   }
-  retailerWholesaler = new RetailerWholesaler(retailerWholesaler);
-  const error = retailerWholesaler.validateSync();
-  if (error) {
-    return {
-      status: false,
-      result: Object.keys(error.errors).map(ele => error.errors[ele].message),
-    };
-  }
-  await retailerWholesaler.save();
-  return { status: true, result: retailerWholesaler };
 };
 
 const getRetailerWholesalers = async (retailerId) => RetailerWholesaler.aggregate([

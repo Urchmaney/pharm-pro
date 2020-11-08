@@ -37,6 +37,9 @@ const listRouterGen = require('./routers/listRouter');
 const reportControllerGen = require('./controllers/reportController');
 const reportRouterGen = require('./routers/reportRouter');
 
+const quantityFormControllerGen = require('./controllers/quantityFormController');
+const quantityFormRouterGen = require('./routers/quantityFormRouter');
+
 const {
   authWholesalerMiddleware, authRetailerMiddleware, authMiddleware,
 } = require('./middlewares/auth_middleware');
@@ -56,6 +59,7 @@ const startApplication = async () => {
     retailerService,
     invoiceService,
     reportService,
+    quantityFormService,
     helpService,
   } = await mongoDB(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/pharm-pro');
 
@@ -90,13 +94,15 @@ const startApplication = async () => {
   );
 
   const wholesalerProductController = wholesalerProductControllerGen(
-    wholesalerProductService,
+    wholesalerProductService, productService,
   );
   const wholesalerProductRouter = wholesalerProductRouterGen(
     wholesalerProductController, wholesalerAuthMiddleware,
   );
 
-  const invoiceController = invoiceControllerGen(invoiceService, retailerService, notifier);
+  const invoiceController = invoiceControllerGen(
+    invoiceService, retailerService, productService, notifier,
+  );
   const invoiceRouter = invoiceRouterGen(
     invoiceController, combineAuthMiddleware, retailerAuthMiddlewere, wholesalerAuthMiddleware,
   );
@@ -107,6 +113,9 @@ const startApplication = async () => {
   const reportController = reportControllerGen(reportService);
   const reportRouter = reportRouterGen(reportController, combineAuthMiddleware);
 
+  const quantityFormController = quantityFormControllerGen(quantityFormService);
+  const quantityFormRouter = quantityFormRouterGen(quantityFormController);
+
   app.use(cors());
 
   app.use(express.json());
@@ -116,6 +125,16 @@ const startApplication = async () => {
   app.get('/otp/:phoneNumber', async (req, res) => {
     const otps = await otpService.getOTPS(req.params.phoneNumber);
     res.status(200).json(otps);
+  });
+
+  app.post('/hook', async (req, res) => {
+    console.log(`body:  ${req.body}`);
+    console.log(req.body);
+    console.log(`params: ${req.params}`);
+    console.log(req.params);
+    console.log(`query: ${req.query}`);
+    console.log(req.query);
+    res.status(200).json('Hooked');
   });
 
   app.use('/api/wholesalers/products', wholesalerProductRouter);
@@ -135,6 +154,8 @@ const startApplication = async () => {
   app.use('/api/lists', listRouter);
 
   app.use('/api/reports', reportRouter);
+
+  app.use('/api/quantity_forms', quantityFormRouter);
 
   app.get('/helps', (req, res) => {
     const helps = helpService.getHelpContacts();

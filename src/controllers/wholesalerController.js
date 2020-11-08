@@ -64,7 +64,8 @@ const wholesalerController = (
       if (!wholesaler) return { statusCode: 400, result: 'Please register.' };
 
       const otp = await otpService.createOTP(phoneNumber, 1);
-      const success = await notifier.sendSMS(`Garhia otp code:    ${otp}`, phoneNumber);
+      let success = await notifier.sendSMS(`Garhia otp code:    ${otp}`, phoneNumber);
+      success = /^\+234[0-9]{10}$/.test(phoneNumber);
       if (!success) return { statusCode: 400, result: 'Issue sending OTP. Check phone number format. +234 format.' };
       return { statusCode: 200, result: 'OTP code successfully sent.' };
     },
@@ -86,12 +87,14 @@ const wholesalerController = (
   const login = {
     roles: [],
     action: async (phoneNumber, otp, token) => {
-      const wholesaler = await wholesalerService.getWholesalerByPhoneNumber(phoneNumber);
+      let wholesaler = await wholesalerService.getWholesalerByPhoneNumber(phoneNumber);
       if (!wholesaler) return { statusCode: 400, result: 'Error Loging. Check your details.' };
       const valid = await otpService.validateOTP(phoneNumber, 1, otp, new Date());
       if (!valid) return { statusCode: 400, result: 'Invalid OTP.' };
 
-      if (token) await wholesalerService.addWholesalerToken(wholesaler._id, token);
+      if (token) {
+        wholesaler = await wholesalerService.addWholesalerToken(wholesaler._id, token);
+      }
       return {
         statusCode: 200,
         result: {

@@ -1,23 +1,43 @@
+/* eslint-disable no-underscore-dangle */
 const { v4 } = require('uuid');
 
-const invoiceController = (invoiceService, retailerService, notifier) => {
+const invoiceController = (invoiceService, retailerService, productService, notifier) => {
   const create = {
     roles: [],
     action: async (invoice, retailerId) => {
       if (!Array.isArray(invoice.products) || !Array.isArray(invoice.wholesalers)) {
         return { statusCode: 400, result: 'Invalid parameter. products and wholesaler must be arrays' };
       }
+      const aux = async (prod) => {
+        const { result } = await productService.createProduct(prod.product);
+        prod.product = result._id;
+        return prod;
+      };
+
+      const iProducts = [];
+      invoice.products.forEach(ele => {
+        if (typeof ele.product === 'string') iProducts.push(ele);
+        else if (typeof ele.product === 'object') {
+          ele.product.isVerified = false;
+          iProducts.push(aux(ele));
+        }
+      });
+
+      invoice.products = await Promise.all(iProducts);
       const listId = v4();
       const invoices = [];
-      invoice.wholesalers.forEach(ele => {
+      for (let i = 0; i < invoice.wholesalers.length; i += 1) {
         const cInvoice = {
-          wholesaler: ele,
+          wholesaler: invoice.wholesalers[i],
           retailer: retailerId,
           listId,
           products: invoice.products,
         };
+        const { status, result } = invoiceService.validateInvoice(cInvoice);
+        if (!status) return { statusCode: 400, result };
+
         invoices.push(invoiceService.createInvoice(cInvoice));
-      });
+      }
       return { statusCode: 201, result: await Promise.all(invoices) };
     },
   };
@@ -53,7 +73,12 @@ const invoiceController = (invoiceService, retailerService, notifier) => {
       );
       if (upateInvoice) {
         const retailerTokens = (await retailerService.getRetailer(upateInvoice.retailer)).tokens;
-        await notifier.sendPushNotification(retailerTokens, upateInvoice);
+        await notifier.sendPushNotification(
+          retailerTokens,
+          invoiceService.objectToSendRetailerNotification(upateInvoice),
+          'Invoice',
+          `update from ${upateInvoice.wholesaler.fullName}.`,
+        );
         return { statusCode: 200, result: upateInvoice };
       }
 

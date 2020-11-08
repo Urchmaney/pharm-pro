@@ -1,4 +1,6 @@
-const { Schema, model, isValidObjectId } = require('mongoose');
+const {
+  Schema, model, Types,
+} = require('mongoose');
 
 /**
  * @swagger
@@ -10,9 +12,8 @@ const { Schema, model, isValidObjectId } = require('mongoose');
  *      properties:
  *        quantity:
  *          type: number
- *        quantityType:
- *          type: enum
- *          enum: [Carton, Satchet, Packet, Box]
+ *        quantityForm:
+ *          type: String
  *        product:
  *          type: string
  *        costPrice:
@@ -35,37 +36,25 @@ const { Schema, model, isValidObjectId } = require('mongoose');
  */
 const invoiceSchema = new Schema({
   retailer: {
-    type: String,
+    type: Types.ObjectId,
     required: true,
     ref: 'retailers',
-    validate: {
-      validator: (_id) => isValidObjectId(_id),
-      message: 'Invalid retailer Id.',
-    },
   },
   isActive: { type: Boolean, default: true },
   hasWholesalerAddedPrice: { type: Boolean, default: false },
   listId: { type: String, required: true },
   wholesaler: {
-    type: String,
+    type: Types.ObjectId,
     required: true,
     ref: 'wholesalers',
-    validate: {
-      validator: (_id) => isValidObjectId(_id),
-      message: 'Invalid wholesaler Id.',
-    },
   },
   products: [{
     quantity: { type: Number, required: true, min: 0.5 },
-    quantityType: { type: String, required: true, enum: ['Satchet', 'Packet', 'Box', 'Carton'] },
+    quantityForm: { type: Types.ObjectId, ref: 'quantityForms', required: true },
     product: {
-      type: String,
+      type: Types.ObjectId,
       required: true,
       ref: 'products',
-      validate: {
-        validator: (_id) => isValidObjectId(_id),
-        message: 'Invalid product Id.',
-      },
     },
     costPrice: { type: Number },
     accepted: { type: Boolean, default: false },

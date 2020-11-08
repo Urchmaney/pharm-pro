@@ -7,7 +7,9 @@ let service = null;
 let wpService = null;
 let wService = null;
 let pService = null;
+let fService = null;
 let closeConn = null;
+let dbase = null;
 
 beforeAll(async () => {
   const {
@@ -15,13 +17,21 @@ beforeAll(async () => {
     wholesalerProductService,
     productService,
     wholesalerService,
+    quantityFormService,
+    db,
     closeConnect,
   } = await mongoConnect(global.__MONGO_URI__);
   service = invoiceService;
   wpService = wholesalerProductService;
   pService = productService;
   wService = wholesalerService;
+  fService = quantityFormService;
   closeConn = closeConnect;
+  dbase = db;
+});
+
+beforeEach(async () => {
+  await dbase.collection('quantityForms').deleteMany({});
 });
 
 describe('Create Invoice', () => {
@@ -54,6 +64,7 @@ describe('Create Invoice', () => {
   });
 
   it('should successfully create an invoice', async () => {
+    const q1 = (await fService.createQuantityForm({ name: 'Packet', shortForm: 'Pkt' })).result._id;
     let invoice = {
       retailer: '5f76d11c34efef00008298f2',
       wholesaler: '9f00d11c43efef01118298f0',
@@ -71,7 +82,7 @@ describe('Create Invoice', () => {
       products: [{
         product: prod,
         quantity: 7,
-        quantityType: 'Packet',
+        quantityForm: q1,
       }],
     };
     result = await service.createInvoice(invoice);
@@ -82,6 +93,9 @@ describe('Create Invoice', () => {
 
 describe('Update invoice product', () => {
   it('should update invoice product', async () => {
+    const q1 = (await fService.createQuantityForm({ name: 'Packet', shortForm: 'Pkt' })).result._id;
+    const q2 = (await fService.createQuantityForm({ name: 'Box', shortForm: 'Bx' })).result._id;
+
     const pId = (await pService.createProduct({ name: 'Amalar' })).result._id;
     const p2Id = (await pService.createProduct({ name: 'Orephtal' })).result._id;
     const whId = (await wService.createWholesaler({
@@ -96,11 +110,11 @@ describe('Update invoice product', () => {
       products: [{
         product: pId,
         quantity: 4,
-        quantityType: 'Satchet',
+        quantityForm: q1,
       }, {
         product: p2Id,
         quantity: 4,
-        quantityType: 'Satchet',
+        quantityForm: q2,
       }],
     };
     const invoiceId = (await service.createInvoice(oldInvoice)).result._id;
@@ -112,16 +126,15 @@ describe('Update invoice product', () => {
       product: pId,
       costPrice: 200,
       quantity: 3,
-      quantityType: 'Box',
+      quantityForm: q1,
     };
     let result = await service.updateInvoiceProduct(invoiceId, updateProduct, whId);
-
-    const updatedProduct = result.products.find(e => e.product === pId.toString());
+    const updatedProduct = result.products.find(e => e.product.toString() === pId.toString());
     expect(updatedProduct.costPrice).toBe(200);
     expect(updatedProduct.quantity).toBe(4);
 
     expect(await wpService.getWholesalerProductCostPrice(
-      whId, updateProduct.product, 'Box',
+      whId, updateProduct.product, q1,
     )).toBe(200);
     updateProduct = {
       product: 'dedwedwekjfkwefwe',
@@ -143,6 +156,9 @@ describe('Update invoice product', () => {
 
 describe('update many invoice products', () => {
   it('should update all valid invoice projects', async () => {
+    const q1 = (await fService.createQuantityForm({ name: 'Packet', shortForm: 'Pkt' })).result._id;
+    const q2 = (await fService.createQuantityForm({ name: 'Box', shortForm: 'Bx' })).result._id;
+
     const p1 = (await pService.createProduct({ name: 'Procold' })).result._id;
     const p2 = (await pService.createProduct({ name: 'Mixanal' })).result._id;
     const whId = (await wService.createWholesaler({
@@ -157,11 +173,11 @@ describe('update many invoice products', () => {
       products: [{
         product: p1,
         quantity: 4,
-        quantityType: 'Satchet',
+        quantityForm: q1,
       }, {
         product: p2,
         quantity: 4,
-        quantityType: 'Satchet',
+        quantityForm: q2,
       }],
     };
     const invoiceId = (await service.createInvoice(oldInvoice)).result._id;
@@ -229,12 +245,16 @@ test('Get invoice by Id', async () => {
 
 test('get retailers lists', async () => {
   const lists = await service.getLists('0f09d33c43efef00028298f1');
+  console.log(lists);
   expect(lists.length).toBe(1);
   expect(lists[0].products.length).toBe(2);
 });
 
 describe('get list product prices', () => {
   it('should return list product prices', async () => {
+    const q1 = (await fService.createQuantityForm({ name: 'Packet', shortForm: 'Pkt' })).result._id;
+    const q2 = (await fService.createQuantityForm({ name: 'Box', shortForm: 'Bx' })).result._id;
+
     const products = (await pService.createManyProducts([
       { name: 'Artesuname', medicalName: 'Malaria' },
       { name: 'Co-artem', medicalName: 'Malaria' },
@@ -247,12 +267,16 @@ describe('get list product prices', () => {
     await wpService.createWholesalerProduct({
       wholesaler: wholesalerId,
       product: products[0]._id,
-      pricePerBox: 3500,
+      formPrices: [
+        { form: q1, price: 4000 },
+      ],
     });
     await wpService.createWholesalerProduct({
       wholesaler: wholesalerId,
       product: products[1]._id,
-      pricePerBox: 5600,
+      formPrices: [
+        { form: q2, price: 5600 },
+      ],
     });
     const listId = v4();
     await service.createInvoice({
@@ -262,11 +286,11 @@ describe('get list product prices', () => {
       products: [{
         product: products[0]._id,
         quantity: 3,
-        quantityType: 'Box',
+        quantityForm: q1,
       }, {
         product: products[1]._id,
         quantity: 2,
-        quantityType: 'Box',
+        quantityForm: q2,
       }],
     });
     await service.createInvoice({
@@ -276,11 +300,11 @@ describe('get list product prices', () => {
       products: [{
         product: products[0]._id,
         quantity: 3,
-        quantityType: 'Box',
+        quantityForm: q1,
       }, {
         product: products[1]._id,
         quantity: 2,
-        quantityType: 'Box',
+        quantityForm: q2,
       }],
     });
     const listPrices = await service.getListProductPrices(listId, products[0]._id);
@@ -290,6 +314,9 @@ describe('get list product prices', () => {
 });
 
 test('should return list product prices', async () => {
+  const q1 = (await fService.createQuantityForm({ name: 'Packet', shortForm: 'Pkt' })).result._id;
+  const q2 = (await fService.createQuantityForm({ name: 'Box', shortForm: 'Bx' })).result._id;
+
   const products = (await pService.createManyProducts([
     { name: 'P-Alaxin', medicalName: 'Malaria' },
     { name: 'Calcimax', medicalName: 'Malaria' },
@@ -302,12 +329,16 @@ test('should return list product prices', async () => {
   await wpService.createWholesalerProduct({
     wholesaler: wholesalerId,
     product: products[0]._id,
-    pricePerBox: 3500,
+    formPrices: [
+      { form: q1, price: 3500 },
+    ],
   });
   await wpService.createWholesalerProduct({
     wholesaler: wholesalerId,
     product: products[1]._id,
-    pricePerBox: 5600,
+    formPrices: [
+      { form: q1, price: 5600 },
+    ],
   });
   const listId = v4();
   await service.createInvoice({
@@ -317,11 +348,11 @@ test('should return list product prices', async () => {
     products: [{
       product: products[0]._id,
       quantity: 3,
-      quantityType: 'Box',
+      quantityForm: q1,
     }, {
       product: products[1]._id,
       quantity: 2,
-      quantityType: 'Box',
+      quantityForm: q2,
     }],
   });
   await service.createInvoice({
@@ -331,11 +362,11 @@ test('should return list product prices', async () => {
     products: [{
       product: products[0]._id,
       quantity: 3,
-      quantityType: 'Box',
+      quantityForm: q1,
     }, {
       product: products[1]._id,
       quantity: 2,
-      quantityType: 'Box',
+      quantityForm: q2,
     }],
   });
   const listPrices = await service.getListProductsPrices(listId);
@@ -344,6 +375,14 @@ test('should return list product prices', async () => {
 });
 
 test('close list', async () => {
+  const q1 = (await fService.createQuantityForm({ name: 'Packet', shortForm: 'Pkt' })).result._id;
+  const q2 = (await fService.createQuantityForm({ name: 'Box', shortForm: 'Bx' })).result._id;
+
+  const products = (await pService.createManyProducts([
+    { name: 'P-Alaxin', medicalName: 'Malaria' },
+    { name: 'Calcimax', medicalName: 'Malaria' },
+  ])).result;
+
   const listId = v4();
   const retailerId = '2f40d73c11efef02008298f2';
   await service.createInvoice({
@@ -351,13 +390,13 @@ test('close list', async () => {
     wholesaler: '0f40d73c11efef02118000f2',
     listId,
     products: [{
-      product: '0g40d94c11efef02111111f2',
+      product: products[0]._id,
       quantity: 3,
-      quantityType: 'Box',
+      quantityForm: q1,
     }, {
-      product: '1f40d73c34ehth00008000f0',
+      product: products[1]._id,
       quantity: 2,
-      quantityType: 'Box',
+      quantityForm: q2,
     }],
   });
   const resultStatus = await service.closeList(listId, retailerId);
@@ -371,20 +410,28 @@ describe('get list', () => {
   });
 
   it('should return list products', async () => {
+    const q1 = (await fService.createQuantityForm({ name: 'Packet', shortForm: 'Pkt' })).result._id;
+    const q2 = (await fService.createQuantityForm({ name: 'Box', shortForm: 'Bx' })).result._id;
+
+    const products = (await pService.createManyProducts([
+      { name: 'P-Alaxin', medicalName: 'Malaria' },
+      { name: 'Calcimax', medicalName: 'Malaria' },
+    ])).result;
+
     const listId = v4();
-    const retailerId = 'zf21t22c00ezz032476743r2';
+    const retailerId = '5d6ede6a0ba62570afcedd3a';
     await service.createInvoice({
       retailer: retailerId,
-      wholesaler: 'zf21t22c00efef02118000f2',
+      wholesaler: '5d6ede6a0ba62570afcedd3b',
       listId,
       products: [{
-        product: '0g40d94c11efef02111111f2',
+        product: products[0]._id,
         quantity: 3,
-        quantityType: 'Box',
+        quantityForm: q1,
       }, {
-        product: '1f40d73c34ehth00008000f0',
+        product: products[1]._id,
         quantity: 2,
-        quantityType: 'Box',
+        quantityForm: q2,
       }],
     });
     const list = await service.getList(retailerId, listId);

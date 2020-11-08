@@ -6,6 +6,7 @@ const wholesalerProductService = require('./services/wholesalerProductService');
 const retailerService = require('./services/retailerService');
 const invoiceService = require('./services/invoiceService');
 const reportService = require('./services/reportService');
+const quantityFormService = require('./services/quantityFormService');
 const helpService = require('./services/helpService');
 
 const mongoConnect = async (URI) => {
@@ -28,6 +29,7 @@ const mongoConnect = async (URI) => {
     wholesalerProductService,
     retailerService,
     invoiceService,
+    quantityFormService,
     reportService,
     helpService,
     closeConnect: () => connection.close(),

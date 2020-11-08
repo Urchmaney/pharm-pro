@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const mongoose = require('mongoose');
 const InvoiceModel = require('../schemas/invoice_schema');
 const {
@@ -8,7 +9,7 @@ const notifier = require('../../notification/notifier');
 
 const getInvoiceById = (_id) => {
   if (!mongoose.isValidObjectId(_id)) return null;
-  return InvoiceModel.findOne({ _id }).lean();
+  return InvoiceModel.findOne({ _id }).populate('products.product').populate('products.quantityForm').lean();
 };
 
 const getRetailerInvoices = (retailerId, status) => {
@@ -25,9 +26,43 @@ const getWholesalerInvoices = (wholesalerId, status) => {
 
 const addInvoiceProductCostPrice = async (invoiceProduct, wholesaler) => {
   const costPrice = await getWholesalerProductCostPrice(
-    wholesaler, invoiceProduct.product, invoiceProduct.quantityType,
+    wholesaler, invoiceProduct.product, invoiceProduct.quantityForm,
   );
   invoiceProduct.costPrice = costPrice;
+};
+
+const objectToSendRetailerNotification = (invoice) => ({
+  listId: invoice.listId,
+  invoiceId: invoice._id.toString(),
+  wholesalerId: invoice.wholesaler ? invoice.wholesaler._id.toString() : '',
+  wholesalerFullName: invoice.wholesaler ? invoice.wholesaler.fullName : '',
+  wholesalerProfileImage: invoice.wholesaler ? invoice.wholesaler.profileImage : '',
+});
+
+const objectToSendWholesalerNotification = (invoice) => ({
+  listId: invoice.listId,
+  invoiceId: invoice._id.toString(),
+  retailerId: invoice.retailer ? invoice.retailer._id.toString() : '',
+  retailerFullName: invoice.retailer ? invoice.retailer.fullName : '',
+  retailerProfileImage: invoice.retailer ? invoice.retailer.profileImage : '',
+});
+
+const validateInvoice = (invoice) => {
+  if (typeof invoice !== 'object') {
+    return {
+      status: false,
+      result: ['Invalid invoice instance.'],
+    };
+  }
+  invoice = new InvoiceModel(invoice);
+  const error = invoice.validateSync();
+  if (error) {
+    return {
+      status: false,
+      result: Object.keys(error.errors).map(ele => error.errors[ele].message),
+    };
+  }
+  return { status: true, result: invoice };
 };
 
 const createInvoice = async (invoice) => {
@@ -38,6 +73,7 @@ const createInvoice = async (invoice) => {
         result: ['Invalid invoice instance.'],
       };
     }
+    console.log(invoice);
     invoice = new InvoiceModel(invoice);
     const error = invoice.validateSync();
     if (error) {
@@ -52,22 +88,30 @@ const createInvoice = async (invoice) => {
     });
     await Promise.all(costProducts);
     await invoice.save();
-    await invoice.populate('products.product').populate('retailer').populate('wholesaler').execPopulate();
-    if (invoice.wholesaler) await notifier.sendPushNotification(invoice.wholesaler.tokens, invoice);
+    await invoice.populate('retailer').populate('wholesaler').execPopulate();
+    if (invoice.wholesaler) {
+      await notifier.sendPushNotification(
+        invoice.wholesaler.tokens,
+        objectToSendWholesalerNotification(invoice),
+        'Invoice',
+        `new invoice from ${invoice.retailer ? invoice.retailer.fullName : ''}.`,
+      );
+    }
     return { status: true, result: invoice };
   } catch (e) {
-    return { status: false, result: e.message };
+    return { status: false, result: [e.message] };
   }
 };
 
 const markInvoiceAsHasSentprice = async (
-  invoiceId) => InvoiceModel.findOneAndUpdate({ _id: invoiceId }, { hasWholesalerAddedPrice: true }, { new: true }).populate('products.product');
+  invoiceId) => InvoiceModel.findOneAndUpdate({ _id: invoiceId }, { hasWholesalerAddedPrice: true }, { new: true }).populate('wholesaler').populate('retailer');
 
 const updateInvoiceProduct = async (invoiceId, updateObj, wholesalerId) => {
-  if (!mongoose.isValidObjectId(invoiceId)) return null;
+  if (!mongoose.isValidObjectId(invoiceId)
+  || !mongoose.isValidObjectId(updateObj.product)) return null;
 
   await updateWholesalerProductQuantityTypePrice(
-    wholesalerId, updateObj.product, updateObj.quantityType, updateObj.costPrice,
+    wholesalerId, updateObj.product, updateObj.quantityForm, updateObj.costPrice,
   );
 
   return InvoiceModel.findOneAndUpdate(
@@ -94,7 +138,7 @@ const updateManyInvoiceProducts = async (invoiceId, invoiceProducts, wholesalerI
 };
 
 const getLists = async (retailerId, status) => {
-  const option = { retailer: retailerId };
+  const option = { retailer: mongoose.Types.ObjectId(retailerId) };
   if (status !== undefined) option.isActive = (status.toLowerCase() === 'true');
 
   return InvoiceModel.aggregate([
@@ -104,22 +148,28 @@ const getLists = async (retailerId, status) => {
 };
 
 const getList = async (retailerId, listId) => {
-  const invoice = await InvoiceModel.findOne({ listId, retailer: retailerId }).lean();
-  if (!invoice) return null;
+  try {
+    const invoice = await InvoiceModel.findOne(
+      { listId, retailer: mongoose.Types.ObjectId(retailerId) },
+    ).lean();
+    if (!invoice) return null;
 
-  return invoice.products;
+    return invoice.products;
+  } catch (e) {
+    return null;
+  }
 };
 
 const getListProductPrices = async (listId, productId) => InvoiceModel.aggregate([
   { $match: { listId } },
   { $unwind: '$products' },
-  { $match: { 'products.product': productId.toString() } },
+  { $match: { 'products.product': mongoose.Types.ObjectId(productId) } },
   {
     $project: {
-      wholesaler: { $toObjectId: '$wholesaler' },
+      wholesaler: '$wholesaler',
       listId: '$listId',
       pId: { $toObjectId: '$products.product' },
-      quantityType: '$products.quantityType',
+      quantityForm: '$products.quantityForm',
       costPrice: '$products.costPrice',
       quantity: '$products.quantity',
     },
@@ -145,7 +195,7 @@ const getListProductPrices = async (listId, productId) => InvoiceModel.aggregate
       productId: '$pId',
       wholesaler: { $arrayElemAt: ['$wholesalers.fullName', 0] },
       listId: '$listId',
-      quantityType: '$quantityType',
+      quantityForm: '$quantityForm',
       costPrice: '$costPrice',
       quantity: '$quantity',
       productName: { $arrayElemAt: ['$product.name', 0] },
@@ -161,7 +211,7 @@ const getListProductsPrices = async (listId) => InvoiceModel.aggregate([
       wholesaler: { $toObjectId: '$wholesaler' },
       listId: '$listId',
       pId: { $toObjectId: '$products.product' },
-      quantityType: '$products.quantityType',
+      quantityForm: '$products.quantityForm',
       costPrice: '$products.costPrice',
       quantity: '$products.quantity',
     },
@@ -187,7 +237,7 @@ const getListProductsPrices = async (listId) => InvoiceModel.aggregate([
       productId: '$pId',
       wholesaler: { $arrayElemAt: ['$wholesalers.fullName', 0] },
       listId: '$listId',
-      quantityType: '$quantityType',
+      quantityForm: '$quantityForm',
       costPrice: '$costPrice',
       quantity: '$quantity',
       productName: { $arrayElemAt: ['$product.name', 0] },
@@ -201,6 +251,7 @@ const closeList = async (listId, retailerId) => InvoiceModel.updateMany(
 );
 
 module.exports = {
+  validateInvoice,
   getInvoiceById,
   getRetailerInvoices,
   getWholesalerInvoices,
@@ -212,4 +263,5 @@ module.exports = {
   getListProductPrices,
   getListProductsPrices,
   closeList,
+  objectToSendRetailerNotification,
 };

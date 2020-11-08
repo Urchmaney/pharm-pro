@@ -1,4 +1,4 @@
-const { sendSMS } = require('../src/notification/notifier');
+const { sendSMS, sendPushNotification } = require('../src/notification/notifier');
 
 describe('Sending SMS', () => {
   it('should send sms for valid number', async () => {
@@ -8,5 +8,13 @@ describe('Sending SMS', () => {
   it('should fail for invalid number', async () => {
     const result = await sendSMS('6473', '+23481292882');
     expect(result).toBe(false);
+  });
+});
+
+describe.only('send push notification', () => {
+  it('should send notification', async () => {
+    const tokens = ['esLOJm1JRYStjDf3wLVOtu:APA91bEGkasBycI0NbhLwch_yTjlkMkaHp42TnBqiJoK2WrPQbIfga0VTdR69YnQbbBLF66cMZaQXvDNZSLGhXTjEp79GwPDZE17o6j4kZ3S-aL-3NGRS6YTG4aBrhIZwjf4qT5C_6ma'];
+    const s = await sendPushNotification(tokens, { name: 'data' });
+    expect(s).toBe(true);
   });
 });

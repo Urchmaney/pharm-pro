@@ -15,7 +15,9 @@ const createProduct = async (product) => {
   return { status: true, result: product };
 };
 
-const getProducts = async (search = '') => {
+const getProducts = async (search = '', page = 1) => {
+  const limit = 20;
+  const skip = (page - 1) * limit;
   const option = {};
   if (search) {
     option.$or = [
@@ -25,12 +27,12 @@ const getProducts = async (search = '') => {
           $options: 'i',
         },
       },
-      {
-        medicalName: {
-          $regex: search,
-          $options: 'i',
-        },
-      },
+      // {
+      //   medicalName: {
+      //     $regex: search,
+      //     $options: 'i',
+      //   },
+      // },
     ];
   }
   return Product.aggregate([
@@ -51,6 +53,8 @@ const getProducts = async (search = '') => {
     {
       $sort: { sIndex: 1 },
     },
+    { $skip: skip },
+    { $limit: limit },
   ]);
 };
 
