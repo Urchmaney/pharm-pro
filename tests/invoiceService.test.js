@@ -32,6 +32,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await dbase.collection('quantityForms').deleteMany({});
+  await dbase.collection('products').deleteMany({});
 });
 
 describe('Create Invoice', () => {
@@ -221,6 +222,40 @@ describe('update many invoice products', () => {
   });
 });
 
+test('it should accept invoice product', async () => {
+  const q1 = (await fService.createQuantityForm({ name: 'Packet', shortForm: 'Pkt' })).result._id;
+  const q2 = (await fService.createQuantityForm({ name: 'Box', shortForm: 'Bx' })).result._id;
+
+  const pId = (await pService.createProduct({ name: 'Amalar' })).result._id;
+  const p2Id = (await pService.createProduct({ name: 'Orephtal' })).result._id;
+  const whId = (await wService.createWholesaler({
+    fullName: 'Muna Ned',
+    registrationNumber: '87672',
+    phoneNumber: '+2349056378211',
+  })).result._id.toString();
+  const retailer = '5f00d22c43efef21800200f2';
+  const oldInvoice = {
+    retailer,
+    wholesaler: whId,
+    listId: v4(),
+    products: [{
+      product: pId,
+      quantity: 4,
+      quantityForm: q1,
+    }, {
+      product: p2Id,
+      quantity: 4,
+      quantityForm: q2,
+    }],
+  };
+  const invoiceId = (await service.createInvoice(oldInvoice)).result._id;
+  const result = await service.acceptInvoiceProduct(retailer, invoiceId, pId);
+  let updatedProduct = result.products.find(e => e.product.toString() === pId.toString());
+  expect(updatedProduct.accepted).toBe(true);
+  updatedProduct = result.products.find(e => e.product.toString() === p2Id.toString());
+  expect(updatedProduct.accepted).toBe(false);
+});
+
 test('Get all retailer invoices', async () => {
   await service.createInvoice({
     retailer: '5f76d33c43efef02008298f2',
@@ -245,7 +280,6 @@ test('Get invoice by Id', async () => {
 
 test('get retailers lists', async () => {
   const lists = await service.getLists('0f09d33c43efef00028298f1');
-  console.log(lists);
   expect(lists.length).toBe(1);
   expect(lists[0].products.length).toBe(2);
 });

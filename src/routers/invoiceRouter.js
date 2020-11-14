@@ -42,13 +42,16 @@ const invoiceRouter = (
    *      - in : query
    *        name: active
    *        type: booleans
+   *      - in : query
+   *        name: priceAdded
+   *        type: booleans
    *    responses:
    *      '200':
    *        description: Successfully fetched.
    */
   router.get('/', combineAuthMiddleware, async (req, res) => {
     const { statusCode, result } = await controller.index.action(
-      req.user.id, req.user.type, req.query.active,
+      req.user.id, req.user.type, req.query.active, req.query.priceAdded,
     );
     res.status(statusCode).json(result);
   });
@@ -131,6 +134,34 @@ const invoiceRouter = (
   router.put('/:id/many', wholesaerAuthMiddleware, async (req, res) => {
     const { statusCode, result } = await controller.updateMany.action(
       req.params.id, req.body, req.user.id,
+    );
+    res.status(statusCode).json(result);
+  });
+
+  /**
+   * @swagger
+   * /api/invoices/accept:
+   *  put:
+   *    description: Accept invoice products
+   *    security:
+   *      - bearerAuth: []
+   *    tags:
+   *      - Invoices
+   *    parameters:
+   *      - in: body
+   *        name: Accept Product
+   *        required: true
+   *        schema:
+   *          type: array
+   *          items:
+   *            $ref: '#/definitions/AcceptProduct'
+   *    responses:
+   *      '200':
+   *        description: successfully updated
+   */
+  router.put('/accept', retailerAuthMiddleware, async (req, res) => {
+    const { statusCode, result } = await controller.acceptProducts.action(
+      req.user.id, req.body,
     );
     res.status(statusCode).json(result);
   });
