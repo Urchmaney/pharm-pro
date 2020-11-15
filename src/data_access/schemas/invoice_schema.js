@@ -5,6 +5,16 @@ const {
 /**
  * @swagger
  *   definitions:
+ *    AcceptProduct:
+ *      type: object
+ *      required:
+ *        - productId
+ *        - invoiceId
+ *      properties:
+ *        productId:
+ *          type: string
+ *        invoiceId:
+ *          type: string
  *    InvoiceProduct:
  *      type: object
  *      required:

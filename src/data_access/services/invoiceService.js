@@ -12,15 +12,17 @@ const getInvoiceById = (_id) => {
   return InvoiceModel.findOne({ _id }).populate('products.product').populate('products.quantityForm').lean();
 };
 
-const getRetailerInvoices = (retailerId, status) => {
+const getRetailerInvoices = (retailerId, status, priceAdded) => {
   const option = { retailer: retailerId };
   if (status !== undefined) option.isActive = (status.toLowerCase() === 'true');
+  if (priceAdded !== undefined) option.hasWholesalerAddedPrice = (priceAdded.toLowerCase() === 'true');
   return InvoiceModel.find(option).populate('wholesaler');
 };
 
-const getWholesalerInvoices = (wholesalerId, status) => {
+const getWholesalerInvoices = (wholesalerId, status, priceAdded) => {
   const option = { wholesaler: wholesalerId };
   if (status !== undefined) option.isActive = (status.toLowerCase() === 'true');
+  if (priceAdded !== undefined) option.hasWholesalerAddedPrice = (priceAdded.toLowerCase() === 'true');
   return InvoiceModel.find(option).populate('retailer');
 };
 
@@ -137,6 +139,19 @@ const updateManyInvoiceProducts = async (invoiceId, invoiceProducts, wholesalerI
   return markInvoiceAsHasSentprice(invoiceId);
 };
 
+const acceptInvoiceProduct = async (retailerId, invoiceId, productId) => {
+  if (!mongoose.isValidObjectId(retailerId) || !mongoose.isValidObjectId(invoiceId)
+  || !mongoose.isValidObjectId(productId)) return null;
+
+  return InvoiceModel.findOneAndUpdate(
+    { _id: invoiceId, retailer: retailerId, 'products.product': productId },
+    {
+      $set: { 'products.$.accepted': true },
+    },
+    { new: true },
+  );
+};
+
 const getLists = async (retailerId, status) => {
   const option = { retailer: mongoose.Types.ObjectId(retailerId) };
   if (status !== undefined) option.isActive = (status.toLowerCase() === 'true');
@@ -191,11 +206,19 @@ const getListProductPrices = async (listId, productId) => InvoiceModel.aggregate
     },
   },
   {
+    $lookup: {
+      from: 'quantityforms',
+      localField: 'quantityForm',
+      foreignField: '_id',
+      as: 'quantityForms',
+    },
+  },
+  {
     $project: {
       productId: '$pId',
       wholesaler: { $arrayElemAt: ['$wholesalers.fullName', 0] },
       listId: '$listId',
-      quantityForm: '$quantityForm',
+      quantityForm: { $arrayElemAt: ['$quantityForms', 0] },
       costPrice: '$costPrice',
       quantity: '$quantity',
       productName: { $arrayElemAt: ['$product.name', 0] },
@@ -258,6 +281,7 @@ module.exports = {
   createInvoice,
   updateInvoiceProduct,
   updateManyInvoiceProducts,
+  acceptInvoiceProduct,
   getLists,
   getList,
   getListProductPrices,

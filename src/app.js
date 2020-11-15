@@ -162,6 +162,15 @@ const startApplication = async () => {
     res.status(200).json(helps);
   });
 
+  let error = '';
+  app.post('/error', (req, res) => {
+    error = req.query.error;
+    res.status(200).json(error);
+  });
+
+  app.get('/error', (req, res) => {
+    res.status(200).json(error);
+  });
   app.use('/', swaggerUI.serve, swaggerUI.setup(swaggerJsDoc));
 
   app.use((err, req, res, next) => {
