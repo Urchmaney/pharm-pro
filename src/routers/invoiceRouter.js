@@ -80,6 +80,34 @@ const invoiceRouter = (
 
   /**
    * @swagger
+   * /api/invoices/accept:
+   *  put:
+   *    description: Accept invoice products
+   *    security:
+   *      - bearerAuth: []
+   *    tags:
+   *      - Invoices
+   *    parameters:
+   *      - in: body
+   *        name: Accept Product
+   *        required: true
+   *        schema:
+   *          type: array
+   *          items:
+   *            $ref: '#/definitions/AcceptProduct'
+   *    responses:
+   *      '200':
+   *        description: successfully updated
+   */
+  router.put('/accept', retailerAuthMiddleware, async (req, res) => {
+    const { statusCode, result } = await controller.acceptProducts.action(
+      req.user.id, req.body,
+    );
+    res.status(statusCode).json(result);
+  });
+
+  /**
+   * @swagger
    * /api/invoices/{id}:
    *  put:
    *    description: Update invoice product
@@ -134,34 +162,6 @@ const invoiceRouter = (
   router.put('/:id/many', wholesaerAuthMiddleware, async (req, res) => {
     const { statusCode, result } = await controller.updateMany.action(
       req.params.id, req.body, req.user.id,
-    );
-    res.status(statusCode).json(result);
-  });
-
-  /**
-   * @swagger
-   * /api/invoices/accept:
-   *  put:
-   *    description: Accept invoice products
-   *    security:
-   *      - bearerAuth: []
-   *    tags:
-   *      - Invoices
-   *    parameters:
-   *      - in: body
-   *        name: Accept Product
-   *        required: true
-   *        schema:
-   *          type: array
-   *          items:
-   *            $ref: '#/definitions/AcceptProduct'
-   *    responses:
-   *      '200':
-   *        description: successfully updated
-   */
-  router.put('/accept', retailerAuthMiddleware, async (req, res) => {
-    const { statusCode, result } = await controller.acceptProducts.action(
-      req.user.id, req.body,
     );
     res.status(statusCode).json(result);
   });
