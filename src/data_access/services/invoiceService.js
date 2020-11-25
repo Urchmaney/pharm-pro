@@ -16,14 +16,14 @@ const getRetailerInvoices = (retailerId, status, priceAdded) => {
   const option = { retailer: retailerId };
   if (status !== undefined) option.isActive = (status.toLowerCase() === 'true');
   if (priceAdded !== undefined) option.hasWholesalerAddedPrice = (priceAdded.toLowerCase() === 'true');
-  return InvoiceModel.find(option).populate('wholesaler');
+  return InvoiceModel.find(option).populate('wholesaler').sort('-createdAt');
 };
 
 const getWholesalerInvoices = (wholesalerId, status, priceAdded) => {
   const option = { wholesaler: wholesalerId };
   if (status !== undefined) option.isActive = (status.toLowerCase() === 'true');
   if (priceAdded !== undefined) option.hasWholesalerAddedPrice = (priceAdded.toLowerCase() === 'true');
-  return InvoiceModel.find(option).populate('retailer');
+  return InvoiceModel.find(option).populate('retailer').sort('-createdAt');
 };
 
 const addInvoiceProductCostPrice = async (invoiceProduct, wholesaler) => {
