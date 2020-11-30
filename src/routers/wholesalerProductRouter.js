@@ -73,7 +73,9 @@ const wholesalerProductRouter = (controller, authMiddlewear) => {
    *        description: successfully updated
    */
   router.put('/:id', authMiddlewear, async (req, res) => {
-    const { statusCode, result } = await controller.update.action(req.params.id, req.body);
+    const {
+      statusCode, result,
+    } = await controller.update.action(req.user.id, req.params.id, req.body);
     res.status(statusCode).json(result);
   });
   return router;

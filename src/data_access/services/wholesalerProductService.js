@@ -70,7 +70,24 @@ const getWholesalerProductCostPrice = async (wholesalerId, productId, formId) =>
   return form ? form.price : 0;
 };
 
-const updateWholesalerProduct = async (wholesaler, product, updateObj) => {
+const updateWholesalerProduct = async (wholesaler, id, updateObj) => {
+  const data = {};
+  if (updateObj.batches && Array.isArray(updateObj.batches)) data.batches = updateObj.batches;
+  if (updateObj.formPrices && Array.isArray(updateObj.formPrices)) {
+    data.formPrices = updateObj.formPrices;
+  }
+
+  try {
+    const updated = await WholesalerProduct.findOneAndUpdate(
+      { wholesaler, _id: id }, data, { new: true },
+    );
+    return updated;
+  } catch (e) {
+    return null;
+  }
+};
+
+const updateWholesalerProductForm = async (wholesaler, product, updateObj) => {
   if (!mongoose.isValidObjectId(wholesaler)
     || !mongoose.isValidObjectId(product)
     || !mongoose.isValidObjectId(updateObj.form)
@@ -88,13 +105,14 @@ const updateWholesalerProduct = async (wholesaler, product, updateObj) => {
 
 const updateWholesalerProductQuantityTypePrice = async (
   wholesalerId, productId, formId, price,
-) => updateWholesalerProduct(wholesalerId, productId, { form: formId, price });
+) => updateWholesalerProductForm(wholesalerId, productId, { form: formId, price });
 
 module.exports = {
   createWholesalerProduct,
   getWholesalerProducts,
   getWholesalerProduct,
   updateWholesalerProduct,
+  updateWholesalerProductForm,
   getWholesalerProductCostPrice,
   updateWholesalerProductQuantityTypePrice,
   getWholesalerProductsByGroups,

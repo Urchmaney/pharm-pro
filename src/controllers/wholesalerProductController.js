@@ -35,11 +35,13 @@ const wholesalerProductController = (wholesalerProductService, productService) =
 
   const update = {
     roles: [],
-    action: async (id, newObj) => {
-      const updatedProduct = await wholesalerProductService.updateWholesalerProduct(id, newObj);
+    action: async (wholesaler, id, newObj) => {
+      const updatedProduct = await wholesalerProductService.updateWholesalerProduct(
+        wholesaler, id, newObj,
+      );
       if (updatedProduct) return { statusCode: 200, result: updatedProduct };
 
-      return { statusCode: 400, result: ['Invalid product Id.'] };
+      return { statusCode: 400, result: ['Invalid Id or bad payload.'] };
     },
   };
 
