@@ -28,6 +28,30 @@ const {
  *          type: string
  *        medicalName:
  *          type: string
+ *    FormPrice:
+ *       type: object
+ *       required:
+ *         - form
+ *         - price
+ *       properties:
+ *         form:
+ *           type: string
+ *         price:
+ *           type: number
+ *         quantity:
+ *           type: number
+ *    Batch:
+ *      type: object
+ *      required:
+ *        - batchNo
+ *        - expiryDate
+ *      properties:
+ *        batchNo:
+ *          type: string
+ *        expiryDate:
+ *          type: string
+ *        quantity:
+ *          type: number
  *    WholesalerProduct:
  *      type: object
  *      required:
@@ -39,18 +63,10 @@ const {
  *          type: array
  *          items:
  *            $ref: '#/definitions/FormPrice'
- *    FormPrice:
- *        type: object
- *        required:
- *          - form
- *          - price
- *        properties:
- *          form:
- *            type: string
- *          price:
- *            type: number
- *          quantity:
- *            type: number
+ *        batches:
+ *          type: array
+ *          items:
+ *            $ref: '#/definitions/Batch'
  */
 const wholesalerProductSchema = new Schema({
   wholesaler: { type: String, required: true, ref: 'wholesalers' },
@@ -65,6 +81,11 @@ const wholesalerProductSchema = new Schema({
       type: Number, default: 0, min: 0, required: true,
     },
     quantity: { type: Number, default: 0, min: 0 },
+  }],
+  batches: [{
+    batchNo: { type: String, required: true },
+    expiryDate: { type: Date, required: true },
+    quantity: { type: Number },
   }],
 });
 
