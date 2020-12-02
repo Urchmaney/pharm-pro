@@ -69,7 +69,7 @@ const {
  *            $ref: '#/definitions/Batch'
  */
 const wholesalerProductSchema = new Schema({
-  wholesaler: { type: String, required: true, ref: 'wholesalers' },
+  wholesaler: { type: Types.ObjectId, required: true, ref: 'wholesalers' },
   product: {
     type: Types.ObjectId,
     required: true,

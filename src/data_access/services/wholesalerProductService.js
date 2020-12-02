@@ -70,6 +70,34 @@ const getWholesalerProductCostPrice = async (wholesalerId, productId, formId) =>
   return form ? form.price : 0;
 };
 
+const getWholesalerProductExpiryBatch = async (wholesaler, date) => WholesalerProduct.aggregate([
+  {
+    $match: { wholesaler, 'batches.expiryDate': { $lte: date } },
+  },
+  {
+    $lookup: {
+      from: 'products',
+      localField: 'product',
+      foreignField: '_id',
+      as: 'product',
+    },
+  },
+  {
+    $project: {
+      wholesaler: '$wholesaler',
+      product: { $arrayElemAt: ['$product', 0] },
+      formPrices: '$formPrices',
+      batches: {
+        $filter: {
+          input: '$batches',
+          as: 'batch',
+          cond: { $lte: ['$$batch.expiryDate', date] },
+        },
+      },
+    },
+  },
+]);
+
 const updateWholesalerProduct = async (wholesaler, id, updateObj) => {
   const data = {};
   if (updateObj.batches && Array.isArray(updateObj.batches)) data.batches = updateObj.batches;
@@ -111,6 +139,7 @@ module.exports = {
   createWholesalerProduct,
   getWholesalerProducts,
   getWholesalerProduct,
+  getWholesalerProductExpiryBatch,
   updateWholesalerProduct,
   updateWholesalerProductForm,
   getWholesalerProductCostPrice,
