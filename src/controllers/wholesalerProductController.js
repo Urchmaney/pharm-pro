@@ -22,10 +22,14 @@ const wholesalerProductController = (wholesalerProductService, productService) =
 
   const index = {
     roles: [],
-    action: async (wholesalerId, type) => {
+    action: async (wholesalerId, type, month = 3) => {
       let products = [];
       if (type && type.toLowerCase() === 'group') {
         products = await wholesalerProductService.getWholesalerProductsByGroups(wholesalerId);
+      } else if (type && type.toLowerCase() === 'expiry') {
+        products = await wholesalerProductService.getWholesalerProductExpiryBatch(
+          wholesalerId, (new Date((new Date()).setMonth((new Date()).getMonth() + month))),
+        );
       } else {
         products = await wholesalerProductService.getWholesalerProducts(wholesalerId);
       }

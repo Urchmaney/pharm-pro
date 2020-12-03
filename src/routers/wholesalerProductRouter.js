@@ -41,12 +41,16 @@ const wholesalerProductRouter = (controller, authMiddlewear) => {
    *    parameters:
    *      - in: query
    *        name: type
+   *      - in: query
+   *        name: months
    *    responses:
    *      '200':
    *        description: Successfully fetched.
    */
   router.get('/', authMiddlewear, async (req, res) => {
-    const { statusCode, result } = await controller.index.action(req.user.id, req.query.type);
+    const { statusCode, result } = await controller.index.action(
+      req.user.id, req.query.type, Number(req.query.months),
+    );
     res.status(statusCode).json(result);
   });
 
