@@ -88,7 +88,7 @@ const wholesalerProductSchema = new Schema({
     quantity: { type: Number },
   }],
 });
-
+wholesalerProductSchema.index({ wholesaler: 1, product: 1 }, { unique: true });
 const wholesalerProduct = model('wholesalerProducts', wholesalerProductSchema);
 
 module.exports = wholesalerProduct;
