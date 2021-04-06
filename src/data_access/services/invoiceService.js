@@ -16,7 +16,7 @@ const getRetailerInvoices = (retailerId, status, priceAdded) => {
   const option = { retailer: retailerId };
   if (status !== undefined) option.isActive = (status.toLowerCase() === 'true');
   if (priceAdded !== undefined) option.hasWholesalerAddedPrice = (priceAdded.toLowerCase() === 'true');
-  return InvoiceModel.find(option).populate('wholesaler').populate('products.product').populate('products.quantityForm').sort('-updatedAt');
+  return InvoiceModel.find(option).populate('wholesaler').sort('-updatedAt');
 };
 
 const getWholesalerInvoices = (wholesalerId, status, priceAdded) => {
