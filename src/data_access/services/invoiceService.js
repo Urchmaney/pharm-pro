@@ -16,7 +16,7 @@ const getRetailerInvoices = (retailerId, status, priceAdded) => {
   const option = { retailer: retailerId };
   if (status !== undefined) option.isActive = (status.toLowerCase() === 'true');
   if (priceAdded !== undefined) option.hasWholesalerAddedPrice = (priceAdded.toLowerCase() === 'true');
-  return InvoiceModel.find(option).populate('wholesaler').sort('-updatedAt');
+  return InvoiceModel.find(option).populate('wholesaler').populate('products.product').populate('products.quantityForm').sort('-updatedAt');
 };
 
 const getWholesalerInvoices = (wholesalerId, status, priceAdded) => {
@@ -34,6 +34,7 @@ const addInvoiceProductCostPrice = async (invoiceProduct, wholesaler) => {
 };
 
 const objectToSendRetailerNotification = (invoice) => ({
+  type: 'invoice',
   listId: invoice.listId,
   invoiceId: invoice._id.toString(),
   wholesalerId: invoice.wholesaler ? invoice.wholesaler._id.toString() : '',
@@ -42,6 +43,7 @@ const objectToSendRetailerNotification = (invoice) => ({
 });
 
 const objectToSendWholesalerNotification = (invoice) => ({
+  type: 'invoice',
   listId: invoice.listId,
   invoiceId: invoice._id.toString(),
   retailerId: invoice.retailer ? invoice.retailer._id.toString() : '',
