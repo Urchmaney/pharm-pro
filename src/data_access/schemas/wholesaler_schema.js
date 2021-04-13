@@ -50,7 +50,7 @@ const wholesalerSchema = new Schema({
       message: num => `"${num.value}"  is not a valid phone number. +2348010000000 is an example.`,
     },
   },
-  registrationNumber: { type: String, required: true },
+  registrationNumber: { type: String },
   isDeleted: { type: Boolean, default: false },
   profileImage: { type: String },
   deletedAt: Date,
