@@ -120,6 +120,7 @@ const retailerRouter = (controller, fileUploadMiddleware, authMiddlewear) => {
   *      description: Successfully logged in.
   */
   router.post('/login', async (req, res) => {
+    console.log(req.body);
     const { statusCode, result } = await controller.login.action(req.body.phoneNumber,
       req.body.otp, req.body.token);
     res.status(statusCode).json(result);
