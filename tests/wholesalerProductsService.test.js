@@ -141,20 +141,20 @@ describe('update wholesaler product', () => {
     };
     await service.createWholesalerProduct(wholesalerProduct);
     let newObj = { form: q1, price: 2000 };
-    let result = await service.updateWholesalerProduct(
+    let result = await service.updateWholesalerProductForm(
       testWholesaler._id, testProduct._id, newObj,
     );
     expect(result).toBeDefined();
     expect(result.formPrices.find(e => e.form.toString() === q1.toString()).price).toBe(2000);
     newObj = { form: q1, price: 2200 };
-    result = await service.updateWholesalerProduct(
+    result = await service.updateWholesalerProductForm(
       testWholesaler._id, testProduct._id, newObj,
     );
     expect(result).toBeDefined();
     expect(result.formPrices.find(e => e.form.toString() === q1.toString()).price).toBe(2200);
 
     newObj = { form: q4, price: 600 };
-    result = await service.updateWholesalerProduct(
+    result = await service.updateWholesalerProductForm(
       testWholesaler._id, testProduct._id, newObj,
     );
     expect(result).toBeDefined();
@@ -173,11 +173,11 @@ describe('update wholesaler product', () => {
   });
   it('should return null if wholesaler and product is invalid', async () => {
     const newObj = { pricePerBox: 2000 };
-    let result = await service.updateWholesalerProduct('rek34kjrkr', newObj);
+    let result = await service.updateWholesalerProductForm('rek34kjrkr', newObj);
     expect(result).toBeNull();
-    result = await service.updateWholesalerProduct(testWholesaler._id, newObj);
+    result = await service.updateWholesalerProductForm(testWholesaler._id, newObj);
     expect(result).toBeNull();
-    result = await service.updateWholesalerProduct('deuid3', newObj);
+    result = await service.updateWholesalerProductForm('deuid3', newObj);
     expect(result).toBeNull();
   });
 });
@@ -226,6 +226,67 @@ test('get wholesalers product by group by medical name', async () => {
   await service.createWholesalerProduct(wholesalerProduct);
   const groupProducts = await service.getWholesalerProductsByGroups(testWholesaler._id);
   expect(groupProducts.length).toBe(2);
+});
+
+describe('Adding and removing batch', () => {
+  it('add and remove batches', async () => {
+    const testProduct = (await pS.createProduct({ name: 'Orheptal', medicalName: 'Tonic' })).result;
+    const wholesalerProduct = {
+      wholesaler: testWholesaler._id,
+      product: testProduct._id,
+      batches: [
+        { batchNo: '27656483', expiryDate: (new Date((new Date()).setMonth((new Date()).getMonth() + 20))).toString() },
+        { batchNo: '47473992', expiryDate: (new Date((new Date()).setMonth((new Date()).getMonth() + 20))).toString() },
+        { batchNo: '2333432', expiryDate: (new Date((new Date()).setMonth((new Date()).getMonth() + 25))).toString() },
+      ],
+    };
+    const { status, result } = await service.createWholesalerProduct(wholesalerProduct);
+    expect(status).toBe(true);
+    expect(result.batches.length).toBe(3);
+
+    wholesalerProduct.batches.pop();
+    const updated = await service.updateWholesalerProduct(
+      testWholesaler._id, result._id, wholesalerProduct,
+    );
+    expect(updated.batches.length).toBe(2);
+  });
+});
+
+describe('Get expiry batch', () => {
+  it('should get expiry batch', async () => {
+    const testProduct1 = (await pS.createProduct({ name: 'Lamadox', medicalName: 'Trand' })).result;
+    const testProduct2 = (await pS.createProduct({ name: 'HB12', medicalName: 'Tonic' })).result;
+    const wholesalerProduct = {
+      wholesaler: testWholesaler._id,
+      product: testProduct1._id,
+      batches: [
+        { batchNo: '12332e3', expiryDate: (new Date((new Date()).setMonth((new Date()).getMonth() + 12))).toString() },
+        { batchNo: '23121221', expiryDate: (new Date((new Date()).setMonth((new Date()).getMonth() + 15))).toString() },
+        { batchNo: '37663482', expiryDate: (new Date((new Date()).setMonth((new Date()).getMonth() + 9))).toString() },
+      ],
+    };
+    const wholesalerProduct1 = {
+      wholesaler: testWholesaler._id,
+      product: testProduct2._id,
+      batches: [
+        { batchNo: '12122312', expiryDate: (new Date((new Date()).setMonth((new Date()).getMonth() + 10))).toString() },
+        { batchNo: '144465567', expiryDate: (new Date((new Date()).setMonth((new Date()).getMonth() + 4))).toString() },
+        { batchNo: '344545211', expiryDate: (new Date((new Date()).setMonth((new Date()).getMonth() + 8))).toString() },
+      ],
+    };
+    await service.createWholesalerProduct(wholesalerProduct);
+    await service.createWholesalerProduct(wholesalerProduct1);
+    let result = await service.getWholesalerProductExpiryBatch(
+      testWholesaler._id, (new Date((new Date()).setMonth((new Date()).getMonth() + 8))),
+    );
+
+    expect(result.length).toBe(1);
+    expect(result[0].batches.length).toBe(2);
+    result = await service.getWholesalerProductExpiryBatch(
+      testWholesaler._id, (new Date((new Date()).setMonth((new Date()).getMonth() + 10))),
+    );
+    expect(result.length).toBe(2);
+  });
 });
 
 afterAll(done => {
