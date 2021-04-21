@@ -1,10 +1,12 @@
 require('dotenv').config();
 const twilio = require('twilio');
 const firebaseAdmin = require('firebase-admin');
+const axios = require('axios');
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = twilio(accountSid, authToken);
+const TERMIL_SEND_URL = 'https://termii.com/api/sms/otp/send';
 
 firebaseAdmin.initializeApp({
   credential: firebaseAdmin.credential.cert({
@@ -14,6 +16,29 @@ firebaseAdmin.initializeApp({
   }),
   databaseURL: process.env.FIREBASE_DATABASE_URL,
 });
+
+const sendOTP = async (phoneNumber, otp) => {
+  try {
+    await axios.post(TERMIL_SEND_URL, {
+      api_key: process.env.TERMII_API_KEY,
+      message_type: 'NUMERIC',
+      to: phoneNumber,
+      from: 'N-Alert',
+      channel: 'dnd',
+      pin_attempts: '10',
+      pin_time_to_live: '5',
+      pin_length: '5',
+      pin_placeholder: '< 1234 >',
+      message_text: `Your login pin is :  ${otp}`,
+      pin_type: 'NUMERIC',
+    });
+    return true;
+  } catch (e) {
+    console.log(e);
+    console.log('Error sending otp');
+    return false;
+  }
+};
 
 const sendSMS = async (data, phoneNumber) => {
   try {
@@ -57,5 +82,6 @@ const sendPushNotification = async (userTokens, data, title, body) => {
 
 module.exports = {
   sendSMS,
+  sendOTP,
   sendPushNotification,
 };
