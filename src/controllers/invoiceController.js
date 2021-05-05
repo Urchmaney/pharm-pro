@@ -1,7 +1,9 @@
 /* eslint-disable no-underscore-dangle */
 const { v4 } = require('uuid');
 
-const invoiceController = (invoiceService, retailerService, productService, notifier) => {
+const invoiceController = (
+  invoiceService, retailerService, productService, notifier, firebaseService,
+) => {
   const create = {
     roles: [],
     action: async (invoice, retailerId) => {
@@ -38,7 +40,9 @@ const invoiceController = (invoiceService, retailerService, productService, noti
 
         invoices.push(invoiceService.createInvoice(cInvoice));
       }
-      return { statusCode: 201, result: await Promise.all(invoices) };
+      const result = await Promise.all(invoices);
+      result.forEach(r => firebaseService.createMarketRequest(r.result));
+      return { statusCode: 201, result };
     },
   };
 

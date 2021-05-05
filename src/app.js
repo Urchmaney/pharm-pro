@@ -9,6 +9,7 @@ const mongoDB = require('./data_access/connect');
 const authenticator = require('./authenticator/auth');
 const notifier = require('./notification/notifier');
 const uploader = require('./file_uploader/cloudinary_file_uploader');
+const firebase = require('./firebase/index');
 
 const wholesalerControllerGen = require('./controllers/wholesalerController');
 const wholesalerRouterGen = require('./routers/wholesalerRouter');
@@ -101,7 +102,7 @@ const startApplication = async () => {
   );
 
   const invoiceController = invoiceControllerGen(
-    invoiceService, retailerService, productService, notifier,
+    invoiceService, retailerService, productService, notifier, firebase,
   );
   const invoiceRouter = invoiceRouterGen(
     invoiceController, combineAuthMiddleware, retailerAuthMiddlewere, wholesalerAuthMiddleware,

@@ -92,7 +92,8 @@ const createInvoice = async (invoice) => {
     });
     await Promise.all(costProducts);
     await invoice.save();
-    await invoice.populate('retailer').populate('wholesaler').execPopulate();
+    await invoice.populate('retailer').populate('wholesaler').populate('products.product').populate('products.quantityForm')
+      .execPopulate();
     if (invoice.wholesaler) {
       await notifier.sendPushNotification(
         invoice.wholesaler.tokens,
