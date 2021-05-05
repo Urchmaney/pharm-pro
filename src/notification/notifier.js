@@ -1,37 +1,50 @@
 require('dotenv').config();
 const twilio = require('twilio');
-const firebaseAdmin = require('firebase-admin');
 const axios = require('axios');
+
+const { firebaseAdmin } = require('../firebase/index');
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = twilio(accountSid, authToken);
-const TERMIL_SEND_URL = 'https://termii.com/api/sms/otp/send';
+const TERMIL_SEND_URL = 'https://termii.com/api/sms/send';
 
-firebaseAdmin.initializeApp({
-  credential: firebaseAdmin.credential.cert({
-    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    projectId: process.env.FIREBASE_PROJECT_ID,
-  }),
-  databaseURL: process.env.FIREBASE_DATABASE_URL,
-});
+// const sendOTP = async (phoneNumber, otp) => {
+//   try {
+//     const result = await axios.post(TERMIL_SEND_URL, {
+//       api_key: process.env.TERMII_API_KEY,
+//       message_type: 'NUMERIC',
+//       to: phoneNumber,
+//       from: 'N-Alert',
+//       channel: 'dnd',
+//       pin_attempts: '10',
+//       pin_time_to_live: '5',
+//       pin_length: '5',
+//       pin_placeholder: '< 1234 >',
+//       message_text: `Your login pin is :  ${otp}`,
+//       pin_type: 'NUMERIC',
+//     });
+//     console.log(result);
+//     return true;
+//   } catch (e) {
+//     console.log(e);
+//     console.log('Error sending otp');
+//     return false;
+//   }
+// };
 
 const sendOTP = async (phoneNumber, otp) => {
   try {
-    await axios.post(TERMIL_SEND_URL, {
+    if (process.env.ENVIRONMENT !== 'production') return true;
+    const result = await axios.post(TERMIL_SEND_URL, {
       api_key: process.env.TERMII_API_KEY,
-      message_type: 'NUMERIC',
       to: phoneNumber,
       from: 'N-Alert',
-      channel: 'dnd',
-      pin_attempts: '10',
-      pin_time_to_live: '5',
-      pin_length: '5',
-      pin_placeholder: '< 1234 >',
-      message_text: `Your login pin is :  ${otp}`,
-      pin_type: 'NUMERIC',
+      channel: 'generic',
+      type: 'plain',
+      sms: `Your login pin is :  ${otp}`,
     });
+    console.log(result);
     return true;
   } catch (e) {
     console.log(e);
