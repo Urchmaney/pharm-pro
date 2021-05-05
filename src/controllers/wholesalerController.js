@@ -68,7 +68,7 @@ const wholesalerController = (
 
       const otp = await otpService.createOTP(phoneNumber, 1);
       const success = await notifier.sendOTP(phoneNumber.substring(1), otp);
-      console.log({phoneNumber, success });
+      console.log({ phoneNumber, success });
       if (!success) return { statusCode: 400, result: 'Issue sending OTP. Contact Admin.' };
 
       return { statusCode: 200, result: 'OTP code successfully sent.' };
