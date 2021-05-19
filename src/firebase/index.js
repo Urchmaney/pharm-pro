@@ -22,7 +22,11 @@ const createMarketRequest = async ({ retailer, wholesaler, products, listId }) =
       wholesaler: wholesaler && wholesaler.fullName ? wholesaler.fullName : '',
       listId: listId || '',
       products: products.map(p => ({
-        form: p.quantityForm.name, name: p.product.name, quantity: p.quantity, unitPrice: 0,
+        form: p.quantityForm.name,
+        name: p.product.name,
+        quantity: p.quantity,
+        unitPrice: 0,
+        accepted: false,
       })),
       processing_state: 'pending',
       agent: '',
