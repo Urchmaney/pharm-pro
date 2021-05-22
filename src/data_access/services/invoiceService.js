@@ -16,7 +16,8 @@ const getRetailerInvoices = (retailerId, status, priceAdded) => {
   const option = { retailer: retailerId };
   if (status !== undefined) option.isActive = (status.toLowerCase() === 'true');
   if (priceAdded !== undefined) option.hasWholesalerAddedPrice = (priceAdded.toLowerCase() === 'true');
-  return InvoiceModel.find(option).populate('wholesaler').populate('products.product').populate('products.quantityForm').sort('-updatedAt');
+  return InvoiceModel.find(option).populate('wholesaler').populate('products.product').populate('products.quantityForm')
+    .sort('-updatedAt');
 };
 
 const getWholesalerInvoices = (wholesalerId, status, priceAdded) => {
@@ -92,7 +93,8 @@ const createInvoice = async (invoice) => {
     });
     await Promise.all(costProducts);
     await invoice.save();
-    await invoice.populate('retailer').populate('wholesaler').execPopulate();
+    await invoice.populate('retailer').populate('wholesaler').populate('products.product').populate('products.quantityForm')
+      .execPopulate();
     if (invoice.wholesaler) {
       await notifier.sendPushNotification(
         invoice.wholesaler.tokens,

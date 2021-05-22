@@ -1,6 +1,6 @@
-const { sendSMS, sendPushNotification } = require('../src/notification/notifier');
+const { sendSMS, sendPushNotification, sendOTP } = require('../src/notification/notifier');
 
-describe.only('Sending SMS', () => {
+describe('Sending SMS', () => {
   it('should send sms for valid number', async () => {
     const result = await sendSMS('6473', '+2348164292882');
     expect(result).toBe(true);
@@ -11,10 +11,18 @@ describe.only('Sending SMS', () => {
   });
 });
 
-describe('send push notification', () => {
+describe.only('send push notification', () => {
   it('should send notification', async () => {
-    const tokens = ['esLOJm1JRYStjDf3wLVOtu:APA91bEGkasBycI0NbhLwch_yTjlkMkaHp42TnBqiJoK2WrPQbIfga0VTdR69YnQbbBLF66cMZaQXvDNZSLGhXTjEp79GwPDZE17o6j4kZ3S-aL-3NGRS6YTG4aBrhIZwjf4qT5C_6ma'];
-    const s = await sendPushNotification(tokens, { name: 'data' });
+    const tokens = ['ckJ3OdHdaCg:APA91bF4k2GTs41feJ79jlehTyFMkx5bjCoQAG_6F5TgxmjYCQn2-hiLHLrDtV2Kg6EaV3to7UuBuX-drq-ICr2a6ot-uiplUMxKeT1AUe0rAmvpsXZ1qC0GWcTRCi2A7dzOZ7vjGZKV'];
+    const s = await sendPushNotification(tokens, { name: 'data' }, 'The Note', 'Welcome Home');
     expect(s).toBe(true);
+  });
+});
+
+describe('Send OTP using Termil', () => {
+  it('should return the OTP ID', async () => {
+    const phoneNumber = '2348164292882';
+    const result = await sendOTP(phoneNumber, '47632');
+    expect(result).toBe(true);
   });
 });
