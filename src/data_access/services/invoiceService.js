@@ -273,6 +273,29 @@ const getListProductsPrices = async (listId) => InvoiceModel.aggregate([
   { $group: { _id: '$productId', products: { $push: '$$ROOT' } } },
 ]);
 
+const getActiveRequests = () => InvoiceModel.aggregate(
+  [
+    { $match: { isActive: false, hasWholesalerAddedPrice: false } },
+    { $project: { wholesaler: '$wholesaler', products: '$products' } },
+    { $group: { _id: '$wholesaler', requests: { $push: '$$ROOT' } } },
+    {
+      $lookup: {
+        from: 'wholesalers',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'wholesalerObj',
+      },
+    },
+    { $unwind: '$wholesalerObj' },
+    {
+      $project: {
+        wholesaler: '$wholesalerObj.fullName',
+        _id: '$_id',
+        requests: '$requests',
+      },
+    },
+  ],
+);
 const closeList = async (listId, retailerId) => InvoiceModel.updateMany(
   { listId, retailer: retailerId }, { isActive: false }, { new: true },
 );
@@ -292,4 +315,5 @@ module.exports = {
   getListProductsPrices,
   closeList,
   objectToSendRetailerNotification,
+  getActiveRequests,
 };

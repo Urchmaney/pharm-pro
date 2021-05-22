@@ -103,6 +103,14 @@ const invoiceController = (
     },
   };
 
+  const activeRequests = {
+    roles: [],
+    action: async () => {
+      const requests = await invoiceService.getActiveRequests();
+      return { statusCode: 200, result: requests };
+    },
+  };
+
   const acceptProducts = {
     roles: [],
     action: async (retailerId, invoiceProducts) => {
@@ -126,6 +134,7 @@ const invoiceController = (
     updateMany,
     show,
     acceptProducts,
+    activeRequests,
   };
 };
 
