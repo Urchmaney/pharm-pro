@@ -13,7 +13,9 @@ firebaseAdmin.initializeApp({
 
 const db = firebaseAdmin.firestore();
 
-const createMarketRequest = async ({ retailer, wholesaler, products, listId }) => {
+const createMarketRequest = async ({
+  retailer, wholesaler, products, listId,
+}) => {
   try {
     const result = await db.collection('market_requests').add({
       retailerId: retailer && retailer._id ? retailer._id.toString() : '',
