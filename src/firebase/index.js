@@ -24,8 +24,8 @@ const createMarketRequest = async ({
       wholesaler: wholesaler && wholesaler.fullName ? wholesaler.fullName : '',
       listId: listId || '',
       products: products.map(p => ({
-        form: p.quantityForm.name,
-        name: p.product.name,
+        form: p.quantityForm.name || p.quantityForm,
+        name: p.product.name || p.product,
         quantity: p.quantity,
         unitPrice: 0,
         accepted: false,

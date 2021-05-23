@@ -32,6 +32,9 @@ const wholesalerProductRouterGen = require('./routers/wholesalerProductRouter');
 const invoiceControllerGen = require('./controllers/invoiceController');
 const invoiceRouterGen = require('./routers/invoiceRouter');
 
+const marketRequestControllerGen = require('./controllers/marketRequestController');
+const marketRequestRouterGen = require('./routers/marketRequestRouter');
+
 const listControllerGen = require('./controllers/listController');
 const listRouterGen = require('./routers/listRouter');
 
@@ -62,6 +65,7 @@ const startApplication = async () => {
     reportService,
     quantityFormService,
     helpService,
+    marketRequestService,
   } = await mongoDB(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/pharm-pro');
 
   const wholesalerController = wholesalerControllerGen(wholesalerService,
@@ -108,6 +112,13 @@ const startApplication = async () => {
     invoiceController, combineAuthMiddleware, retailerAuthMiddlewere, wholesalerAuthMiddleware,
   );
 
+  const marketRequestController = marketRequestControllerGen(
+    marketRequestService, firebase,
+  );
+  const marketRequestRouter = marketRequestRouterGen(
+    marketRequestController, retailerAuthMiddlewere,
+  );
+
   const listController = listControllerGen(invoiceService, productService);
   const listRouter = listRouterGen(listController, retailerAuthMiddlewere);
 
@@ -137,6 +148,8 @@ const startApplication = async () => {
     console.log(req.query);
     res.status(200).json('Hooked');
   });
+
+  app.use('/api/v2/market/requests', marketRequestRouter);
 
   app.use('/api/wholesalers/products', wholesalerProductRouter);
 
