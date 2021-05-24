@@ -53,10 +53,13 @@ const retailerController = (
       const retailer = await retailerService.getRetailerByPhoneNumber(phoneNumber);
       if (!retailer) return { statusCode: 400, result: 'Please register.' };
 
+      const isPhoneNumberFormat = /^\+234[0-9]{10}$/.test(phoneNumber);
+      if (!isPhoneNumberFormat) return { statusCode: 400, result: 'Wrong phone number format. Check phone number format. +234 format.' };
+
       const otp = await otpService.createOTP(phoneNumber, 2);
-      let success = await notifier.sendSMS(`Garhia otp code:    ${otp}`, phoneNumber);
-      success = /^\+234[0-9]{10}$/.test(phoneNumber);
-      if (!success) return { statusCode: 400, result: 'Issue sending OTP. Check phone number format. +234 format.' };
+      const success = await notifier.sendOTP(phoneNumber.substring(1), otp);
+      if (!success) return { statusCode: 400, result: 'Issue sending OTP. Contact Admin.' };
+
       return { statusCode: 200, result: 'OTP code successfully sent.' };
     },
   };

@@ -1,7 +1,9 @@
 /* eslint-disable no-underscore-dangle */
 const { v4 } = require('uuid');
 
-const invoiceController = (invoiceService, retailerService, productService, notifier) => {
+const invoiceController = (
+  invoiceService, retailerService, productService, notifier, firebaseService,
+) => {
   const create = {
     roles: [],
     action: async (invoice, retailerId) => {
@@ -38,7 +40,9 @@ const invoiceController = (invoiceService, retailerService, productService, noti
 
         invoices.push(invoiceService.createInvoice(cInvoice));
       }
-      return { statusCode: 201, result: await Promise.all(invoices) };
+      const result = await Promise.all(invoices);
+      result.forEach(r => firebaseService.createMarketRequest(r.result));
+      return { statusCode: 201, result };
     },
   };
 
@@ -99,6 +103,14 @@ const invoiceController = (invoiceService, retailerService, productService, noti
     },
   };
 
+  const activeRequests = {
+    roles: [],
+    action: async () => {
+      const requests = await invoiceService.getActiveRequests();
+      return { statusCode: 200, result: requests };
+    },
+  };
+
   const acceptProducts = {
     roles: [],
     action: async (retailerId, invoiceProducts) => {
@@ -122,6 +134,7 @@ const invoiceController = (invoiceService, retailerService, productService, noti
     updateMany,
     show,
     acceptProducts,
+    activeRequests,
   };
 };
 

@@ -58,6 +58,22 @@ const invoiceRouter = (
 
   /**
    * @swagger
+   * /api/invoices/active-requests:
+   *  get:
+   *    description: Get all active requests
+   *    tags:
+   *      - Invoices
+   *    responses:
+   *      '200':
+   *        description: Successfully fetched.
+   */
+  router.get('/active-requests', async (req, res) => {
+    const { statusCode, result } = await controller.activeRequests.action();
+    res.status(statusCode).json(result);
+  });
+
+  /**
+   * @swagger
    * /api/invoices/{id}:
    *  get:
    *    description: Get a single invoice
@@ -165,7 +181,6 @@ const invoiceRouter = (
     );
     res.status(statusCode).json(result);
   });
-
   return router;
 };
 

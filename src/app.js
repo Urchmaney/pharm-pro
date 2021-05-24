@@ -9,6 +9,7 @@ const mongoDB = require('./data_access/connect');
 const authenticator = require('./authenticator/auth');
 const notifier = require('./notification/notifier');
 const uploader = require('./file_uploader/cloudinary_file_uploader');
+const firebase = require('./firebase/index');
 
 const wholesalerControllerGen = require('./controllers/wholesalerController');
 const wholesalerRouterGen = require('./routers/wholesalerRouter');
@@ -30,6 +31,9 @@ const wholesalerProductRouterGen = require('./routers/wholesalerProductRouter');
 
 const invoiceControllerGen = require('./controllers/invoiceController');
 const invoiceRouterGen = require('./routers/invoiceRouter');
+
+const marketRequestControllerGen = require('./controllers/marketRequestController');
+const marketRequestRouterGen = require('./routers/marketRequestRouter');
 
 const listControllerGen = require('./controllers/listController');
 const listRouterGen = require('./routers/listRouter');
@@ -61,6 +65,7 @@ const startApplication = async () => {
     reportService,
     quantityFormService,
     helpService,
+    marketRequestService,
   } = await mongoDB(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/pharm-pro');
 
   const wholesalerController = wholesalerControllerGen(wholesalerService,
@@ -101,10 +106,17 @@ const startApplication = async () => {
   );
 
   const invoiceController = invoiceControllerGen(
-    invoiceService, retailerService, productService, notifier,
+    invoiceService, retailerService, productService, notifier, firebase,
   );
   const invoiceRouter = invoiceRouterGen(
     invoiceController, combineAuthMiddleware, retailerAuthMiddlewere, wholesalerAuthMiddleware,
+  );
+
+  const marketRequestController = marketRequestControllerGen(
+    marketRequestService, firebase,
+  );
+  const marketRequestRouter = marketRequestRouterGen(
+    marketRequestController, retailerAuthMiddlewere,
   );
 
   const listController = listControllerGen(invoiceService, productService);
@@ -136,6 +148,8 @@ const startApplication = async () => {
     console.log(req.query);
     res.status(200).json('Hooked');
   });
+
+  app.use('/api/v2/market/requests', marketRequestRouter);
 
   app.use('/api/wholesalers/products', wholesalerProductRouter);
 

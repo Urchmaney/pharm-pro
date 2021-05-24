@@ -16,7 +16,8 @@ const getRetailerInvoices = (retailerId, status, priceAdded) => {
   const option = { retailer: retailerId };
   if (status !== undefined) option.isActive = (status.toLowerCase() === 'true');
   if (priceAdded !== undefined) option.hasWholesalerAddedPrice = (priceAdded.toLowerCase() === 'true');
-  return InvoiceModel.find(option).populate('wholesaler').sort('-updatedAt');
+  return InvoiceModel.find(option).populate('wholesaler').populate('products.product').populate('products.quantityForm')
+    .sort('-updatedAt');
 };
 
 const getWholesalerInvoices = (wholesalerId, status, priceAdded) => {
@@ -34,6 +35,7 @@ const addInvoiceProductCostPrice = async (invoiceProduct, wholesaler) => {
 };
 
 const objectToSendRetailerNotification = (invoice) => ({
+  type: 'invoice',
   listId: invoice.listId,
   invoiceId: invoice._id.toString(),
   wholesalerId: invoice.wholesaler ? invoice.wholesaler._id.toString() : '',
@@ -42,6 +44,7 @@ const objectToSendRetailerNotification = (invoice) => ({
 });
 
 const objectToSendWholesalerNotification = (invoice) => ({
+  type: 'invoice',
   listId: invoice.listId,
   invoiceId: invoice._id.toString(),
   retailerId: invoice.retailer ? invoice.retailer._id.toString() : '',
@@ -90,7 +93,8 @@ const createInvoice = async (invoice) => {
     });
     await Promise.all(costProducts);
     await invoice.save();
-    await invoice.populate('retailer').populate('wholesaler').execPopulate();
+    await invoice.populate('retailer').populate('wholesaler').populate('products.product').populate('products.quantityForm')
+      .execPopulate();
     if (invoice.wholesaler) {
       await notifier.sendPushNotification(
         invoice.wholesaler.tokens,
@@ -269,6 +273,29 @@ const getListProductsPrices = async (listId) => InvoiceModel.aggregate([
   { $group: { _id: '$productId', products: { $push: '$$ROOT' } } },
 ]);
 
+const getActiveRequests = () => InvoiceModel.aggregate(
+  [
+    { $match: { isActive: false, hasWholesalerAddedPrice: false } },
+    { $project: { wholesaler: '$wholesaler', products: '$products' } },
+    { $group: { _id: '$wholesaler', requests: { $push: '$$ROOT' } } },
+    {
+      $lookup: {
+        from: 'wholesalers',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'wholesalerObj',
+      },
+    },
+    { $unwind: '$wholesalerObj' },
+    {
+      $project: {
+        wholesaler: '$wholesalerObj.fullName',
+        _id: '$_id',
+        requests: '$requests',
+      },
+    },
+  ],
+);
 const closeList = async (listId, retailerId) => InvoiceModel.updateMany(
   { listId, retailer: retailerId }, { isActive: false }, { new: true },
 );
@@ -288,4 +315,5 @@ module.exports = {
   getListProductsPrices,
   closeList,
   objectToSendRetailerNotification,
+  getActiveRequests,
 };
