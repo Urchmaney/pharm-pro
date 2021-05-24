@@ -21,7 +21,32 @@ const AddMarketRequest = async (marketRequest) => {
 
 const isValidMongooseId = (id) => mongoose.isValidObjectId(id);
 
+const pendingMarketRequestGroupedByWholesalers = async () => MarketRequestModel.aggregate(
+  [
+    { $match: { status: 'pending' } },
+    { $project: { wholesaler: '$wholesaler', products: '$products' } },
+    { $group: { _id: '$wholesaler', requests: { $push: '$$ROOT' } } },
+    {
+      $lookup: {
+        from: 'wholesalers',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'wholesalerObj',
+      },
+    },
+    { $unwind: '$wholesalerObj' },
+    {
+      $project: {
+        wholesaler: '$wholesalerObj.fullName',
+        _id: '$_id',
+        requests: '$requests',
+      },
+    },
+  ],
+);
+
 module.exports = {
   AddMarketRequest,
   isValidMongooseId,
+  pendingMarketRequestGroupedByWholesalers,
 };

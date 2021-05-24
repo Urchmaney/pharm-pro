@@ -72,7 +72,7 @@ const getWholesalerProductCostPrice = async (wholesalerId, productId, formId) =>
 
 const getWholesalerProductExpiryBatch = async (wholesaler, date) => WholesalerProduct.aggregate([
   {
-    $match: { wholesaler, 'batches.expiryDate': { $lte: date } },
+    $match: { wholesaler: { $toObjectId: wholesaler }, 'batches.expiryDate': { $lte: date } },
   },
   {
     $lookup: {

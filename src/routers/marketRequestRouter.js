@@ -29,6 +29,23 @@ const marketRequestRouter = (
     const { statusCode, result } = await controller.create.action(req.body, req.user.id);
     res.status(statusCode).json(result.map(x => serializer(x)));
   });
+
+  /**
+   * @swagger
+   * /api/v2/market/requests:
+   *  get:
+   *    description: Get all pending market requests
+   *    tags:
+   *      - Market Request
+   *    responses:
+   *      '200':
+   *        description: Successfully fetched.
+   */
+  router.get('/', async (req, res) => {
+    const { statusCode, result } = await controller.index.action();
+    res.status(statusCode).json(result);
+  });
+
   return router;
 };
 

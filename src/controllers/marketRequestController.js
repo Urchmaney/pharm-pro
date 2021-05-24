@@ -37,8 +37,17 @@ const marketRequestController = (marketRequestService, firebaseService) => {
     },
   };
 
+  const index = {
+    roles: [],
+    action: async () => {
+      const result = await marketRequestService.pendingMarketRequestGroupedByWholesalers();
+      return { statusCode: 200, result };
+    },
+  };
+
   return {
     create,
+    index,
   };
 };
 
