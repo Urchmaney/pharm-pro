@@ -9,6 +9,7 @@ const reportService = require('./services/reportService');
 const quantityFormService = require('./services/quantityFormService');
 const helpService = require('./services/helpService');
 const marketRequestService = require('./services/marketRequestService');
+const agentService = require('./services/agent_service');
 
 const mongoConnect = async (URI) => {
   await connect(URI,
@@ -34,6 +35,7 @@ const mongoConnect = async (URI) => {
     reportService,
     marketRequestService,
     helpService,
+    agentService,
     closeConnect: () => connection.close(),
     db: connection.db,
   };
