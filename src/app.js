@@ -123,7 +123,7 @@ const startApplication = async () => {
     marketRequestController, retailerAuthMiddlewere,
   );
 
-  const agentController = agentControllerGen(agentService);
+  const agentController = agentControllerGen(agentService, authenticator);
   const agentRouter = agentRouterGen(agentController);
 
   const listController = listControllerGen(invoiceService, productService);

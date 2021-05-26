@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-const agentController = (agentService) => {
+const agentController = (agentService, authenticator) => {
   const create = {
     roles: [],
     action: async (agent) => {
@@ -9,8 +9,29 @@ const agentController = (agentService) => {
     },
   };
 
+  const login = {
+    action: async (phoneNumber, password) => {
+      const { status, result } = await agentService.verifyLoginDetail(phoneNumber, password);
+      if (!status) return { statusCode: 400, result };
+      return {
+        statusCode: 200,
+        result: {
+          agent: result,
+          token: authenticator.generateAuthToken(
+            {
+              id: result._id,
+              phoneNumber: result.phoneNumber,
+              fullName: result.fullName,
+            },
+          ),
+        },
+      };
+    },
+  };
+
   return {
     create,
+    login,
   };
 };
 

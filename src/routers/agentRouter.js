@@ -25,6 +25,33 @@ const agentRouter = (controller) => {
     res.status(statusCode).json(result);
   });
 
+  /**
+  * @swagger
+  * /api/v2/market/agents/login:
+  *  post:
+  *    description: login agent.
+  *    tags:
+  *     - Agent
+  *    parameters:
+  *     - name: session
+  *       in: body
+  *       required: true
+  *       schema:
+  *         properties:
+  *           phoneNumber:
+  *             type: string
+  *           password:
+  *             type: string
+  *    responses:
+  *     '200':
+  *      description: Successfully logged in.
+  */
+  router.post('/login', async (req, res) => {
+    const { statusCode, result } = await controller.login.action(req.body.phoneNumber,
+      req.body.password);
+    res.status(statusCode).json(result);
+  });
+
   return router;
 };
 
