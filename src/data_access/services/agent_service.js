@@ -22,10 +22,10 @@ const createAgent = async (agent) => {
 
 const verifyLoginDetail = async (phoneNumber, password) => {
   const user = await AgentModel.findOne({ phoneNumber });
-  if (!user) return { status: false, result: 'Wrong Login details.' };
+  if (!user) return { status: false, result: ['Wrong Login details.'] };
 
   const isPasswordCorreect = await bcrypt.compare(password, user.password);
-  if (!isPasswordCorreect) return { status: false, result: 'Wrong Login details.' };
+  if (!isPasswordCorreect) return { status: false, result: ['Wrong Login details.'] };
 
   return { status: true, result: user };
 };
