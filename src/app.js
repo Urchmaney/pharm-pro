@@ -44,6 +44,9 @@ const reportRouterGen = require('./routers/reportRouter');
 const quantityFormControllerGen = require('./controllers/quantityFormController');
 const quantityFormRouterGen = require('./routers/quantityFormRouter');
 
+const agentControllerGen = require('./controllers/agent_controller');
+const agentRouterGen = require('./routers/agentRouter');
+
 const {
   authWholesalerMiddleware, authRetailerMiddleware, authMiddleware,
 } = require('./middlewares/auth_middleware');
@@ -66,6 +69,7 @@ const startApplication = async () => {
     quantityFormService,
     helpService,
     marketRequestService,
+    agentService,
   } = await mongoDB(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/pharm-pro');
 
   const wholesalerController = wholesalerControllerGen(wholesalerService,
@@ -119,6 +123,9 @@ const startApplication = async () => {
     marketRequestController, retailerAuthMiddlewere,
   );
 
+  const agentController = agentControllerGen(agentService, authenticator);
+  const agentRouter = agentRouterGen(agentController);
+
   const listController = listControllerGen(invoiceService, productService);
   const listRouter = listRouterGen(listController, retailerAuthMiddlewere);
 
@@ -150,6 +157,8 @@ const startApplication = async () => {
   });
 
   app.use('/api/v2/market/requests', marketRequestRouter);
+
+  app.use('/api/v2/market/agents', agentRouter);
 
   app.use('/api/wholesalers/products', wholesalerProductRouter);
 
