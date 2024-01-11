@@ -20,6 +20,17 @@ const createAgent = async (agent) => {
   return { status: true, result: agent };
 };
 
+const verifyLoginDetail = async (phoneNumber, password) => {
+  const user = await AgentModel.findOne({ phoneNumber });
+  if (!user) return { status: false, result: ['Wrong Login details.'] };
+
+  const isPasswordCorreect = await bcrypt.compare(password, user.password);
+  if (!isPasswordCorreect) return { status: false, result: ['Wrong Login details.'] };
+
+  return { status: true, result: user };
+};
+
 module.exports = {
   createAgent,
+  verifyLoginDetail,
 };
